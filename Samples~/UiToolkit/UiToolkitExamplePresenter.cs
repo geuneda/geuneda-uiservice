@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UIElements;
-using GameLovers.UiService;
+using Geuneda.UiService;
 
-namespace GameLovers.UiService.Examples
+namespace Geuneda.UiService.Examples
 {
 	/// <summary>
 	/// Example UI Presenter using Unity's UI Toolkit with the self-contained UiToolkitPresenterFeature.

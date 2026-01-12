@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace GameLovers.UiService.Views
+namespace Geuneda.UiService.Views
 { 
     /// <summary>
     /// Resizes a RectTransform to fit the size of its content.

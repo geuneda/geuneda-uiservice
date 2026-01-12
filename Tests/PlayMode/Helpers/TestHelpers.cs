@@ -5,7 +5,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace GameLovers.UiService.Tests.PlayMode
+namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
 	/// Helper methods for creating test objects

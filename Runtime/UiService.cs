@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 
 // ReSharper disable CheckNamespace
 
-namespace GameLovers.UiService
+namespace Geuneda.UiService
 {
 	/// <inheritdoc />
 	public class UiService : IUiServiceInit

@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using GameLovers.UiService;
+using Geuneda.UiService;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
@@ -10,7 +10,7 @@ using UnityEngine.UIElements;
 
 // ReSharper disable once CheckNamespace
 
-namespace GameLoversEditor.UiService
+namespace GeunedaEditor.UiService
 {
 	/// <summary>
 	/// Implementation of <see cref="UiConfigsEditorBase{TSet}"/> that syncs with Unity Addressables.

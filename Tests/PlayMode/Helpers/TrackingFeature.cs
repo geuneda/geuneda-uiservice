@@ -1,6 +1,6 @@
 using Cysharp.Threading.Tasks;
 
-namespace GameLovers.UiService.Tests.PlayMode
+namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
 	/// Mock feature that tracks lifecycle and can simulate transitions.

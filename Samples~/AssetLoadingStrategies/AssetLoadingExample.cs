@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using GameLovers.UiService;
+using Geuneda.UiService;
 using Cysharp.Threading.Tasks;
 using TMPro;
 
 // ReSharper disable CheckNamespace
 
-namespace GameLovers.UiService.Examples
+namespace Geuneda.UiService.Examples
 {
 	/// <summary>
 	/// Example demonstrating different UI asset loading strategies:

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-namespace GameLovers.UiService.Views
+namespace Geuneda.UiService.Views
 {
     /// <summary>
     /// This view is responsible to handle all types of links (ex: hyperlinks) set in the <see cref="TMP_Text"/>

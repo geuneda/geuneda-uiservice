@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 
 // ReSharper disable CheckNamespace
 
-namespace GameLovers.UiService
+namespace Geuneda.UiService
 {
 	/// <summary>
 	/// Represents a configuration of an <seealso cref="UiPresenter"/> with all it's important data

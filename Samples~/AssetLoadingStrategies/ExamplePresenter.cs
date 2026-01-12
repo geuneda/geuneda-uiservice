@@ -2,11 +2,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using GameLovers.UiService;
+using Geuneda.UiService;
 
 // ReSharper disable CheckNamespace
 
-namespace GameLovers.UiService.Examples
+namespace Geuneda.UiService.Examples
 {
 	/// <summary>
 	/// Simple presenter for demonstrating different loading strategies.

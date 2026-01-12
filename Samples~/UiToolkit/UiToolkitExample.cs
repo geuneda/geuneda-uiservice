@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.UIElements;
-using GameLovers.UiService;
+using Geuneda.UiService;
 using Cysharp.Threading.Tasks;
 
-namespace GameLovers.UiService.Examples
+namespace Geuneda.UiService.Examples
 {
 	/// <summary>
 	/// Example demonstrating UI Toolkit integration with UiService.

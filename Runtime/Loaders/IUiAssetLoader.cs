@@ -4,7 +4,7 @@ using UnityEngine;
 
 // ReSharper disable CheckNamespace
 
-namespace GameLovers.UiService
+namespace Geuneda.UiService
 {
 	/// <summary>
 	/// This interface allows to wrap the asset loading scheme into the UI memory

@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using System;
 
-namespace GameLovers.UiService.Tests
+namespace Geuneda.UiService.Tests
 {
     /// <summary>
     /// EditMode tests for UiService constructor and basic initialization.

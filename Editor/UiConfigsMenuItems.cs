@@ -1,10 +1,10 @@
-using GameLovers.UiService;
+using Geuneda.UiService;
 using UnityEditor;
 using UnityEngine;
 
 // ReSharper disable once CheckNamespace
 
-namespace GameLoversEditor.UiService
+namespace GeunedaEditor.UiService
 {
 	/// <summary>
 	/// Helps selecting the <see cref="UiConfigs"/> asset file in the Editor

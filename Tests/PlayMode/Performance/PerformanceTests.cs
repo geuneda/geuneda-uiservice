@@ -5,7 +5,7 @@ using NUnit.Framework;
 using Unity.PerformanceTesting;
 using UnityEngine.TestTools;
 
-namespace GameLovers.UiService.Tests.PlayMode
+namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
 	/// Performance benchmarks for the UI Service.

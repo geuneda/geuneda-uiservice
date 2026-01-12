@@ -1,4 +1,4 @@
-namespace GameLovers.UiService.Tests.PlayMode
+namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
 	/// Test presenter data struct

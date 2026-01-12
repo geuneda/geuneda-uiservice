@@ -4,7 +4,7 @@ using UnityEngine;
 
 // ReSharper disable CheckNamespace
 
-namespace GameLovers.UiService
+namespace Geuneda.UiService
 {
 	/// <summary>
 	/// Represents a configuration set of UIs that can be managed together in the <seealso cref="UiService"/>

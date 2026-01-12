@@ -5,7 +5,7 @@ using UnityEngine;
 
 // ReSharper disable CheckNamespace
 
-namespace GameLovers.UiService
+namespace Geuneda.UiService
 {
 	/// <summary>
 	/// Implementation of <see cref="IUiAssetLoader"/> that loads assets from the Resources folder.

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameLovers.UiService
+namespace Geuneda.UiService
 {
     /// <summary>
     /// This class is responsible for updating the resolution and device orientation of the <see cref="UiService"/>

@@ -4,7 +4,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace GameLovers.UiService.Tests
+namespace Geuneda.UiService.Tests
 {
 	/// <summary>
 	/// Mock asset loader for testing without Addressables.

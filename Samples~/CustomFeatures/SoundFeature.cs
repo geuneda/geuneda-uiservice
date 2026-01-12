@@ -1,7 +1,7 @@
 using UnityEngine;
-using GameLovers.UiService;
+using Geuneda.UiService;
 
-namespace GameLovers.UiService.Examples
+namespace Geuneda.UiService.Examples
 {
 	/// <summary>
 	/// Custom feature that plays sounds on UI lifecycle events.

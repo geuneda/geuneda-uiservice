@@ -2,10 +2,10 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using TMPro;
-using GameLovers.UiService;
+using Geuneda.UiService;
 using Cysharp.Threading.Tasks;
 
-namespace GameLovers.UiService.Examples
+namespace Geuneda.UiService.Examples
 {
 	/// <summary>
 	/// Example demonstrating delayed UI presenters with animations and time delays.

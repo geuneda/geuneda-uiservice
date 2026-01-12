@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace GameLovers.UiService.Tests.PlayMode
+namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
 	/// Test presenter with multiple features (UiToolkit + TimeDelay)

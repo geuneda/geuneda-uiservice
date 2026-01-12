@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 // ReSharper disable CheckNamespace
 
-namespace GameLovers.UiService.Views
+namespace Geuneda.UiService.Views
 {
 	/// <summary>
 	/// This view helper translate anchored views based on device safe area (screens witch a notch)

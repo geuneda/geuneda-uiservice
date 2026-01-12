@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GameLovers.UiService;
+using Geuneda.UiService;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 
 // ReSharper disable once CheckNamespace
 
-namespace GameLoversEditor.UiService
+namespace GeunedaEditor.UiService
 {
 	/// <summary>
 	/// Base class for <see cref="UiConfigs"/> editors with shared logic for layer visualization and set management.

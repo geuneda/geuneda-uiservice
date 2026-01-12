@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UIElements;
 
-namespace GameLovers.UiService
+namespace Geuneda.UiService
 {
 	/// <summary>
 	/// Feature that provides UI Toolkit integration for a <see cref="UiPresenter"/>.

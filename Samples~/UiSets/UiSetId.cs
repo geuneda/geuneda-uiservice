@@ -1,4 +1,4 @@
-namespace GameLovers.UiService.Examples
+namespace Geuneda.UiService.Examples
 {
 	/// <summary>
 	/// Define your UI Set IDs as an enum for type safety.

@@ -1,9 +1,9 @@
-using GameLovers.UiService;
+using Geuneda.UiService;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UIElements;
 
-namespace GameLovers.UiService.Examples
+namespace Geuneda.UiService.Examples
 {
 	/// <summary>
 	/// Data structure for the animated UI Toolkit example

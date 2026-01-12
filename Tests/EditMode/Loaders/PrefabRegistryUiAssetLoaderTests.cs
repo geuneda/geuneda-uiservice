@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace GameLovers.UiService.Tests
+namespace Geuneda.UiService.Tests
 {
 	[TestFixture]
 	public class PrefabRegistryUiAssetLoaderTests

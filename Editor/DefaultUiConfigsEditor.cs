@@ -1,7 +1,7 @@
-using GameLovers.UiService;
+using Geuneda.UiService;
 using UnityEditor;
 
-namespace GameLoversEditor.UiService
+namespace GeunedaEditor.UiService
 {
 	/// <summary>
 	/// Default UI Set identifiers for out-of-the-box usage.

@@ -4,10 +4,10 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using Cysharp.Threading.Tasks;
-using GameLovers.UiService;
+using Geuneda.UiService;
 using TMPro;
 
-namespace GameLovers.UiService.Examples
+namespace Geuneda.UiService.Examples
 {
 	/// <summary>
 	/// Example demonstrating UI Sets - grouping multiple UIs that are loaded/opened/closed together.

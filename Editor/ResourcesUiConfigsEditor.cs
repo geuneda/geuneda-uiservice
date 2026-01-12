@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using GameLovers.UiService;
+using Geuneda.UiService;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -9,7 +9,7 @@ using UnityEditor.UIElements;
 
 // ReSharper disable once CheckNamespace
 
-namespace GameLoversEditor.UiService
+namespace GeunedaEditor.UiService
 {
 	/// <summary>
 	/// Implementation of <see cref="UiConfigsEditorBase{TSet}"/> that syncs with the Resources folder.

@@ -1,9 +1,9 @@
 using System.Collections;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using GameLovers.UiService;
+using Geuneda.UiService;
 
-namespace GameLovers.UiService.Examples
+namespace Geuneda.UiService.Examples
 {
 	/// <summary>
 	/// Custom feature that adds scale in/out effects with easing.

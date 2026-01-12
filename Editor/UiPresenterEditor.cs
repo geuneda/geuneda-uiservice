@@ -2,11 +2,11 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
-using GameLovers.UiService;
+using Geuneda.UiService;
 
 // ReSharper disable once CheckNamespace
 
-namespace GameLoversEditor.UiService
+namespace GeunedaEditor.UiService
 {
 	/// <summary>
 	/// Custom editor for UiPresenter to show quick actions in the inspector

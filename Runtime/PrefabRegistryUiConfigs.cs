@@ -4,7 +4,7 @@ using UnityEngine;
 
 // ReSharper disable CheckNamespace
 
-namespace GameLovers.UiService
+namespace Geuneda.UiService
 {
 	/// <summary>
 	/// UiConfigs implementation for PrefabRegistry-based asset loading.

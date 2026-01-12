@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 // ReSharper disable CheckNamespace
 
-namespace GameLovers.UiService.Views
+namespace Geuneda.UiService.Views
 {
 	/// <summary>
 	/// A concrete subclass of the Unity UI `Graphic` class that just skips drawing.

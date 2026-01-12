@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
-using GameLovers.UiService;
+using Geuneda.UiService;
 using Cysharp.Threading.Tasks;
 using TMPro;
 
-namespace GameLovers.UiService.Examples
+namespace Geuneda.UiService.Examples
 {
 	/// <summary>
 	/// Example demonstrating how to create and use custom presenter features.

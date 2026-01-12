@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameLovers.UiService
+namespace Geuneda.UiService
 {
 	/// <summary>
 	/// Base class for presenter features that can be attached to a <see cref="UiPresenter"/> to extend its functionality.

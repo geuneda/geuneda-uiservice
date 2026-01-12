@@ -2,7 +2,7 @@ using System;
 
 // ReSharper disable CheckNamespace
 
-namespace GameLovers.UiService
+namespace Geuneda.UiService
 {
 	/// <summary>
 	/// Represents a unique identifier for a UI presenter instance.

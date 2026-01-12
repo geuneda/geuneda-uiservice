@@ -3,12 +3,12 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
-using GameLovers.UiService;
+using Geuneda.UiService;
 using Cysharp.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
 
-namespace GameLoversEditor.UiService
+namespace GeunedaEditor.UiService
 {
 	/// <summary>
 	/// Unified editor window for managing UI presenters tracked by the UiService.
@@ -215,7 +215,7 @@ namespace GameLoversEditor.UiService
 				return;
 			}
 
-			var service = GameLovers.UiService.UiService.CurrentService;
+			var service = Geuneda.UiService.UiService.CurrentService;
 			if (service == null)
 			{
 				var warningBox = new HelpBox("No UiService instance found.", HelpBoxMessageType.Warning);
@@ -248,7 +248,7 @@ namespace GameLoversEditor.UiService
 			}
 		}
 
-		private VisualElement CreatePresenterRow(GameLovers.UiService.UiService service, UiInstance instance, bool isOpen, int index)
+		private VisualElement CreatePresenterRow(Geuneda.UiService.UiService service, UiInstance instance, bool isOpen, int index)
 		{
 			var row = new VisualElement();
 			row.style.flexDirection = FlexDirection.Row;
@@ -361,7 +361,7 @@ namespace GameLoversEditor.UiService
 			var closeAllButton = new Button(() => {
 				if (EditorUtility.DisplayDialog("Close All", "Close all visible UI presenters?", "Yes", "Cancel"))
 				{
-					GameLovers.UiService.UiService.CurrentService?.CloseAllUi();
+					Geuneda.UiService.UiService.CurrentService?.CloseAllUi();
 					UpdateContent();
 				}
 			}) { text = "Close All" };
@@ -369,7 +369,7 @@ namespace GameLoversEditor.UiService
 			footer.Add(closeAllButton);
 			
 			var unloadAllButton = new Button(() => {
-				var service = GameLovers.UiService.UiService.CurrentService;
+				var service = Geuneda.UiService.UiService.CurrentService;
 				if (service == null) return;
 				
 				var loaded = service.GetLoadedPresenters();

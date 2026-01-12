@@ -1,4 +1,4 @@
-using GameLovers.UiService.Views;
+using Geuneda.UiService.Views;
 using UnityEditor;
 using UnityEditor.UI;
 using UnityEditor.UIElements;
@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 
 // ReSharper disable once CheckNamespace
 
-namespace GameLoversEditor.UiService
+namespace GeunedaEditor.UiService
 {
 	/// <summary>
 	/// <see cref="NonDrawingView"/> custom inspector

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameLovers.UiService.Tests.PlayMode
+namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
 	/// Test presenter with three features

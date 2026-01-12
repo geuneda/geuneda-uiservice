@@ -1,294 +1,143 @@
-# GameLovers UI Service
+# Geuneda UI Service
 
 [![Unity Version](https://img.shields.io/badge/Unity-6000.0%2B-blue.svg)](https://unity3d.com/get-unity/download)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.2.0-green.svg)](CHANGELOG.md)
 
-> **Quick Links**: [Installation](#installation) | [Quick Start](#quick-start) | [Documentation](docs/README.md) | [Examples](#examples) | [Troubleshooting](docs/troubleshooting.md)
+Unity 게임 UI를 효율적으로 관리하는 서비스 패키지입니다.
 
-![UiService Demo](docs/demo.gif)
+## 왜 이 패키지를 사용해야 하나요?
 
-## Why Use This Package?
+| 문제점 | 해결책 |
+|--------|--------|
+| 분산된 UI 로직 | 중앙 집중식 서비스로 UI 생명주기 관리 |
+| 메모리 관리 복잡성 | Addressables 통합으로 자동 로드/언로드 |
+| 복잡한 비동기 로딩 | UniTask 기반 비동기 작업 지원 |
+| 중복된 보일러플레이트 | 피처 조합 시스템으로 확장 |
 
-Managing UI in Unity games often becomes a tangled mess of direct references, scattered open/close logic, and manual lifecycle management. This **UI Service** solves these pain points:
+## 주요 기능
 
-| Problem | Solution |
-|---------|----------|
-| **Scattered UI logic** | Centralized service manages all UI lifecycle (load → open → close → unload) |
-| **Memory management headaches** | Addressables integration with automatic asset loading/unloading |
-| **Rigid UI hierarchies** | Layer-based organization with flexible depth sorting |
-| **Duplicated boilerplate** | Feature composition system extends behavior without inheritance complexity |
-| **Async loading complexity** | UniTask-powered async operations with cancellation support |
-| **No visibility into UI state** | Editor windows for real-time analytics, hierarchy debugging, and configuration |
-| **Difficult testing** | Injectable interfaces (`IUiService`, `IUiAssetLoader`) and built-in loaders enable easy mocking |
+- **UI MVP 패턴**: UI 로직의 깔끔한 분리
+- **UI Toolkit 지원**: uGUI와 UI Toolkit 모두 호환
+- **피처 조합**: 모듈식 피처 시스템
+- **비동기 로딩**: UniTask 기반 비동기 에셋 로딩
+- **UI 그룹**: 레이어별 UI 구성 및 일괄 작업
 
-**Built for production:** Used in real games with WebGL, mobile, and desktop support. Zero per-frame allocations in hot paths.
+## 설치 방법
 
-### Key Features
+### Unity Package Manager (Git URL)
 
-- **🎭 UI Model-View-Presenter Pattern** - Clean separation of UI logic with lifecycle management
-- **🎨 UI Toolkit Support** - Compatible with both uGUI and UI Toolkit
-- **🧩 Feature Composition** - Modular feature system for extending presenter behavior
-- **🔄 Async Loading** - Load UI assets asynchronously with UniTask support
-- **📦 UI Group Organization** - Organize UI elements by depth layers and in groups for batch operations
-- **💾 Memory Management** - Efficient loading/unloading of UI assets with Unity's Addressables system
-- **📊 Analytics & Performance Tracking** - Optional analytics system with dependency injection
-- **🛠️ Editor Tools** - Powerful editor windows for debugging and monitoring
-- **📱 Responsive Design** - Built-in support for device safe areas (e.g. iPhone dynamic island)
+1. **Window → Package Manager** 열기
+2. **+** 버튼 → **Add package from git URL...**
+3. URL 입력:
+```
+https://github.com/geuneda/geuneda-uiservice.git
+```
 
----
-
-## System Requirements
-
-- **[Unity](https://unity.com/download)** (v6.0+) - To run the package
-- **[Unity Addressables](https://docs.unity3d.com/Packages/com.unity.addressables@latest)** (v2.6.0+) - For async asset loading
-- **[UniTask](https://github.com/Cysharp/UniTask)** (v2.5.10+) - For efficient async operations
-
-Dependencies are automatically resolved when installing via Unity Package Manager.
-
-### Compatibility Matrix
-
-| Unity Version | Status | Notes |
-|---------------|--------|-------|
-| 6000.3.x (Unity 6) | ✅ Fully Tested | Primary development target |
-| 6000.0.x (Unity 6) | ✅ Fully Tested | Fully supported |
-| 2022.3 LTS | ⚠️ Untested | May require minor adaptations |
-
-| Platform | Status | Notes |
-|----------|--------|-------|
-| Standalone (Windows/Mac/Linux) | ✅ Supported | Full feature support |
-| WebGL | ✅ Supported | Requires UniTask (no Task.Delay) |
-| Mobile (iOS/Android) | ✅ Supported | Full feature support |
-| Console | ⚠️ Untested | Should work with Addressables setup |
-
-## Installation
-
-### Via Unity Package Manager (Recommended)
-
-1. Open Unity Package Manager (`Window` → `Package Manager`)
-2. Click the `+` button and select `Add package from git URL`
-3. Enter the following URL:
-   ```
-   https://github.com/CoderGamester/com.gamelovers.uiservice.git
-   ```
-
-### Via manifest.json
-
-Add the following line to your project's `Packages/manifest.json`:
-
+또는 `Packages/manifest.json`에 직접 추가:
 ```json
 {
   "dependencies": {
-    "com.gamelovers.uiservice": "https://github.com/CoderGamester/com.gamelovers.uiservice.git"
+    "com.geuneda.uiservice": "https://github.com/geuneda/geuneda-uiservice.git#v1.0.0"
   }
 }
 ```
 
-### Via OpenUPM
+## 요구 사항
 
-```bash
-openupm add com.gamelovers.uiservice
-```
+- Unity 6000.0 이상
+- Addressables 2.6.0+
+- UniTask 2.5.10+
 
----
+## 빠른 시작
 
-## Documentation
+### 1. UiConfigs 생성
 
-| Document | Description |
-|----------|-------------|
-| [Getting Started](docs/getting-started.md) | Installation, setup, and first presenter |
-| [Core Concepts](docs/core-concepts.md) | Presenters, layers, sets, features |
-| [API Reference](docs/api-reference.md) | Complete API documentation |
-| [Advanced Topics](docs/advanced.md) | Analytics, performance, helper views |
-| [Troubleshooting](docs/troubleshooting.md) | Common issues and solutions |
+Project View에서 우클릭 → **Create → ScriptableObjects → Configs → UiConfigs**
 
-## Package Structure
-
-```
-Runtime/
-├── Loaders/
-│   ├── IUiAssetLoader.cs          # Asset loading interface
-│   ├── AddressablesUiAssetLoader.cs # Addressables implementation
-│   ├── PrefabRegistryUiAssetLoader.cs # Direct prefab references
-│   └── ResourcesUiAssetLoader.cs # Resources.Load implementation
-├── IUiService.cs          # Public API interface
-├── UiService.cs           # Core implementation
-├── UiPresenter.cs         # Base presenter classes
-├── UiConfigs.cs           # Configuration ScriptableObject
-├── Features/              # Composable features
-│   ├── TimeDelayFeature.cs
-│   ├── AnimationDelayFeature.cs
-│   └── UiToolkitPresenterFeature.cs
-└── Views/                 # Helper components
-
-Editor/
-├── UiConfigsEditor.cs     # Enhanced inspector
-├── UiAnalyticsWindow.cs   # Performance monitoring
-└── UiServiceHierarchyWindow.cs  # Live debugging
-```
-
-### Key Files
-
-| Component | Responsibility |
-|-----------|----------------|
-| **IUiService** | Public API surface for all UI operations |
-| **UiService** | Core implementation managing lifecycle, layers, and state |
-| **UiPresenter** | Base class for all UI views with lifecycle hooks |
-| **UiConfigs** | ScriptableObject storing UI configuration and sets |
-| **PrefabRegistryConfig** | Map address keys to UI Prefabs for direct reference |
-| **IUiAssetLoader** | Interface for custom asset loading strategies |
-| **AddressablesUiAssetLoader** | Handles Addressables integration for async loading |
-| **PrefabRegistryUiAssetLoader** | Simple loader for direct prefab references |
-| **ResourcesUiAssetLoader** | Loads UI from Unity's Resources folder |
-| **PresenterFeatureBase** | Base class for composable presenter behaviors |
-| **UiInstanceId** | Enables multiple instances of the same presenter type |
-
----
-
-## Quick Start
-
-### 1. Create UI Configuration
-
-1. Right-click in Project View
-2. Navigate to `Create` → `ScriptableObjects` → `Configs` → `UiConfigs`
-3. Configure your UI presenters in the created asset
-
-### 2. Initialize the UI Service
+### 2. UiPresenter 구현
 
 ```csharp
+using Geuneda.UiService;
 using UnityEngine;
-using GameLovers.UiService;
-
-public class GameInitializer : MonoBehaviour
-{
-    [SerializeField] private UiConfigs _uiConfigs;
-    private IUiServiceInit _uiService;
-    
-    void Start()
-    {
-        _uiService = new UiService();
-        _uiService.Init(_uiConfigs);
-    }
-}
-```
-
-### 3. Create Your First UI Presenter
-
-```csharp
-using UnityEngine;
-using GameLovers.UiService;
+using UnityEngine.UI;
 
 public class MainMenuPresenter : UiPresenter
 {
-    [SerializeField] private Button _playButton;
-    
-    protected override void OnInitialized()
+    [SerializeField] private Button playButton;
+
+    protected override void OnOpen()
     {
-        _playButton.onClick.AddListener(OnPlayClicked);
+        playButton.onClick.AddListener(OnPlayClicked);
     }
-    
-    protected override void OnOpened()
+
+    protected override void OnClose()
     {
-        Debug.Log("Main menu opened!");
+        playButton.onClick.RemoveListener(OnPlayClicked);
     }
-    
-    protected override void OnClosed()
-    {
-        Debug.Log("Main menu closed!");
-    }
-    
+
     private void OnPlayClicked()
     {
-        Close(destroy: false);
+        // 게임 시작
     }
 }
 ```
 
-### 4. Open and Manage UI
+### 3. 데이터가 있는 UI
 
 ```csharp
-// Open UI
-var mainMenu = await _uiService.OpenUiAsync<MainMenuPresenter>();
-
-// Check visibility
-if (_uiService.IsVisible<MainMenuPresenter>())
+public class PlayerInfoPresenter : UiPresenter<PlayerData>
 {
-    Debug.Log("Main menu is visible");
+    [SerializeField] private Text nameText;
+    [SerializeField] private Text levelText;
+
+    protected override void OnDataChanged(PlayerData data)
+    {
+        nameText.text = data.Name;
+        levelText.text = $"Lv.{data.Level}";
+    }
 }
 
-// Close UI
-_uiService.CloseUi<MainMenuPresenter>();
+// 사용
+var playerData = new PlayerData { Name = "영웅", Level = 10 };
+await UiService.OpenUiAsync<PlayerInfoPresenter, PlayerData>(playerData);
 ```
 
-📖 **For complete setup guide, see [Getting Started](docs/getting-started.md)**
+### 4. UI Set 사용
 
----
+```csharp
+// 여러 UI를 세트로 관리 (HUD: 체력바, 미니맵 등)
+await UiService.OpenUiSetAsync(hudSet);
+await UiService.CloseUiSetAsync(hudSet);
+```
 
-## Examples
+## 피처 시스템
 
-The package includes sample implementations in the `Samples~` folder.
+내장 피처:
+- **TimeDelayFeature**: 시간 기반 지연
+- **AnimationDelayFeature**: 애니메이션 기반 지연
+- **UiToolkitPresenterFeature**: UI Toolkit 통합
 
-### Importing Samples
+커스텀 피처:
+```csharp
+public class FadeFeature : PresenterFeatureBase
+{
+    public override async UniTask OnOpenAsync()
+    {
+        // 페이드 인 로직
+    }
+}
+```
 
-1. Open Unity Package Manager (`Window` → `Package Manager`)
-2. Select "UI Service" package
-3. Navigate to the "Samples" tab
-4. Click "Import" next to the sample you want
+## 에셋 로딩 전략
 
-### Available Samples
+| 전략 | 설명 |
+|------|------|
+| **PrefabRegistry** | 직접 참조, 항상 로드 |
+| **Addressables** | 주소 기반, 번들링 |
+| **Resources** | 경로 기반, 간단한 프로젝트 |
 
-| Sample | Description |
-|--------|-------------|
-| **BasicUiFlow** | Basic presenter lifecycle and button interactions |
-| **DataPresenter** | Data-driven UI with `UiPresenter<T>` |
-| **DelayedPresenter** | Time and animation delay features |
-| **UiToolkit** | UI Toolkit (UI Elements) integration |
-| **DelayedUiToolkit** | Multiple features combined |
-| **Analytics** | Performance tracking integration |
+## 라이센스
 
----
+MIT License
 
-## Contributing
-
-We welcome contributions! Here's how you can help:
-
-### Reporting Issues
-
-- Use the [GitHub Issues](https://github.com/CoderGamester/com.gamelovers.uiservice/issues) page
-- Include Unity version, package version, and reproduction steps
-- Attach relevant code samples, error logs, or screenshots
-
-### Development Setup
-
-1. Fork the repository on GitHub
-2. Clone your fork: `git clone https://github.com/yourusername/com.gamelovers.uiservice.git`
-3. Create a feature branch: `git checkout -b feature/amazing-feature`
-4. Make your changes with tests
-5. Commit: `git commit -m 'Add amazing feature'`
-6. Push: `git push origin feature/amazing-feature`
-7. Create a Pull Request
-
-### Code Guidelines
-
-- Follow [C# Coding Conventions](https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions)
-- Add XML documentation to all public APIs
-- Include unit tests for new features
-- Update CHANGELOG.md for notable changes
-
----
-
-## Support
-
-- **Issues**: [Report bugs or request features](https://github.com/CoderGamester/com.gamelovers.uiservice/issues)
-- **Discussions**: [Ask questions and share ideas](https://github.com/CoderGamester/com.gamelovers.uiservice/discussions)
-- **Changelog**: See [CHANGELOG.md](CHANGELOG.md) for version history
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
-
----
-
-**Made with ❤️ for the Unity community**
-
-*If this package helps your project, please consider giving it a ⭐ on GitHub!*
+원본 저작권: Miguel Tomas (GameLovers)

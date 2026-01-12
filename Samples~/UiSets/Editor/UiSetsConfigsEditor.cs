@@ -1,9 +1,9 @@
-using GameLovers.UiService;
-using GameLovers.UiService.Examples;
-using GameLoversEditor.UiService;
+using Geuneda.UiService;
+using Geuneda.UiService.Examples;
+using GeunedaEditor.UiService;
 using UnityEditor;
 
-namespace GameLoversEditor.UiService.Examples
+namespace GeunedaEditor.UiService.Examples
 {
 	/// <summary>
 	/// Custom editor for the UiSets sample that uses the sample's <see cref="UiSetId"/> enum

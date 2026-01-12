@@ -3,7 +3,7 @@ using System.IO;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace GameLovers.UiService.Tests
+namespace Geuneda.UiService.Tests
 {
 	[TestFixture]
 	public class ResourcesUiAssetLoaderTests

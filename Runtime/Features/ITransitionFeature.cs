@@ -1,6 +1,6 @@
 using Cysharp.Threading.Tasks;
 
-namespace GameLovers.UiService
+namespace Geuneda.UiService
 {
 	/// <summary>
 	/// Interface for presenter features that provide open/close transition delays.

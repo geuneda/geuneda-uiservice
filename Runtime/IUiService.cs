@@ -5,7 +5,7 @@ using System.Threading;
 
 // ReSharper disable CheckNamespace
 
-namespace GameLovers.UiService
+namespace Geuneda.UiService
 {
 	/// <summary>
 	/// Represents a UI presenter instance with its type, address and presenter reference

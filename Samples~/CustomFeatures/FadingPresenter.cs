@@ -2,9 +2,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using GameLovers.UiService;
+using Geuneda.UiService;
 
-namespace GameLovers.UiService.Examples
+namespace Geuneda.UiService.Examples
 {
 	/// <summary>
 	/// Example presenter that uses the FadeFeature.

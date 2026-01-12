@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameLovers.UiService.Tests
+namespace Geuneda.UiService.Tests
 {
 	/// <summary>
 	/// Helper methods for creating test objects

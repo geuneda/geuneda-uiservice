@@ -1,6 +1,6 @@
-using GameLovers.UiService;
+using Geuneda.UiService;
 
-namespace GameLovers.UiService.Tests
+namespace Geuneda.UiService.Tests
 {
 	/// <summary>
 	/// Simple test presenter for basic tests

@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 
-namespace GameLovers.UiService.Tests
+namespace Geuneda.UiService.Tests
 {
     [TestFixture]
     public class UiSetConfigTests
