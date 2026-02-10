@@ -2,10 +2,10 @@
   "name": "com.geuneda.uiservice",
   "displayName": "Geuneda UI Service",
   "author": "geuneda",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "unity": "6000.0",
   "license": "MIT",
-  "description": "Unity 게임 UI를 관리하는 서비스 패키지입니다. UI의 열기, 닫기, 로드, 언로드 기능을 제공하며, UI Set을 통해 여러 UI를 동시에 관리할 수 있습니다.",
+  "description": "Unity 게임 UI를 관리하는 서비스 패키지입니다. UI의 열기, 닫기, 로드, 언로드 기능을 제공하며, UI Set을 통해 여러 UI를 동시에 관리할 수 있습니다. 피처 조합 시스템, UI Toolkit 지원, 다중 인스턴스, 다양한 에셋 로딩 전략을 포함합니다.",
   "dependencies": {
     "com.unity.addressables": "2.6.0",
     "com.cysharp.unitask": "2.5.10"
@@ -20,13 +20,43 @@
     },
     {
       "displayName": "Data Presenter",
-      "description": "데이터 기반 UI 예제",
+      "description": "UiPresenter<T>를 사용한 데이터 기반 UI. OpenUiAsync로 초기 데이터 전달 및 Data 프로퍼티를 통한 동적 업데이트를 보여줍니다.",
       "path": "Samples~/DataPresenter"
     },
     {
+      "displayName": "Delayed Presenter",
+      "description": "TimeDelayFeature와 AnimationDelayFeature를 사용한 시간/애니메이션 기반 지연 피처 예제",
+      "path": "Samples~/DelayedPresenter"
+    },
+    {
+      "displayName": "UI Toolkit",
+      "description": "UiToolkitPresenterFeature를 사용한 UI Toolkit 통합 예제",
+      "path": "Samples~/UiToolkit"
+    },
+    {
+      "displayName": "Delayed UI Toolkit",
+      "description": "지연 피처와 UI Toolkit을 결합한 고급 조합 패턴 예제",
+      "path": "Samples~/DelayedUiToolkit"
+    },
+    {
       "displayName": "UI Sets",
-      "description": "여러 UI를 그룹으로 관리하는 예제",
+      "description": "여러 UI를 그룹으로 로드, 열기, 닫기하는 예제 (예: 게임 HUD의 체력바, 재화 등)",
       "path": "Samples~/UiSets"
+    },
+    {
+      "displayName": "Multi-Instance",
+      "description": "같은 UI 타입의 여러 인스턴스 생성 예제 (예: 알림 팝업, 채팅 창)",
+      "path": "Samples~/MultiInstance"
+    },
+    {
+      "displayName": "Custom Features",
+      "description": "PresenterFeatureBase를 확장하여 커스텀 피처(페이드, 스케일, 사운드) 만들기 예제",
+      "path": "Samples~/CustomFeatures"
+    },
+    {
+      "displayName": "Asset Loading Strategies",
+      "description": "PrefabRegistry, Addressables, Resources 로딩 전략 비교 예제",
+      "path": "Samples~/AssetLoadingStrategies"
     }
   ]
 }

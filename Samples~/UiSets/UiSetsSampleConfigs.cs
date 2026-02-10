@@ -5,7 +5,7 @@ namespace Geuneda.UiService.Examples
 {
 	/// <summary>
 	/// Sample-specific UiConfigs that uses <see cref="UiSetId"/> for UI set management.
-	/// This class exists to allow a custom editor (<see cref="GeunedalEditor.UiService.Examples.UiSetsConfigsEditor"/>)
+	/// This class exists to allow a custom editor (<see cref="GeunedaEditor.UiService.Examples.UiSetsConfigsEditor"/>)
 	/// to display set IDs using the sample's enum names instead of raw integers.
 	/// 
 	/// In your own project, you can either:
