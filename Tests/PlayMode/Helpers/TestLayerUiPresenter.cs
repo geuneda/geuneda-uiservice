@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
-	/// Test presenter for layer testing (on a different layer)
+	/// 레이어 테스트를 위한 테스트 프레젠터 (다른 레이어에 배치)
 	/// </summary>
 	public class TestLayerUiPresenter : UiPresenter
 	{
@@ -11,7 +11,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 
 		protected override void OnInitialized()
 		{
-			// Canvas sorting order reflects the layer
+			// Canvas 정렬 순서가 레이어를 반영
 			var canvas = GetComponent<Canvas>();
 			if (canvas != null)
 			{

@@ -1,8 +1,8 @@
 namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
-	/// Simple test presenter for basic tests.
-	/// This class is in a runtime-compatible assembly so it can be added to prefabs.
+	/// 기본 테스트를 위한 간단한 테스트 프레젠터.
+	/// 프리팹에 추가할 수 있도록 런타임 호환 어셈블리에 위치한 클래스입니다.
 	/// </summary>
 	public class TestUiPresenter : UiPresenter
 	{

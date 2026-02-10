@@ -7,9 +7,9 @@ using UnityEngine;
 namespace Geuneda.UiService
 {
 	/// <summary>
-	/// Represents a configuration set of UIs that can be managed together in the <seealso cref="UiService"/>
-	/// This can be helpful for a UI combo set that are always visible together (ex: player Hud with currency & settings)
-	/// Supports multiple instances of the same UI type via UiInstanceId
+	/// <seealso cref="UiService"/>에서 함께 관리할 수 있는 UI 구성 세트를 나타냅니다.
+	/// 항상 함께 표시되는 UI 조합 세트에 유용합니다 (예: 재화 및 설정이 있는 플레이어 HUD)
+	/// UiInstanceId를 통해 동일한 UI 타입의 다중 인스턴스를 지원합니다
 	/// </summary>
 	[Serializable]
 	public struct UiSetConfig
@@ -19,20 +19,20 @@ namespace Geuneda.UiService
 	}
 
 	/// <summary>
-	/// Serializable entry for a UI instance in a set.
-	/// Stores Type as string and optional instance address.
-	/// This is more robust than storing addressable addresses which can change.
+	/// 세트 내 UI 인스턴스를 위한 직렬화 가능한 항목입니다.
+	/// Type을 문자열로 저장하고 선택적 인스턴스 주소를 포함합니다.
+	/// 변경될 수 있는 어드레서블 주소를 저장하는 것보다 더 견고합니다.
 	/// </summary>
 	[Serializable]
 	public struct UiSetEntry
 	{
 		/// <summary>
-		/// The AssemblyQualifiedName of the UI presenter type
+		/// UI 프레젠터 타입의 AssemblyQualifiedName입니다
 		/// </summary>
 		public string UiTypeName;
 		
 		/// <summary>
-		/// Optional instance address for multi-instance support. Empty string means default instance.
+		/// 다중 인스턴스 지원을 위한 선택적 인스턴스 주소입니다. 빈 문자열은 기본 인스턴스를 의미합니다.
 		/// </summary>
 		public string InstanceAddress;
 		
@@ -58,8 +58,8 @@ namespace Geuneda.UiService
 	}
 
 	/// <summary>
-	/// Necessary to serialize the data in scriptable object.
-	/// Now stores Type names instead of addressable addresses for robustness.
+	/// ScriptableObject에서 데이터를 직렬화하기 위해 필요합니다.
+	/// 견고성을 위해 어드레서블 주소 대신 Type 이름을 저장합니다.
 	/// </summary>
 	[Serializable]
 	public struct UiSetConfigSerializable

@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
-	/// Performance benchmarks for the UI Service.
+	/// UI 서비스의 성능 벤치마크.
 	/// </summary>
 	[TestFixture]
 	public class PerformanceTests
@@ -73,7 +73,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 					task.GetAwaiter().GetResult();
 				}
 				
-				// Cleanup for next measurement
+				// 다음 측정을 위한 정리
 				_service.UnloadUiSet(1);
 			})
 			.WarmupCount(1)
@@ -88,13 +88,13 @@ namespace Geuneda.UiService.Tests.PlayMode
 		{
 			Measure.Method(() =>
 			{
-				// Measure only the unload part
+				// 언로드 부분만 측정
 				using (Measure.Scope())
 				{
 					_service.UnloadUi(typeof(TestUiPresenter));
 				}
 				
-				// Re-load for next measurement
+				// 다음 측정을 위해 다시 로드
 				_service.LoadUiAsync(typeof(TestUiPresenter)).GetAwaiter().GetResult();
 			})
 			.SetUp(() =>
@@ -111,7 +111,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest, Performance]
 		public IEnumerator Perf_OpenCloseUi_Cycle()
 		{
-			// Pre-load
+			// 사전 로드
 			var loadTask = _service.LoadUiAsync(typeof(TestUiPresenter));
 			yield return loadTask.ToCoroutine();
 
@@ -131,7 +131,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest, Performance]
 		public IEnumerator Perf_OpenUiWithData_Cycle()
 		{
-			// Pre-load
+			// 사전 로드
 			var loadTask = _service.LoadUiAsync(typeof(TestDataUiPresenter));
 			yield return loadTask.ToCoroutine();
 			var data = new TestPresenterData { Id = 1, Name = "PerfTest" };
@@ -173,7 +173,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest, Performance]
 		public IEnumerator Perf_GetLoadedPresenters_ManyPresenters()
 		{
-			// Load many presenters
+			// 많은 프레젠터 로드
 			for (int i = 0; i < 50; i++)
 			{
 				var task = _service.LoadUiAsync(typeof(TestUiPresenter), $"instance_{i}");

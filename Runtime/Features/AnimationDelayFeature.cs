@@ -5,9 +5,9 @@ using UnityEngine;
 namespace Geuneda.UiService
 {
 	/// <summary>
-	/// Feature that adds animation-based delayed opening and closing to a <see cref="UiPresenter"/>.
-	/// Plays intro/outro animations and waits for them to complete.
-	/// Implements <see cref="ITransitionFeature"/> to allow the presenter to await transitions.
+	/// <see cref="UiPresenter"/>에 애니메이션 기반 지연 열기/닫기를 추가하는 기능입니다.
+	/// 인트로/아웃트로 애니메이션을 재생하고 완료될 때까지 대기합니다.
+	/// <see cref="ITransitionFeature"/>를 구현하여 프레젠터가 전환을 대기할 수 있게 합니다.
 	/// </summary>
 	[RequireComponent(typeof(Animation))]
 	public class AnimationDelayFeature : PresenterFeatureBase, ITransitionFeature
@@ -20,27 +20,27 @@ namespace Geuneda.UiService
 		private UniTaskCompletionSource _closeTransitionCompletion;
 
 		/// <summary>
-		/// Gets the Animation component
+		/// Animation 컴포넌트를 가져옵니다
 		/// </summary>
 		public Animation AnimationComponent => _animation;
 
 		/// <summary>
-		/// Gets the intro animation clip
+		/// 인트로 애니메이션 클립을 가져옵니다
 		/// </summary>
 		public AnimationClip IntroAnimationClip => _introAnimationClip;
 
 		/// <summary>
-		/// Gets the outro animation clip
+		/// 아웃트로 애니메이션 클립을 가져옵니다
 		/// </summary>
 		public AnimationClip OutroAnimationClip => _outroAnimationClip;
 
 		/// <summary>
-		/// Gets the delay in seconds for opening (based on intro animation length)
+		/// 열기 지연 시간(초)을 가져옵니다 (인트로 애니메이션 길이 기반)
 		/// </summary>
 		public float OpenDelayInSeconds => _introAnimationClip == null ? 0f : _introAnimationClip.length;
 
 		/// <summary>
-		/// Gets the delay in seconds for closing (based on outro animation length)
+		/// 닫기 지연 시간(초)을 가져옵니다 (아웃트로 애니메이션 길이 기반)
 		/// </summary>
 		public float CloseDelayInSeconds => _outroAnimationClip == null ? 0f : _outroAnimationClip.length;
 
@@ -74,8 +74,8 @@ namespace Geuneda.UiService
 		}
 
 		/// <summary>
-		/// Called when the presenter's opening animation starts.
-		/// Override this in derived classes to add custom behavior.
+		/// 프레젠터의 열기 애니메이션이 시작될 때 호출됩니다.
+		/// 파생 클래스에서 커스텀 동작을 추가하려면 재정의하세요.
 		/// </summary>
 		protected virtual void OnOpenStarted()
 		{
@@ -87,14 +87,14 @@ namespace Geuneda.UiService
 		}
 
 		/// <summary>
-		/// Called when the presenter's opening animation is completed.
-		/// Override this in derived classes to add custom behavior.
+		/// 프레젠터의 열기 애니메이션이 완료되었을 때 호출됩니다.
+		/// 파생 클래스에서 커스텀 동작을 추가하려면 재정의하세요.
 		/// </summary>
 		protected virtual void OnOpenedCompleted() { }
 
 		/// <summary>
-		/// Called when the presenter's closing animation starts.
-		/// Override this in derived classes to add custom behavior.
+		/// 프레젠터의 닫기 애니메이션이 시작될 때 호출됩니다.
+		/// 파생 클래스에서 커스텀 동작을 추가하려면 재정의하세요.
 		/// </summary>
 		protected virtual void OnCloseStarted()
 		{
@@ -106,8 +106,8 @@ namespace Geuneda.UiService
 		}
 
 		/// <summary>
-		/// Called when the presenter's closing animation is completed.
-		/// Override this in derived classes to add custom behavior.
+		/// 프레젠터의 닫기 애니메이션이 완료되었을 때 호출됩니다.
+		/// 파생 클래스에서 커스텀 동작을 추가하려면 재정의하세요.
 		/// </summary>
 		protected virtual void OnClosedCompleted() { }
 
@@ -137,7 +137,7 @@ namespace Geuneda.UiService
 
 			if (this && gameObject)
 			{
-				// Note: Visibility (SetActive) is now handled by UiPresenter after all transitions complete
+				// 참고: 가시성(SetActive)은 이제 모든 전환이 완료된 후 UiPresenter가 처리합니다
 				OnClosedCompleted();
 			}
 			

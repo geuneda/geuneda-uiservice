@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
-	/// Test presenter with zero delay for edge case testing
+	/// 엣지 케이스 테스트를 위한 지연 시간 0인 테스트 프레젠터
 	/// </summary>
 	[RequireComponent(typeof(TimeDelayFeature))]
 	public class TestZeroDelayPresenter : UiPresenter
@@ -19,7 +19,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 				DelayFeature = gameObject.AddComponent<TimeDelayFeature>();
 			}
 			
-			// Set zero delays
+			// 지연 시간 0으로 설정
 			var openField = typeof(TimeDelayFeature).GetField("_openDelayInSeconds", 
 				System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 			var closeField = typeof(TimeDelayFeature).GetField("_closeDelayInSeconds", 

@@ -3,7 +3,7 @@ using Geuneda.UiService;
 namespace Geuneda.UiService.Tests
 {
 	/// <summary>
-	/// Simple test presenter for basic tests
+	/// 기본 테스트를 위한 간단한 테스트 프레젠터
 	/// </summary>
 	public class TestUiPresenter : UiPresenter
 	{
@@ -48,7 +48,7 @@ namespace Geuneda.UiService.Tests
 	}
 	
 	/// <summary>
-	/// Test presenter with data support
+	/// 데이터 지원이 있는 테스트 프레젠터
 	/// </summary>
 	public struct TestPresenterData
 	{

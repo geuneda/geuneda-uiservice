@@ -6,9 +6,9 @@ using UnityEngine.TestTools;
 namespace Geuneda.UiService.Tests.PlayMode
 {
     /// <summary>
-    /// Core PlayMode tests for UiService that require Init() to be called.
-    /// These tests need PlayMode because UiService.Init() calls DontDestroyOnLoad
-    /// which only works during runtime.
+    /// Init() 호출이 필요한 UiService의 핵심 PlayMode 테스트.
+    /// UiService.Init()이 런타임에서만 동작하는 DontDestroyOnLoad를 호출하므로
+    /// 이 테스트들은 PlayMode가 필요합니다.
     /// </summary>
     [TestFixture]
     public class UiServiceCorePlayModeTests
@@ -32,16 +32,16 @@ namespace Geuneda.UiService.Tests.PlayMode
         [UnityTest]
         public IEnumerator Init_WithValidConfigs_InitializesCorrectly()
         {
-            // Arrange
+            // 준비
             _service = new UiService(_mockLoader);
             var configs = TestHelpers.CreateTestConfigs(
                 TestHelpers.CreateTestConfig(typeof(TestUiPresenter), "test_address", 0)
             );
 
-            // Act
+            // 실행
             _service.Init(configs);
 
-            // Assert - Check that service can accept load requests
+            // 검증 - 서비스가 로드 요청을 수락할 수 있는지 확인
             Assert.IsNotNull(_service.UiSets);
             Assert.IsNotNull(_service.VisiblePresenters);
             yield return null;
@@ -50,12 +50,12 @@ namespace Geuneda.UiService.Tests.PlayMode
         [UnityTest]
         public IEnumerator AddUiConfig_NewConfig_AddsSuccessfully()
         {
-            // Arrange
+            // 준비
             _service = new UiService(_mockLoader);
             _service.Init(TestHelpers.CreateTestConfigs());
             var config = TestHelpers.CreateTestConfig(typeof(TestUiPresenter), "new_address", 0);
 
-            // Act & Assert - Should not throw
+            // 실행 및 검증 - 예외가 발생하지 않아야 함
             Assert.DoesNotThrow(() => _service.AddUiConfig(config));
             yield return null;
         }
@@ -63,12 +63,12 @@ namespace Geuneda.UiService.Tests.PlayMode
         [UnityTest]
         public IEnumerator AddUiSet_NewSet_AddsSuccessfully()
         {
-            // Arrange
+            // 준비
             _service = new UiService(_mockLoader);
             _service.Init(TestHelpers.CreateTestConfigs());
             var set = TestHelpers.CreateTestUiSet(1);
 
-            // Act & Assert
+            // 실행 & Assert
             Assert.DoesNotThrow(() => _service.AddUiSet(set));
             Assert.IsTrue(_service.UiSets.ContainsKey(1));
             yield return null;
@@ -77,11 +77,11 @@ namespace Geuneda.UiService.Tests.PlayMode
         [UnityTest]
         public IEnumerator VisiblePresenters_InitiallyEmpty()
         {
-            // Arrange
+            // 준비
             _service = new UiService(_mockLoader);
             _service.Init(TestHelpers.CreateTestConfigs());
 
-            // Assert
+            // 검증
             Assert.AreEqual(0, _service.VisiblePresenters.Count);
             yield return null;
         }
@@ -89,14 +89,14 @@ namespace Geuneda.UiService.Tests.PlayMode
         [UnityTest]
         public IEnumerator GetLoadedPresenters_InitiallyEmpty()
         {
-            // Arrange
+            // 준비
             _service = new UiService(_mockLoader);
             _service.Init(TestHelpers.CreateTestConfigs());
 
-            // Act
+            // 실행
             var loaded = _service.GetLoadedPresenters();
 
-            // Assert
+            // 검증
             Assert.AreEqual(0, loaded.Count);
             yield return null;
         }
@@ -104,14 +104,14 @@ namespace Geuneda.UiService.Tests.PlayMode
         [UnityTest]
         public IEnumerator GetUi_NotLoaded_ThrowsKeyNotFoundException()
         {
-            // Arrange
+            // 준비
             _service = new UiService(_mockLoader);
             var configs = TestHelpers.CreateTestConfigs(
                 TestHelpers.CreateTestConfig(typeof(TestUiPresenter), "test_address", 0)
             );
             _service.Init(configs);
 
-            // Act & Assert
+            // 실행 & Assert
             Assert.Throws<KeyNotFoundException>(() => _service.GetUi<TestUiPresenter>());
             yield return null;
         }
@@ -119,14 +119,14 @@ namespace Geuneda.UiService.Tests.PlayMode
         [UnityTest]
         public IEnumerator UnloadUi_NotLoaded_ThrowsKeyNotFoundException()
         {
-            // Arrange
+            // 준비
             _service = new UiService(_mockLoader);
             var configs = TestHelpers.CreateTestConfigs(
                 TestHelpers.CreateTestConfig(typeof(TestUiPresenter), "test_address", 0)
             );
             _service.Init(configs);
 
-            // Act & Assert
+            // 실행 & Assert
             Assert.Throws<KeyNotFoundException>(() => _service.UnloadUi(typeof(TestUiPresenter)));
             yield return null;
         }
@@ -134,11 +134,11 @@ namespace Geuneda.UiService.Tests.PlayMode
         [UnityTest]
         public IEnumerator RemoveUiSet_InvalidSetId_ThrowsKeyNotFoundException()
         {
-            // Arrange
+            // 준비
             _service = new UiService(_mockLoader);
             _service.Init(TestHelpers.CreateTestConfigs());
 
-            // Act & Assert
+            // 실행 & Assert
             Assert.Throws<KeyNotFoundException>(() => _service.RemoveUiSet(999));
             yield return null;
         }
@@ -146,11 +146,11 @@ namespace Geuneda.UiService.Tests.PlayMode
         [UnityTest]
         public IEnumerator Dispose_CalledTwice_DoesNotThrow()
         {
-            // Arrange
+            // 준비
             _service = new UiService(_mockLoader);
             _service.Init(TestHelpers.CreateTestConfigs());
 
-            // Act & Assert
+            // 실행 & Assert
             Assert.DoesNotThrow(() => _service.Dispose());
             Assert.DoesNotThrow(() => _service.Dispose());
             yield return null;
@@ -159,14 +159,14 @@ namespace Geuneda.UiService.Tests.PlayMode
         [UnityTest]
         public IEnumerator RemoveUi_NotLoaded_ReturnsFalse()
         {
-            // Arrange
+            // 준비
             _service = new UiService(_mockLoader);
             _service.Init(TestHelpers.CreateTestConfigs());
 
-            // Act
+            // 실행
             var result = _service.RemoveUi(typeof(TestUiPresenter));
 
-            // Assert
+            // 검증
             Assert.IsFalse(result);
             yield return null;
         }
@@ -174,17 +174,17 @@ namespace Geuneda.UiService.Tests.PlayMode
         [UnityTest]
         public IEnumerator IsVisible_NotLoaded_ReturnsFalse()
         {
-            // Arrange
+            // 준비
             _service = new UiService(_mockLoader);
             var configs = TestHelpers.CreateTestConfigs(
                 TestHelpers.CreateTestConfig(typeof(TestUiPresenter), "test_address", 0)
             );
             _service.Init(configs);
 
-            // Act
+            // 실행
             var result = _service.IsVisible<TestUiPresenter>();
 
-            // Assert
+            // 검증
             Assert.IsFalse(result);
             yield return null;
         }

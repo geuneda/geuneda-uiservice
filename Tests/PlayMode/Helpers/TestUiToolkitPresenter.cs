@@ -4,8 +4,8 @@ using UnityEngine.UIElements;
 namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
-	/// Test presenter with UiToolkitPresenterFeature.
-	/// Demonstrates the correct pattern for handling UI Toolkit element recreation on reopen.
+	/// UiToolkitPresenterFeature가 있는 테스트 프레젠터.
+	/// 재열기 시 UI Toolkit 요소 재생성을 처리하는 올바른 패턴을 시연합니다.
 	/// </summary>
 	[RequireComponent(typeof(UiToolkitPresenterFeature))]
 	[RequireComponent(typeof(UIDocument))]
@@ -19,14 +19,14 @@ namespace Geuneda.UiService.Tests.PlayMode
 
 	private void Awake()
 	{
-		// Ensure UIDocument exists
+		// UIDocument가 존재하는지 확인
 		var document = GetComponent<UIDocument>();
 		if (document == null)
 		{
 			document = gameObject.AddComponent<UIDocument>();
 		}
 
-		// Create PanelSettings for test environment (required for panel attachment)
+		// 테스트 환경을 위한 PanelSettings 생성 (패널 연결에 필요)
 		if (document.panelSettings == null)
 		{
 			document.panelSettings = ScriptableObject.CreateInstance<PanelSettings>();
@@ -38,7 +38,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			ToolkitFeature = gameObject.AddComponent<UiToolkitPresenterFeature>();
 		}
 
-		// Set document reference via reflection
+		// 리플렉션을 통해 문서 참조 설정
 		var docField = typeof(UiToolkitPresenterFeature).GetField("_document",
 			System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 		docField?.SetValue(ToolkitFeature, document);
@@ -46,7 +46,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 
 		protected override void OnInitialized()
 		{
-			// Register the callback to be invoked on each open
+			// 열기마다 호출될 콜백 등록
 			ToolkitFeature.AddVisualTreeAttachedListener(SetupUI);
 		}
 
@@ -54,7 +54,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		{
 			SetupCallbackCount++;
 
-			// Correct pattern: unregister from old, query fresh, register on new
+			// 올바른 패턴: 이전 것에서 해제, 새로 쿼리, 새 것에 등록
 			_testButton?.UnregisterCallback<ClickEvent>(OnButtonClicked);
 			_testButton = root?.Q<Button>("TestButton");
 			_testButton?.RegisterCallback<ClickEvent>(OnButtonClicked);
@@ -62,11 +62,11 @@ namespace Geuneda.UiService.Tests.PlayMode
 
 		private void OnButtonClicked(ClickEvent evt)
 		{
-			// Test click handler
+			// 테스트 클릭 핸들러
 		}
 
 		/// <summary>
-		/// Removes the setup listener for testing RemoveVisualTreeAttachedListener.
+		/// RemoveVisualTreeAttachedListener 테스트를 위해 설정 리스너를 제거합니다.
 		/// </summary>
 		public void RemoveSetupListener()
 		{

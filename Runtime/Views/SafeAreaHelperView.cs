@@ -7,13 +7,13 @@ using UnityEngine.UI;
 namespace Geuneda.UiService.Views
 {
 	/// <summary>
-	/// This view helper translate anchored views based on device safe area (screens witch a notch)
+	/// 기기 안전 영역(노치가 있는 화면)을 기반으로 앵커된 뷰를 변환하는 뷰 헬퍼입니다
 	/// </summary>
 	[RequireComponent(typeof(RectTransform))]
 	public class SafeAreaHelperView : MonoBehaviour
 	{
-		[Tooltip("If true then will only shift the anchor when the pivot is out of the safe area. If inside the safe area" +
-				 "will remain in the same anchor position")]
+		[Tooltip("true이면 피벗이 안전 영역 밖에 있을 때만 앵커를 이동합니다. 안전 영역 내부에 있으면 " +
+				 "동일한 앵커 위치를 유지합니다")]
 		[SerializeField] private bool _checkAreaBounds = false;
 		[SerializeField] private RectTransform _rectTransform;
 		[SerializeField] private bool _ignoreHeight = false;
@@ -59,7 +59,7 @@ namespace Geuneda.UiService.Views
 		{
 
 #if UNITY_EDITOR
-			// Because Unity Device Simulator and Game View have different screen resolution configs and sometimes use Desktop resolution
+			// Unity Device Simulator와 Game View는 화면 해상도 설정이 다르고 때로는 데스크톱 해상도를 사용하기 때문입니다
 			_safeArea = Screen.safeArea;
 			_resolution = new Rect(0, 0, Screen.width, Screen.height);
 			_resolution = _resolution == _safeArea ? _resolution : new Rect(0, 0, Screen.currentResolution.width, Screen.currentResolution.height);
@@ -74,36 +74,36 @@ namespace Geuneda.UiService.Views
 			var anchorMin = _rectTransform.anchorMin;
 			var anchoredPosition = _initAnchoredPosition;
 
-			// Check if it is stretched on all sides
+			// 모든 면이 늘어나 있는지 확인합니다
 			if (anchorMin == Vector2.zero && anchorMax == Vector2.one)
 			{
 				AllStretchedAnchoring();
 				return;
 			}
 
-			// Check if anchored to top or bottom
+			// 상단 또는 하단에 앵커되어 있는지 확인합니다
 			if (!_ignoreHeight && Mathf.Approximately(anchorMax.y, anchorMin.y) && !CheckHeightAreaBounds(anchoredPosition))
 			{
-				// bottom
+				// 하단
 				if (anchorMax.y < Mathf.Epsilon)
 				{
 					anchoredPosition.y += (_safeArea.yMin - _resolution.yMin) * _refResolution.y / _resolution.height;
 				}
-				else // top
+				else // 상단
 				{
 					anchoredPosition.y += (_safeArea.yMax - _resolution.yMax) * _refResolution.y / _resolution.height;
 				}
 			}
 
-			// Check if anchored to left or right
+			// 좌측 또는 우측에 앵커되어 있는지 확인합니다
 			if (!_ignoreWidth && Mathf.Approximately(anchorMax.x, anchorMin.x) && !CheckWidthAreaBounds(anchoredPosition))
 			{
-				// left
+				// 좌측
 				if (anchorMax.x < Mathf.Epsilon)
 				{
 					anchoredPosition.x += (_safeArea.xMin - _resolution.xMin) * _refResolution.x / _resolution.width;
 				}
-				else // right
+				else // 우측
 				{
 					anchoredPosition.x += (_safeArea.xMax - _resolution.xMax) * _refResolution.x / _resolution.width;
 				}
@@ -127,7 +127,7 @@ namespace Geuneda.UiService.Views
 			var anchoredPosition = _initAnchoredPosition;
 			var sizeDelta = _initSizeDelta;
 
-			// Check if anchored to top or bottom
+			// 상단 또는 하단에 앵커되어 있는지 확인합니다
 			if (!_ignoreHeight && !CheckHeightAreaBounds(anchoredPosition))
 			{
 				var yDelta = (_safeArea.yMax - _resolution.yMax) * _refResolution.y / _resolution.height;
@@ -136,7 +136,7 @@ namespace Geuneda.UiService.Views
 				sizeDelta.y -= yDelta / 2f;
 			}
 
-			// Check if anchored to left or right
+			// 좌측 또는 우측에 앵커되어 있는지 확인합니다
 			if (!_ignoreWidth && !CheckWidthAreaBounds(anchoredPosition))
 			{
 				var xDelta = (_safeArea.xMin - _resolution.xMin) * _refResolution.x / _resolution.width;
@@ -152,7 +152,7 @@ namespace Geuneda.UiService.Views
 
 #if UNITY_EDITOR
 	/// <summary>
-	/// Custom inspector for the <see cref="SafeAreaHelperView"/> class
+	/// <see cref="SafeAreaHelperView"/> 클래스를 위한 커스텀 인스펙터입니다
 	/// </summary>
 	[UnityEditor.CustomEditor(typeof(SafeAreaHelperView))]
 	public class SafeAreaHelperViewEditor : UnityEditor.Editor

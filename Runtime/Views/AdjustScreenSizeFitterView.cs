@@ -6,11 +6,11 @@ using UnityEngine.UI;
 namespace Geuneda.UiService.Views
 { 
     /// <summary>
-    /// Resizes a RectTransform to fit the size of its content.
+    /// RectTransform의 크기를 콘텐츠 크기에 맞게 조정합니다.
     /// </summary>
     /// <remarks>
-    /// Similar to <see cref="ContentSizeFitter"/>, but rounds the size of its content between min and preferred sizes.
-    /// Works better with explicit size anchors and not fitting size anchors
+    /// <see cref="ContentSizeFitter"/>와 유사하지만, 콘텐츠 크기를 최소 크기와 기본 크기 사이에서 반올림합니다.
+    /// 명시적 크기 앵커에서 더 잘 작동하며, 맞춤 크기 앵커에서는 적합하지 않습니다
     /// </remarks>
     [AddComponentMenu("Layout/Adjust Size Fitter", 141)]
     [ExecuteAlways]
@@ -70,12 +70,12 @@ namespace Geuneda.UiService.Views
         }
 
         /// <summary>
-        /// Method called by the layout system. Has no effect
+        /// 레이아웃 시스템에서 호출하는 메서드입니다. 효과 없음
         /// </summary>
         public virtual void SetLayoutHorizontal() {}
 
         /// <summary>
-        /// Method called by the layout system. Has no effect
+        /// 레이아웃 시스템에서 호출하는 메서드입니다. 효과 없음
         /// </summary>
         public virtual void SetLayoutVertical() {}
         

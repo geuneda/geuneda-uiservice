@@ -8,22 +8,22 @@ using System.Threading;
 namespace Geuneda.UiService
 {
 	/// <summary>
-	/// Represents a UI presenter instance with its type, address and presenter reference
+	/// 타입, 주소 및 프레젠터 참조를 가진 UI 프레젠터 인스턴스를 나타냅니다
 	/// </summary>
 	public readonly struct UiInstance
 	{
 		/// <summary>
-		/// The type of the UI presenter
+		/// UI 프레젠터의 타입입니다
 		/// </summary>
 		public readonly Type Type;
-		
+
 		/// <summary>
-		/// The instance address (empty string for default/singleton instances)
+		/// 인스턴스 주소입니다 (기본/싱글턴 인스턴스의 경우 빈 문자열)
 		/// </summary>
 		public readonly string Address;
-		
+
 		/// <summary>
-		/// The UI presenter reference
+		/// UI 프레젠터 참조입니다
 		/// </summary>
 		public readonly UiPresenter Presenter;
 
@@ -36,290 +36,290 @@ namespace Geuneda.UiService
 	}
 
 	/// <summary>
-	/// This service provides an abstraction layer to interact with the game's UI <seealso cref="UiPresenter"/>
-	/// The Ui Service is organized by layers. The higher the layer the more close is to the camera viewport.
-	/// Supports multiple instances of the same UI type through the UiInstanceId system.
+	/// 게임의 UI <seealso cref="UiPresenter"/>와 상호작용하기 위한 추상화 레이어를 제공하는 서비스입니다.
+	/// UI 서비스는 레이어별로 구성됩니다. 레이어가 높을수록 카메라 뷰포트에 더 가깝습니다.
+	/// UiInstanceId 시스템을 통해 동일한 UI 타입의 다중 인스턴스를 지원합니다.
 	/// </summary>
 	public interface IUiService
 	{
 		
 		/// <summary>
-		/// Gets a read-only list of all Presenter instances currently visible.
-		/// Each entry is a UiInstanceId containing the Type and instance name.
+		/// 현재 표시 중인 모든 프레젠터 인스턴스의 읽기 전용 목록을 가져옵니다.
+		/// 각 항목은 Type과 인스턴스 이름을 포함하는 UiInstanceId입니다.
 		/// </summary>
 		IReadOnlyList<UiInstanceId> VisiblePresenters { get; }
 
 		/// <summary>
-		/// Gets a read-only dictionary of the containers of UI, called 'Ui Set' maintained by the UI service.
+		/// UI 서비스가 관리하는 'UI 세트'라 불리는 UI 컨테이너의 읽기 전용 딕셔너리를 가져옵니다.
 		/// </summary>
 		IReadOnlyDictionary<int, UiSetConfig> UiSets { get; }
 
 		/// <summary>
-		/// Gets all UI presenters currently loaded in memory by the UI service.
+		/// UI 서비스에 의해 현재 메모리에 로드된 모든 UI 프레젠터를 가져옵니다.
 		/// </summary>
-		/// <returns>A list of all loaded UI instances</returns>
+		/// <returns>로드된 모든 UI 인스턴스 목록</returns>
 		List<UiInstance> GetLoadedPresenters();
 
 		/// <summary>
-		/// Requests the UI of given type <typeparamref name="T"/>
+		/// 주어진 <typeparamref name="T"/> 타입의 UI를 요청합니다
 		/// </summary>
 		/// <exception cref="KeyNotFoundException">
-		/// Thrown if the service does NOT contain an <see cref="UiPresenter"/> of the given <typeparamref name="T"/>
+		/// 서비스에 주어진 <typeparamref name="T"/>의 <see cref="UiPresenter"/>가 없는 경우 발생합니다
 		/// </exception>
-		/// <typeparam name="T">The type of UI presenter requested.</typeparam>
-		/// <returns>The UI of type <typeparamref name="T"/> requested</returns>
+		/// <typeparam name="T">요청된 UI 프레젠터의 타입입니다.</typeparam>
+		/// <returns>요청된 <typeparamref name="T"/> 타입의 UI</returns>
 		T GetUi<T>() where T : UiPresenter;
 
 		/// <summary>
-		/// Requests the visible state of the given UI type <typeparamref name="T"/>.
+		/// 주어진 <typeparamref name="T"/> UI 타입의 표시 상태를 요청합니다.
 		/// </summary>
-		/// <typeparam name="T">The type of UI presenter to check if is visible or not.</typeparam>
-		/// <returns>True if the UI is visble, false otherwise</returns>
+		/// <typeparam name="T">표시 여부를 확인할 UI 프레젠터의 타입입니다.</typeparam>
+		/// <returns>UI가 표시 중이면 true, 그렇지 않으면 false</returns>
 		bool IsVisible<T>() where T : UiPresenter;
 
 		/// <summary>
-		/// Adds a UI configuration to the service.
+		/// 서비스에 UI 구성을 추가합니다.
 		/// </summary>
-		/// <param name="config">The UI configuration to add.</param>
+		/// <param name="config">추가할 UI 구성.</param>
 		void AddUiConfig(UiConfig config);
 
 		/// <summary>
-		/// Adds a UI set configuration to the service.
+		/// 서비스에 UI 세트 구성을 추가합니다.
 		/// </summary>
-		/// <param name="uiSet">The UI set configuration to add.</param>
+		/// <param name="uiSet">추가할 UI 세트 구성.</param>
 		void AddUiSet(UiSetConfig uiSet);
 
 		/// <summary>
-		/// Adds a UI presenter to the service and includes it in the specified layer.
-		/// If <paramref name="openAfter"/> is true, the UI presenter will be opened after being added to the service.
+		/// UI 프레젠터를 서비스에 추가하고 지정된 레이어에 포함시킵니다.
+		/// <paramref name="openAfter"/>가 true이면 서비스에 추가된 후 UI 프레젠터가 열립니다.
 		/// </summary>
-		/// <typeparam name="T">The type of UI presenter to add.</typeparam>
-		/// <param name="ui">The UI presenter to add.</param>
-		/// <param name="layer">The layer to include the UI presenter in.</param>
-		/// <param name="openAfter">Whether to open the UI presenter after adding it to the service.</param>
+		/// <typeparam name="T">추가할 UI 프레젠터의 타입.</typeparam>
+		/// <param name="ui">추가할 UI 프레젠터.</param>
+		/// <param name="layer">UI 프레젠터를 포함할 레이어.</param>
+		/// <param name="openAfter">서비스에 추가 후 UI 프레젠터를 열지 여부.</param>
 		void AddUi<T>(T ui, int layer, bool openAfter = false) where T : UiPresenter;
 
 		/// <summary>
-		/// Removes the UI of the specified type from the service without unloading it.
+		/// 지정된 타입의 UI를 언로드하지 않고 서비스에서 제거합니다.
 		/// </summary>
-		/// <typeparam name="T">The type of UI to remove.</typeparam>
-		/// <returns>True if the UI was removed, false otherwise.</returns>
+		/// <typeparam name="T">제거할 UI의 타입.</typeparam>
+		/// <returns>UI가 제거되었으면 true, 그렇지 않으면 false.</returns>
 		bool RemoveUi<T>() where T : UiPresenter;
 
 		/// <summary>
-		/// Removes the specified UI presenter from the service without unloading it.
+		/// 지정된 UI 프레젠터를 언로드하지 않고 서비스에서 제거합니다.
 		/// </summary>
-		/// <typeparam name="T">The type of UI presenter to remove.</typeparam>
-		/// <param name="uiPresenter">The UI presenter to remove.</param>
-		/// <returns>True if the UI presenter was removed, false otherwise.</returns>
+		/// <typeparam name="T">제거할 UI 프레젠터의 타입.</typeparam>
+		/// <param name="uiPresenter">제거할 UI 프레젠터.</param>
+		/// <returns>UI 프레젠터가 제거되었으면 true, 그렇지 않으면 false.</returns>
 		bool RemoveUi<T>(T uiPresenter) where T : UiPresenter;
 
 		/// <summary>
-		/// Removes the UI of the specified type from the service without unloading it.
+		/// 지정된 타입의 UI를 언로드하지 않고 서비스에서 제거합니다.
 		/// </summary>
-		/// <param name="type">The type of UI to remove.</param>
-		/// <returns>True if the UI was removed, false otherwise.</returns>
+		/// <param name="type">제거할 UI의 타입.</param>
+		/// <returns>UI가 제거되었으면 true, 그렇지 않으면 false.</returns>
 		bool RemoveUi(Type type);
 
 		/// <summary>
-		/// Removes and returns all UI presenters from the specified UI set that are still present in the service.
+		/// 서비스에 여전히 존재하는 지정된 UI 세트의 모든 UI 프레젠터를 제거하고 반환합니다.
 		/// </summary>
-		/// <param name="setId">The ID of the UI set to remove from.</param>
-		/// <returns>A list of removed UI presenters.</returns>
-		/// <exception cref="KeyNotFoundException">Thrown if the service does not contain a UI set with the specified ID.</exception>
+		/// <param name="setId">제거할 UI 세트의 ID.</param>
+		/// <returns>제거된 UI 프레젠터 목록.</returns>
+		/// <exception cref="KeyNotFoundException">서비스에 지정된 ID의 UI 세트가 없는 경우 발생합니다.</exception>
 		List<UiPresenter> RemoveUiSet(int setId);
 
 		/// <summary>
-		/// Loads the UI of the specified type asynchronously.
-		/// This method can be controlled in an async method and returns the loaded UI.
-		/// If <paramref name="openAfter"/> is true, the UI will be opened after loading.
+		/// 지정된 타입의 UI를 비동기적으로 로드합니다.
+		/// 이 메서드는 async 메서드에서 제어할 수 있으며 로드된 UI를 반환합니다.
+		/// <paramref name="openAfter"/>가 true이면 로딩 후 UI가 열립니다.
 		/// </summary>
-		/// <typeparam name="T">The type of UI to load.</typeparam>
-		/// <param name="openAfter">Whether to open the UI after loading.</param>
-		/// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
-		/// <returns>A task that completes with the loaded UI.</returns>
-		/// <exception cref="KeyNotFoundException">Thrown if the service does not contain a UI configuration for the specified type.</exception>
+		/// <typeparam name="T">로드할 UI의 타입.</typeparam>
+		/// <param name="openAfter">로딩 후 UI를 열지 여부.</param>
+		/// <param name="cancellationToken">작업을 취소하기 위한 취소 토큰.</param>
+		/// <returns>로드된 UI로 완료되는 태스크.</returns>
+		/// <exception cref="KeyNotFoundException">서비스에 지정된 타입의 UI 구성이 없는 경우 발생합니다.</exception>
 		UniTask<T> LoadUiAsync<T>(bool openAfter = false, CancellationToken cancellationToken = default) where T : UiPresenter;
 
 		/// <summary>
-		/// Loads the UI of the specified type asynchronously.
-		/// This method can be controlled in an async method and returns the loaded UI.
-		/// If <paramref name="openAfter"/> is true, the UI will be opened after loading.
+		/// 지정된 타입의 UI를 비동기적으로 로드합니다.
+		/// 이 메서드는 async 메서드에서 제어할 수 있으며 로드된 UI를 반환합니다.
+		/// <paramref name="openAfter"/>가 true이면 로딩 후 UI가 열립니다.
 		/// </summary>
-		/// <param name="type">The type of UI to load.</param>
-		/// <param name="openAfter">Whether to open the UI after loading.</param>
-		/// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
-		/// <returns>A task that completes with the loaded UI.</returns>
-		/// <exception cref="KeyNotFoundException">Thrown if the service does not contain a UI configuration for the specified type.</exception>
+		/// <param name="type">로드할 UI의 타입.</param>
+		/// <param name="openAfter">로딩 후 UI를 열지 여부.</param>
+		/// <param name="cancellationToken">작업을 취소하기 위한 취소 토큰.</param>
+		/// <returns>로드된 UI로 완료되는 태스크.</returns>
+		/// <exception cref="KeyNotFoundException">서비스에 지정된 타입의 UI 구성이 없는 경우 발생합니다.</exception>
 		UniTask<UiPresenter> LoadUiAsync(Type type, bool openAfter = false, CancellationToken cancellationToken = default);
 
 		/// <summary>
-		/// Loads all UI presenters from the specified UI set asynchronously.
-		/// This method can be controlled in an async method and returns each UI when it is loaded.
-		/// The UIs are returned in a first-load-first-return scheme.
+		/// 지정된 UI 세트의 모든 UI 프레젠터를 비동기적으로 로드합니다.
+		/// 이 메서드는 async 메서드에서 제어할 수 있으며 로드된 각 UI를 반환합니다.
+		/// UI는 먼저 로드된 순서대로 반환됩니다.
 		/// </summary>
-		/// <param name="setId">The ID of the UI set to load from.</param>
-		/// <returns>An array of tasks that complete with each loaded UI.</returns>
-		/// <exception cref="KeyNotFoundException">Thrown if the service does not contain a UI set with the specified ID.</exception>
+		/// <param name="setId">로드할 UI 세트의 ID.</param>
+		/// <returns>로드된 각 UI로 완료되는 태스크 배열.</returns>
+		/// <exception cref="KeyNotFoundException">서비스에 지정된 ID의 UI 세트가 없는 경우 발생합니다.</exception>
 		IList<UniTask<UiPresenter>> LoadUiSetAsync(int setId);
 
 		/// <summary>
-		/// Unloads the UI of the specified type.
+		/// 지정된 타입의 UI를 언로드합니다.
 		/// </summary>
-		/// <typeparam name="T">The type of UI to unload.</typeparam>
-		/// <exception cref="KeyNotFoundException">Thrown if the service does not contain a UI of the specified type.</exception>
+		/// <typeparam name="T">언로드할 UI의 타입.</typeparam>
+		/// <exception cref="KeyNotFoundException">서비스에 지정된 타입의 UI가 없는 경우 발생합니다.</exception>
 		void UnloadUi<T>() where T : UiPresenter;
 
 		/// <summary>
-		/// Unloads the specified UI presenter.
+		/// 지정된 UI 프레젠터를 언로드합니다.
 		/// </summary>
-		/// <typeparam name="T">The type of UI presenter to unload.</typeparam>
-		/// <param name="uiPresenter">The UI presenter to unload.</param>
-		/// <exception cref="KeyNotFoundException">Thrown if the service does not contain the specified UI presenter.</exception>
+		/// <typeparam name="T">언로드할 UI 프레젠터의 타입.</typeparam>
+		/// <param name="uiPresenter">언로드할 UI 프레젠터.</param>
+		/// <exception cref="KeyNotFoundException">서비스에 지정된 UI 프레젠터가 없는 경우 발생합니다.</exception>
 		void UnloadUi<T>(T uiPresenter) where T : UiPresenter;
 
 		/// <summary>
-		/// Unloads the UI of the specified type.
+		/// 지정된 타입의 UI를 언로드합니다.
 		/// </summary>
-		/// <param name="type">The type of UI to unload.</param>
-		/// <exception cref="KeyNotFoundException">Thrown if the service does not contain a UI of the specified type.</exception>
+		/// <param name="type">언로드할 UI의 타입.</param>
+		/// <exception cref="KeyNotFoundException">서비스에 지정된 타입의 UI가 없는 경우 발생합니다.</exception>
 		void UnloadUi(Type type);
 
 		/// <summary>
-		/// Unloads a specific presenter instance of the specified type.
+		/// 지정된 타입의 특정 프레젠터 인스턴스를 언로드합니다.
 		/// </summary>
-		/// <param name="type">The type of UI to unload.</param>
-		/// <param name="instanceAddress">The instance address (empty string for default/singleton instances).</param>
-		/// <exception cref="KeyNotFoundException">Thrown if the service does not contain a UI of the specified type and instance address.</exception>
+		/// <param name="type">언로드할 UI의 타입.</param>
+		/// <param name="instanceAddress">인스턴스 주소 (기본/싱글턴 인스턴스의 경우 빈 문자열).</param>
+		/// <exception cref="KeyNotFoundException">서비스에 지정된 타입과 인스턴스 주소의 UI가 없는 경우 발생합니다.</exception>
 		void UnloadUi(Type type, string instanceAddress);
 
 		/// <summary>
-		/// Unloads all UI presenters from the specified UI set.
+		/// 지정된 UI 세트의 모든 UI 프레젠터를 언로드합니다.
 		/// </summary>
-		/// <param name="setId">The ID of the UI set to unload from.</param>
-		/// <exception cref="KeyNotFoundException">Thrown if the service does not contain a UI set with the specified ID.</exception>
+		/// <param name="setId">언로드할 UI 세트의 ID.</param>
+		/// <exception cref="KeyNotFoundException">서비스에 지정된 ID의 UI 세트가 없는 경우 발생합니다.</exception>
 		void UnloadUiSet(int setId);
 
 		/// <summary>
-		/// Opens a UI presenter asynchronously, loading its assets if necessary.
+		/// UI 프레젠터를 비동기적으로 열고, 필요한 경우 에셋을 로드합니다.
 		/// </summary>
-		/// <typeparam name="T">The type of UI presenter to open.</typeparam>
-		/// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
-		/// <returns>A task that completes when the UI presenter is opened.</returns>
+		/// <typeparam name="T">열 UI 프레젠터의 타입.</typeparam>
+		/// <param name="cancellationToken">작업을 취소하기 위한 취소 토큰.</param>
+		/// <returns>UI 프레젠터가 열리면 완료되는 태스크.</returns>
 		UniTask<T> OpenUiAsync<T>(CancellationToken cancellationToken = default) where T : UiPresenter;
 
 		/// <summary>
-		/// Opens a UI presenter asynchronously, loading its assets if necessary.
+		/// UI 프레젠터를 비동기적으로 열고, 필요한 경우 에셋을 로드합니다.
 		/// </summary>
-		/// <param name="type">The type of UI presenter to open.</param>
-		/// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
-		/// <returns>A task that completes when the UI presenter is opened.</returns>
+		/// <param name="type">열 UI 프레젠터의 타입.</param>
+		/// <param name="cancellationToken">작업을 취소하기 위한 취소 토큰.</param>
+		/// <returns>UI 프레젠터가 열리면 완료되는 태스크.</returns>
 		UniTask<UiPresenter> OpenUiAsync(Type type, CancellationToken cancellationToken = default);
 
 		/// <summary>
-		/// Opens a UI presenter asynchronously, loading its assets if necessary, and sets its initial data.
+		/// UI 프레젠터를 비동기적으로 열고, 필요한 경우 에셋을 로드하며, 초기 데이터를 설정합니다.
 		/// </summary>
-		/// <typeparam name="T">The type of UI presenter to open.</typeparam>
-		/// <typeparam name="TData">The type of initial data to set.</typeparam>
-		/// <param name="initialData">The initial data to set.</param>
-		/// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
-		/// <returns>A task that completes when the UI presenter is opened.</returns>
-		UniTask<T> OpenUiAsync<T, TData>(TData initialData, CancellationToken cancellationToken = default) 
-			where T : class, IUiPresenterData 
+		/// <typeparam name="T">열 UI 프레젠터의 타입.</typeparam>
+		/// <typeparam name="TData">설정할 초기 데이터의 타입.</typeparam>
+		/// <param name="initialData">설정할 초기 데이터.</param>
+		/// <param name="cancellationToken">작업을 취소하기 위한 취소 토큰.</param>
+		/// <returns>UI 프레젠터가 열리면 완료되는 태스크.</returns>
+		UniTask<T> OpenUiAsync<T, TData>(TData initialData, CancellationToken cancellationToken = default)
+			where T : class, IUiPresenterData
 			where TData : struct;
 
 		/// <summary>
-		/// Opens a UI presenter asynchronously, loading its assets if necessary, and sets its initial data.
+		/// UI 프레젠터를 비동기적으로 열고, 필요한 경우 에셋을 로드하며, 초기 데이터를 설정합니다.
 		/// </summary>
-		/// <param name="type">The type of UI presenter to open.</param>
-		/// <param name="initialData">The initial data to set.</param>
-		/// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
-		/// <returns>A task that completes when the UI presenter is opened.</returns>
+		/// <param name="type">열 UI 프레젠터의 타입.</param>
+		/// <param name="initialData">설정할 초기 데이터.</param>
+		/// <param name="cancellationToken">작업을 취소하기 위한 취소 토큰.</param>
+		/// <returns>UI 프레젠터가 열리면 완료되는 태스크.</returns>
 		UniTask<UiPresenter> OpenUiAsync<TData>(Type type, TData initialData, CancellationToken cancellationToken = default) where TData : struct;
 
 		/// <summary>
-		/// Opens all UI presenters in the specified UI set, loading them if necessary.
-		/// This method ensures proper address handling for UI sets, making it safe to use
-		/// in combination with <see cref="CloseAllUiSet"/> and <see cref="UnloadUiSet"/>.
-		/// All UIs in the set are opened in parallel using UniTask.WhenAll.
+		/// 지정된 UI 세트의 모든 UI 프레젠터를 열고, 필요한 경우 로드합니다.
+		/// 이 메서드는 UI 세트에 대한 올바른 주소 처리를 보장하므로
+		/// <see cref="CloseAllUiSet"/> 및 <see cref="UnloadUiSet"/>와 함께 안전하게 사용할 수 있습니다.
+		/// 세트의 모든 UI는 UniTask.WhenAll을 사용하여 병렬로 열립니다.
 		/// </summary>
-		/// <param name="setId">The ID of the UI set to open.</param>
-		/// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
-		/// <returns>A task that completes with an array of all opened UI presenters when all UIs in the set are opened.</returns>
-		/// <exception cref="KeyNotFoundException">Thrown if the service does not contain a UI set with the specified ID.</exception>
+		/// <param name="setId">열 UI 세트의 ID.</param>
+		/// <param name="cancellationToken">작업을 취소하기 위한 취소 토큰.</param>
+		/// <returns>세트의 모든 UI가 열리면 열린 모든 UI 프레젠터 배열로 완료되는 태스크.</returns>
+		/// <exception cref="KeyNotFoundException">서비스에 지정된 ID의 UI 세트가 없는 경우 발생합니다.</exception>
 		UniTask<UiPresenter[]> OpenUiSetAsync(int setId, CancellationToken cancellationToken = default);
 
 		/// <summary>
-		/// Closes a UI presenter and optionally destroys its assets.
+		/// UI 프레젠터를 닫고 선택적으로 에셋을 파괴합니다.
 		/// </summary>
-		/// <typeparam name="T">The type of UI presenter to close.</typeparam>
-		/// <param name="destroy">Whether to destroy the UI presenter's assets.</param>
+		/// <typeparam name="T">닫을 UI 프레젠터의 타입.</typeparam>
+		/// <param name="destroy">UI 프레젠터의 에셋을 파괴할지 여부.</param>
 		void CloseUi<T>(bool destroy = false) where T : UiPresenter;
 
 		/// <summary>
-		/// Closes a UI presenter and optionally destroys its assets.
+		/// UI 프레젠터를 닫고 선택적으로 에셋을 파괴합니다.
 		/// </summary>
-		/// <param name="uiPresenter">The UI presenter to close.</param>
-		/// <param name="destroy">Whether to destroy the UI presenter's assets.</param>
-		/// <returns>A task that completes when the UI presenter is closed.</returns>
+		/// <param name="uiPresenter">닫을 UI 프레젠터.</param>
+		/// <param name="destroy">UI 프레젠터의 에셋을 파괴할지 여부.</param>
+		/// <returns>UI 프레젠터가 닫히면 완료되는 태스크.</returns>
 		void CloseUi<T>(T uiPresenter, bool destroy = false) where T : UiPresenter;
 
 		/// <summary>
-		/// Closes a UI presenter and optionally destroys its assets.
+		/// UI 프레젠터를 닫고 선택적으로 에셋을 파괴합니다.
 		/// </summary>
-		/// <param name="type">The type of UI presenter to close.</param>
-		/// <param name="destroy">Whether to destroy the UI presenter's assets.</param>
-		/// <returns>A task that completes when the UI presenter is closed.</returns>
+		/// <param name="type">닫을 UI 프레젠터의 타입.</param>
+		/// <param name="destroy">UI 프레젠터의 에셋을 파괴할지 여부.</param>
+		/// <returns>UI 프레젠터가 닫히면 완료되는 태스크.</returns>
 		void CloseUi(Type type, bool destroy = false);
 
 		/// <summary>
-		/// Closes a specific presenter instance and optionally destroys its assets.
+		/// 특정 프레젠터 인스턴스를 닫고 선택적으로 에셋을 파괴합니다.
 		/// </summary>
-		/// <param name="type">The type of UI presenter to close.</param>
-		/// <param name="instanceAddress">The instance address (empty string for default/singleton instances).</param>
-		/// <param name="destroy">Whether to destroy the UI presenter's assets.</param>
+		/// <param name="type">닫을 UI 프레젠터의 타입.</param>
+		/// <param name="instanceAddress">인스턴스 주소 (기본/싱글턴 인스턴스의 경우 빈 문자열).</param>
+		/// <param name="destroy">UI 프레젠터의 에셋을 파괴할지 여부.</param>
 		void CloseUi(Type type, string instanceAddress, bool destroy = false);
 
 		/// <summary>
-		/// Closes all visible UI presenters.
+		/// 모든 표시 중인 UI 프레젠터를 닫습니다.
 		/// </summary>
 		void CloseAllUi();
 
 		/// <summary>
-		/// Closes all visible UI presenters in the given layer.
+		/// 지정된 레이어의 모든 표시 중인 UI 프레젠터를 닫습니다.
 		/// </summary>
-		/// <param name="layer">The layer to close UI presenters in.</param>
+		/// <param name="layer">UI 프레젠터를 닫을 레이어.</param>
 		void CloseAllUi(int layer);
 
 		/// <summary>
-		/// Closes all UI presenters that are part of the given UI set configuration.
+		/// 지정된 UI 세트 구성에 속하는 모든 UI 프레젠터를 닫습니다.
 		/// </summary>
-		/// <param name="setId">The ID of the UI set configuration to close.</param>
+		/// <param name="setId">닫을 UI 세트 구성의 ID.</param>
 		void CloseAllUiSet(int setId);
 	}
 
 	/// <inheritdoc cref="IUiService" />
 	/// <remarks>
-	/// This interface provides a way to initialize the UI service with the game's UI configurations.
+	/// 이 인터페이스는 게임의 UI 구성으로 UI 서비스를 초기화하는 방법을 제공합니다.
 	/// </remarks>
 	public interface IUiServiceInit : IUiService, IDisposable
 	{
 		/// <summary>
-		/// Initializes the UI service with the given UI configurations.
+		/// 주어진 UI 구성으로 UI 서비스를 초기화합니다.
 		/// </summary>
-		/// <param name="configs">The UI configurations to initialize the service with.</param>
+		/// <param name="configs">서비스를 초기화할 UI 구성.</param>
 		/// <remarks>
-		/// To help configure the game's UI, you need to create a UiConfigs Scriptable object by:
-		/// - Right Click on the Project View > Create > ScriptableObjects > Configs > UiConfigs
-		/// - Duplicate UI configs or UI sets will log warnings but will not throw exceptions
-		/// - Layer numbers below 0 or above 1000 will log warnings
-		/// - Empty addressable addresses or null UI types will throw ArgumentException
+		/// 게임의 UI를 구성하려면 다음과 같이 UiConfigs ScriptableObject를 생성해야 합니다:
+		/// - Project View에서 우클릭 > Create > ScriptableObjects > Configs > UiConfigs
+		/// - 중복된 UI 구성이나 UI 세트는 경고를 기록하지만 예외를 발생시키지 않습니다
+		/// - 0 미만 또는 1000 초과의 레이어 번호는 경고를 기록합니다
+		/// - 빈 어드레서블 주소 또는 null UI 타입은 ArgumentException을 발생시킵니다
 		/// </remarks>
 		/// <exception cref="ArgumentNullException">
-		/// Thrown if <paramref name="configs"/> is null.
+		/// <paramref name="configs"/>가 null인 경우 발생합니다.
 		/// </exception>
 		/// <exception cref="ArgumentException">
-		/// Thrown if any UI config has an empty addressable address or null UI type.
+		/// UI 구성에 빈 어드레서블 주소 또는 null UI 타입이 있는 경우 발생합니다.
 		/// </exception>
 		void Init(UiConfigs configs);
 	}

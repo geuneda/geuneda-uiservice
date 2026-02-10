@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
-	/// Test presenter with multiple features (UiToolkit + TimeDelay)
+	/// 다중 기능(UiToolkit + TimeDelay)을 가진 테스트 프레젠터
 	/// </summary>
 	[RequireComponent(typeof(UiToolkitPresenterFeature))]
 	[RequireComponent(typeof(TimeDelayFeature))]
@@ -22,7 +22,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			document = gameObject.AddComponent<UIDocument>();
 		}
 
-		// Create PanelSettings for test environment (required for panel attachment)
+		// 테스트 환경을 위한 PanelSettings 생성 (패널 연결에 필요)
 		if (document.panelSettings == null)
 		{
 			document.panelSettings = ScriptableObject.CreateInstance<PanelSettings>();
@@ -40,12 +40,12 @@ namespace Geuneda.UiService.Tests.PlayMode
 				DelayFeature = gameObject.AddComponent<TimeDelayFeature>();
 			}
 
-			// Set document reference
+			// 문서 참조 설정
 			var docField = typeof(UiToolkitPresenterFeature).GetField("_document",
 				System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 			docField?.SetValue(ToolkitFeature, document);
 
-			// Set short delays
+			// 짧은 지연 시간 설정
 			var openField = typeof(TimeDelayFeature).GetField("_openDelayInSeconds",
 				System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 			openField?.SetValue(DelayFeature, 0.01f);

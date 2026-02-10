@@ -5,8 +5,8 @@ using UnityEngine.UIElements;
 namespace Geuneda.UiService
 {
 	/// <summary>
-	/// Feature that provides UI Toolkit integration for a <see cref="UiPresenter"/>.
-	/// Handles visual tree timing so subscribers don't need to worry about it.
+	/// <see cref="UiPresenter"/>에 UI Toolkit 통합을 제공하는 기능입니다.
+	/// 비주얼 트리 타이밍을 처리하므로 구독자가 이에 대해 신경 쓸 필요가 없습니다.
 	/// </summary>
 	[RequireComponent(typeof(UIDocument))]
 	public class UiToolkitPresenterFeature : PresenterFeatureBase
@@ -17,12 +17,12 @@ namespace Geuneda.UiService
 		private bool _callbacksRegistered;
 
 		/// <summary>
-		/// The attached <see cref="UIDocument"/>.
+		/// 부착된 <see cref="UIDocument"/>입니다.
 		/// </summary>
 		public UIDocument Document => _document;
 
 		/// <summary>
-		/// The root <see cref="VisualElement"/> of the UIDocument.
+		/// UIDocument의 루트 <see cref="VisualElement"/>입니다.
 		/// </summary>
 		public VisualElement Root => _document?.rootVisualElement;
 
@@ -38,9 +38,9 @@ namespace Geuneda.UiService
 		}
 
 		/// <summary>
-		/// Registers a callback to be invoked when the visual tree is ready.
-		/// Invokes on each open (UI Toolkit recreates elements on activate).
-		/// Safe to call in OnInitialized().
+		/// 비주얼 트리가 준비되었을 때 호출될 콜백을 등록합니다.
+		/// 매 열기마다 호출됩니다 (UI Toolkit은 활성화 시 요소를 재생성합니다).
+		/// OnInitialized()에서 호출해도 안전합니다.
 		/// </summary>
 		public void AddVisualTreeAttachedListener(UnityAction<VisualElement> callback)
 		{
@@ -51,7 +51,7 @@ namespace Geuneda.UiService
 
 			_onVisualTreeReady.AddListener(callback);
 
-			// Visual tree already ready? Invoke immediately
+			// 비주얼 트리가 이미 준비되었으면 즉시 호출합니다
 			if (Root?.panel != null)
 			{
 				callback(Root);
@@ -59,7 +59,7 @@ namespace Geuneda.UiService
 		}
 
 		/// <summary>
-		/// Removes a previously registered callback.
+		/// 이전에 등록된 콜백을 제거합니다.
 		/// </summary>
 		public void RemoveVisualTreeAttachedListener(UnityAction<VisualElement> callback)
 		{

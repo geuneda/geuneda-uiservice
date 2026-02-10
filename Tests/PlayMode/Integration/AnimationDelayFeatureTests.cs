@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
-	/// Tests for AnimationDelayFeature functionality.
+	/// AnimationDelayFeature 기능 테스트.
 	/// </summary>
 	[TestFixture]
 	public class AnimationDelayFeatureTests
@@ -38,12 +38,12 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator AnimationDelayFeature_NoClips_HasZeroDelay()
 		{
-			// Act
+			// 실행
 			var task = _service.LoadUiAsync(typeof(TestAnimationDelayPresenter));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestAnimationDelayPresenter;
 
-			// Assert - No clips means zero delay
+			// 검증 - 클립이 없으면 지연 시간 0
 			Assert.AreEqual(0f, presenter.AnimationFeature.OpenDelayInSeconds);
 			Assert.AreEqual(0f, presenter.AnimationFeature.CloseDelayInSeconds);
 		}
@@ -51,89 +51,89 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator AnimationDelayFeature_OnOpen_NotifiesTransitionCompleted()
 		{
-			// Act
+			// 실행
 			var task = _service.OpenUiAsync(typeof(TestAnimationDelayPresenter));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestAnimationDelayPresenter;
 
-			// Wait for presenter's open transition to complete
+			// 프레젠터의 열기 전환 완료 대기
 			yield return presenter.OpenTransitionTask.ToCoroutine();
 
-			// Assert
+			// 검증
 			Assert.IsTrue(presenter.WasOpenTransitionCompleted);
 		}
 
 		[UnityTest]
 		public IEnumerator AnimationDelayFeature_OnClose_NotifiesTransitionCompleted()
 		{
-			// Arrange
+			// 준비
 			var task = _service.OpenUiAsync(typeof(TestAnimationDelayPresenter));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestAnimationDelayPresenter;
 			yield return presenter.OpenTransitionTask.ToCoroutine();
 
-			// Act
+			// 실행
 			_service.CloseUi(typeof(TestAnimationDelayPresenter));
 			yield return presenter.CloseTransitionTask.ToCoroutine();
 
-			// Assert
+			// 검증
 			Assert.IsTrue(presenter.WasCloseTransitionCompleted);
 		}
 
 		[UnityTest]
 		public IEnumerator AnimationDelayFeature_OnClose_DeactivatesGameObject()
 		{
-			// Arrange
+			// 준비
 			var task = _service.OpenUiAsync(typeof(TestAnimationDelayPresenter));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestAnimationDelayPresenter;
 			yield return presenter.OpenTransitionTask.ToCoroutine();
 
-			// Act
+			// 실행
 			_service.CloseUi(typeof(TestAnimationDelayPresenter));
 			yield return presenter.CloseTransitionTask.ToCoroutine();
 
-			// Assert
+			// 검증
 			Assert.IsFalse(presenter.gameObject.activeSelf);
 		}
 
 		[UnityTest]
 		public IEnumerator AnimationDelayFeature_AnimationComponent_IsAssigned()
 		{
-			// Act
+			// 실행
 			var task = _service.LoadUiAsync(typeof(TestAnimationDelayPresenter));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestAnimationDelayPresenter;
 
-			// Assert
+			// 검증
 			Assert.IsNotNull(presenter.AnimationFeature.AnimationComponent);
 		}
 
 		[UnityTest]
 		public IEnumerator AnimationDelayFeature_WithClip_UsesClipLength()
 		{
-			// Arrange - Create a test animation clip
+			// 준비 - 테스트 애니메이션 클립 생성
 			_mockLoader.RegisterPrefab<TestAnimationDelayWithClipPresenter>("animation_clip_presenter");
 			_service.AddUiConfig(TestHelpers.CreateTestConfig(typeof(TestAnimationDelayWithClipPresenter), "animation_clip_presenter", 0));
 
-			// Act
+			// 실행
 			var task = _service.LoadUiAsync(typeof(TestAnimationDelayWithClipPresenter));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestAnimationDelayWithClipPresenter;
 
-			// Assert - Should use clip length
+			// 검증 - 클립 길이를 사용해야 함
 			Assert.AreEqual(0.1f, presenter.AnimationFeature.OpenDelayInSeconds, 0.001f);
 		}
 
 		[UnityTest]
 		public IEnumerator AnimationDelayFeature_ImplementsITransitionFeature()
 		{
-			// Act
+			// 실행
 			var task = _service.LoadUiAsync(typeof(TestAnimationDelayPresenter));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestAnimationDelayPresenter;
 
-			// Assert
+			// 검증
 			Assert.IsTrue(presenter.AnimationFeature is ITransitionFeature);
 			
 			var transitionFeature = presenter.AnimationFeature as ITransitionFeature;

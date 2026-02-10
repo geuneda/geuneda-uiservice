@@ -8,22 +8,22 @@ using UnityEngine;
 namespace Geuneda.UiService
 {
 	/// <summary>
-	/// Implementation of <see cref="IUiAssetLoader"/> that uses a dictionary to map addresses to prefabs.
-	/// This is useful for testing or when prefabs are directly referenced in a ScriptableObject or MonoBehavior.
+	/// 딕셔너리를 사용하여 주소를 프리팹에 매핑하는 <see cref="IUiAssetLoader"/> 구현입니다.
+	/// 테스트 시 또는 프리팹이 ScriptableObject나 MonoBehaviour에서 직접 참조될 때 유용합니다.
 	/// </summary>
 	public class PrefabRegistryUiAssetLoader : IUiAssetLoader
 	{
 		private readonly Dictionary<string, GameObject> _prefabMap = new();
 
 		/// <summary>
-		/// Default constructor.
+		/// 기본 생성자입니다.
 		/// </summary>
 		public PrefabRegistryUiAssetLoader()
 		{
 		}
 
 		/// <summary>
-		/// Initializes the loader with entries from the given <paramref name="configs"/>.
+		/// 주어진 <paramref name="configs"/>의 항목으로 로더를 초기화합니다.
 		/// </summary>
 		public PrefabRegistryUiAssetLoader(PrefabRegistryUiConfigs configs)
 		{
@@ -36,7 +36,7 @@ namespace Geuneda.UiService
 		}
 
 		/// <summary>
-		/// Registers a prefab with a given address.
+		/// 주어진 주소로 프리팹을 등록합니다.
 		/// </summary>
 		public void RegisterPrefab(string address, GameObject prefab)
 		{

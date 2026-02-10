@@ -9,7 +9,7 @@ namespace Geuneda.UiService.Tests
         [Test]
         public void UiConfig_Creation_PreservesAllProperties()
         {
-            // Arrange & Act
+            // 준비 및 실행
             var config = new UiConfig
             {
                 Address = "test_address",
@@ -18,7 +18,7 @@ namespace Geuneda.UiService.Tests
                 LoadSynchronously = true
             };
 
-            // Assert
+            // 검증
             Assert.AreEqual("test_address", config.Address);
             Assert.AreEqual(5, config.Layer);
             Assert.AreEqual(typeof(TestUiPresenter), config.UiType);
@@ -28,10 +28,10 @@ namespace Geuneda.UiService.Tests
         [Test]
         public void UiConfig_DefaultValues_AreCorrect()
         {
-            // Arrange & Act
+            // 준비 및 실행
             var config = new UiConfig();
 
-            // Assert
+            // 검증
             Assert.IsNull(config.Address);
             Assert.AreEqual(0, config.Layer);
             Assert.IsNull(config.UiType);

@@ -13,7 +13,7 @@ using UnityEngine.UIElements;
 namespace GeunedaEditor.UiService
 {
 	/// <summary>
-	/// Implementation of <see cref="UiConfigsEditorBase{TSet}"/> that syncs with Unity Addressables.
+	/// Unity Addressables와 동기화하는 <see cref="UiConfigsEditorBase{TSet}"/>의 구현입니다.
 	/// </summary>
 	public abstract class AddressablesUiConfigsEditor<TSet> : UiConfigsEditorBase<TSet>
 		where TSet : Enum

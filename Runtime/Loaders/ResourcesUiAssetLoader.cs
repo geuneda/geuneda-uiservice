@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Geuneda.UiService
 {
 	/// <summary>
-	/// Implementation of <see cref="IUiAssetLoader"/> that loads assets from the Resources folder.
+	/// Resources 폴더에서 에셋을 로드하는 <see cref="IUiAssetLoader"/> 구현입니다.
 	/// </summary>
 	public class ResourcesUiAssetLoader : IUiAssetLoader
 	{

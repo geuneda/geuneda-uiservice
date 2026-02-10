@@ -35,13 +35,13 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator LoadUi_WithInstanceAddress_CreatesMultipleInstances()
 		{
-			// Act
+			// 실행
 			var task1 = _service.LoadUiAsync(typeof(TestUiPresenter), "instance_1");
 			yield return task1.ToCoroutine();
 			var task2 = _service.LoadUiAsync(typeof(TestUiPresenter), "instance_2");
 			yield return task2.ToCoroutine();
 
-			// Assert
+			// 검증
 			Assert.AreEqual(2, _mockLoader.InstantiateCallCount);
 			Assert.AreEqual(2, _service.GetLoadedPresenters().Count);
 		}
@@ -49,7 +49,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator GetUi_WithInstanceAddress_ReturnsCorrectInstance()
 		{
-			// Arrange
+			// 준비
 			var task1 = _service.LoadUiAsync(typeof(TestUiPresenter), "instance_1");
 			yield return task1.ToCoroutine();
 			var presenter1 = task1.GetAwaiter().GetResult();
@@ -58,24 +58,24 @@ namespace Geuneda.UiService.Tests.PlayMode
 			yield return task2.ToCoroutine();
 			var presenter2 = task2.GetAwaiter().GetResult();
 
-			// Act
+			// 실행
 			var retrieved = _service.GetUi<TestUiPresenter>("instance_2");
 
-			// Assert
+			// 검증
 			Assert.AreEqual(presenter2, retrieved);
 		}
 
 		[UnityTest]
 		public IEnumerator IsVisible_WithInstanceAddress_ChecksCorrectInstance()
 		{
-			// Arrange
+			// 준비
 			var task1 = _service.OpenUiAsync(typeof(TestUiPresenter), "instance_1");
 			yield return task1.ToCoroutine();
 			
 			var task2 = _service.LoadUiAsync(typeof(TestUiPresenter), "instance_2");
 			yield return task2.ToCoroutine();
 
-			// Assert
+			// 검증
 			Assert.That(_service.IsVisible<TestUiPresenter>("instance_1"), Is.True);
 			Assert.That(_service.IsVisible<TestUiPresenter>("instance_2"), Is.False);
 		}
@@ -83,7 +83,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator CloseUi_WithInstanceAddress_ClosesCorrectInstance()
 		{
-			// Arrange
+			// 준비
 			var task1 = _service.OpenUiAsync(typeof(TestUiPresenter), "instance_1");
 			yield return task1.ToCoroutine();
 			var presenter1 = task1.GetAwaiter().GetResult();
@@ -91,11 +91,11 @@ namespace Geuneda.UiService.Tests.PlayMode
 			var task2 = _service.OpenUiAsync(typeof(TestUiPresenter), "instance_2");
 			yield return task2.ToCoroutine();
 
-			// Act
+			// 실행
 			_service.CloseUi(typeof(TestUiPresenter), "instance_1");
 			yield return presenter1.CloseTransitionTask.ToCoroutine();
 
-			// Assert
+			// 검증
 			Assert.That(_service.IsVisible<TestUiPresenter>("instance_1"), Is.False);
 			Assert.That(_service.IsVisible<TestUiPresenter>("instance_2"), Is.True);
 		}
@@ -103,16 +103,16 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator UnloadUi_WithInstanceAddress_UnloadsCorrectInstance()
 		{
-			// Arrange
+			// 준비
 			var task1 = _service.LoadUiAsync(typeof(TestUiPresenter), "instance_1");
 			yield return task1.ToCoroutine();
 			var task2 = _service.LoadUiAsync(typeof(TestUiPresenter), "instance_2");
 			yield return task2.ToCoroutine();
 
-			// Act
+			// 실행
 			_service.UnloadUi(typeof(TestUiPresenter), "instance_1");
 
-			// Assert
+			// 검증
 			var loaded = _service.GetLoadedPresenters();
 			Assert.AreEqual(1, loaded.Count);
 			Assert.AreEqual("instance_2", loaded[0].Address);
@@ -121,7 +121,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator CloseWithDestroyTrue_FromPresenter_UnloadsCorrectInstance()
 		{
-			// Arrange - Load two instances
+			// 준비 - 두 인스턴스 로드
 			var task1 = _service.OpenUiAsync(typeof(TestUiPresenter), "instance_1");
 			yield return task1.ToCoroutine();
 			var presenter1 = task1.GetAwaiter().GetResult();
@@ -130,39 +130,39 @@ namespace Geuneda.UiService.Tests.PlayMode
 			yield return task2.ToCoroutine();
 			var presenter2 = task2.GetAwaiter().GetResult();
 
-			// Act - Close instance_1 with destroy from within the presenter
-			// This simulates presenter calling Close(destroy: true)
+			// 실행 - 프레젠터 내부에서 destroy와 함께 instance_1 닫기
+			// 프레젠터가 Close(destroy: true)를 호출하는 것을 시뮬레이션
 			_service.CloseUi(presenter1, destroy: true);
 			yield return presenter1.CloseTransitionTask.ToCoroutine();
-			yield return null; // Wait for unload
+			yield return null; // 언로드 대기
 
-			// Assert - Only instance_1 should be unloaded
+			// 검증 - instance_1만 언로드되어야 함
 			var loaded = _service.GetLoadedPresenters();
-			Assert.AreEqual(1, loaded.Count, "Only one instance should remain");
-			Assert.AreEqual("instance_2", loaded[0].Address, "instance_2 should still be loaded");
+			Assert.AreEqual(1, loaded.Count, "하나의 인스턴스만 남아 있어야 함");
+			Assert.AreEqual("instance_2", loaded[0].Address, "instance_2가 아직 로드되어 있어야 함");
 		}
 
 		[UnityTest]
 		public IEnumerator PresenterInstanceAddress_IsSetCorrectly()
 		{
-			// Arrange & Act
+			// 준비 & Act
 			var task = _service.LoadUiAsync(typeof(TestUiPresenter), "my_address");
 			yield return task.ToCoroutine();
 			var presenter = (TestUiPresenter) task.GetAwaiter().GetResult();
 
-			// Assert
+			// 검증
 			Assert.AreEqual("my_address", presenter.InstanceAddress);
 		}
 
 		[UnityTest]
 		public IEnumerator PresenterInstanceAddress_DefaultIsConfigAddress()
 		{
-			// Arrange & Act
+			// 준비 & Act
 			var task = _service.LoadUiAsync(typeof(TestUiPresenter));
 			yield return task.ToCoroutine();
 			var presenter = (TestUiPresenter) task.GetAwaiter().GetResult();
 
-			// Assert - Default instance address should be the config's address
+			// 검증 - 기본 인스턴스 주소는 설정의 주소여야 함
 			Assert.AreEqual("test_presenter", presenter.InstanceAddress);
 		}
 	}

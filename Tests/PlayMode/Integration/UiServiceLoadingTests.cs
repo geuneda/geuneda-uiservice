@@ -85,7 +85,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator LoadUiAsync_MissingConfig_ThrowsException()
 		{
-			// Arrange - Remove configs and recreate service with no TestUiPresenter config
+			// Arrange - 설정을 제거하고 TestUiPresenter 설정 없이 서비스를 다시 생성합니다
 			_service.Dispose();
 			_service = new UiService(_mockLoader);
 			_service.Init(TestHelpers.CreateTestConfigs());
@@ -158,17 +158,17 @@ namespace Geuneda.UiService.Tests.PlayMode
 			Assert.IsNotNull(caughtException);
 		}
 
-		#region Visibility State Consistency Tests
+		#region 표시 상태 일관성 테스트
 
 		/// <summary>
-		/// Verifies that LoadUiAsync on an already-visible presenter does NOT change visibility.
-		/// LoadUiAsync is a load operation, not a visibility management operation.
-		/// The openAfter parameter only applies when the presenter is newly loaded.
+		/// 이미 표시 중인 프레젠터에 대한 LoadUiAsync가 표시 상태를 변경하지 않는지 확인합니다.
+		/// LoadUiAsync는 로드 작업이며, 표시 관리 작업이 아닙니다.
+		/// openAfter 매개변수는 프레젠터가 새로 로드될 때만 적용됩니다.
 		/// </summary>
 		[UnityTest]
 		public IEnumerator LoadUiAsync_OnVisiblePresenter_WithOpenAfterFalse_DoesNotChangeVisibility()
 		{
-			// Arrange - Open the presenter first
+			// Arrange - 먼저 프레젠터를 엽니다
 			var openTask = _service.OpenUiAsync(typeof(TestUiPresenter));
 			yield return openTask.ToCoroutine();
 			var presenter = openTask.GetAwaiter().GetResult();
@@ -177,22 +177,22 @@ namespace Geuneda.UiService.Tests.PlayMode
 			Assert.That(_service.VisiblePresenters.Count, Is.EqualTo(1));
 			Assert.That(presenter.gameObject.activeSelf, Is.True);
 
-			// Act - Call LoadUiAsync with openAfter=false on already visible presenter
+			// Act - 이미 표시 중인 프레젠터에 openAfter=false로 LoadUiAsync를 호출합니다
 			var loadTask = _service.LoadUiAsync(typeof(TestUiPresenter), openAfter: false);
 			yield return loadTask.ToCoroutine();
 
-			// Assert - Presenter should remain visible (LoadUiAsync doesn't manage visibility of already-loaded presenters)
+			// Assert - 프레젠터는 표시 상태를 유지해야 합니다 (LoadUiAsync는 이미 로드된 프레젠터의 표시를 관리하지 않습니다)
 			Assert.That(_service.VisiblePresenters.Count, Is.EqualTo(1));
 			Assert.That(presenter.gameObject.activeSelf, Is.True);
 		}
 
 		/// <summary>
-		/// Verifies that LoadUiAsync on an already-visible presenter with openAfter=true keeps it visible.
+		/// openAfter=true로 이미 표시 중인 프레젠터에 대한 LoadUiAsync가 표시 상태를 유지하는지 확인합니다.
 		/// </summary>
 		[UnityTest]
 		public IEnumerator LoadUiAsync_OnVisiblePresenter_WithOpenAfterTrue_RemainsOpen()
 		{
-			// Arrange - Open the presenter first
+			// Arrange - 먼저 프레젠터를 엽니다
 			var openTask = _service.OpenUiAsync(typeof(TestUiPresenter));
 			yield return openTask.ToCoroutine();
 			var presenter = openTask.GetAwaiter().GetResult();
@@ -200,54 +200,54 @@ namespace Geuneda.UiService.Tests.PlayMode
 
 			Assert.That(_service.VisiblePresenters.Count, Is.EqualTo(1));
 
-			// Act - Call LoadUiAsync with openAfter=true on already visible presenter
+			// Act - 이미 표시 중인 프레젠터에 openAfter=true로 LoadUiAsync를 호출합니다
 			var loadTask = _service.LoadUiAsync(typeof(TestUiPresenter), openAfter: true);
 			yield return loadTask.ToCoroutine();
 
-			// Assert - Presenter should remain visible (no state change)
+			// Assert - 프레젠터는 표시 상태를 유지해야 합니다 (상태 변경 없음)
 			Assert.That(_service.VisiblePresenters.Count, Is.EqualTo(1));
 			Assert.That(presenter.gameObject.activeSelf, Is.True);
 		}
 
 		/// <summary>
-		/// Verifies that CloseUi properly closes a presenter and OpenUiAsync can reopen it.
-		/// This tests the correct API for managing visibility (CloseUi, not LoadUiAsync).
+		/// CloseUi가 프레젠터를 올바르게 닫고 OpenUiAsync가 다시 열 수 있는지 확인합니다.
+		/// 표시 관리를 위한 올바른 API(LoadUiAsync가 아닌 CloseUi)를 테스트합니다.
 		/// </summary>
 		[UnityTest]
 		public IEnumerator OpenUiAsync_AfterCloseUi_OpensSuccessfully()
 		{
-			// Arrange - Open the presenter, then close it via CloseUi
+			// Arrange - 프레젠터를 열고 CloseUi를 통해 닫습니다
 			var openTask1 = _service.OpenUiAsync(typeof(TestUiPresenter));
 			yield return openTask1.ToCoroutine();
 			var presenter = openTask1.GetAwaiter().GetResult();
 			yield return presenter.OpenTransitionTask.ToCoroutine();
 
-			// Close via CloseUi (the correct API for closing)
+			// CloseUi를 통해 닫습니다 (닫기를 위한 올바른 API)
 			_service.CloseUi(typeof(TestUiPresenter));
 			yield return presenter.CloseTransitionTask.ToCoroutine();
 
 			Assert.That(_service.VisiblePresenters.Count, Is.EqualTo(0));
 
-			// Act - Open again
+			// Act - 다시 엽니다
 			var openTask2 = _service.OpenUiAsync(typeof(TestUiPresenter));
 			yield return openTask2.ToCoroutine();
 			var reopenedPresenter = openTask2.GetAwaiter().GetResult();
 			yield return reopenedPresenter.OpenTransitionTask.ToCoroutine();
 
-			// Assert - Presenter should open successfully
+			// Assert - 프레젠터가 성공적으로 열려야 합니다
 			Assert.That(_service.VisiblePresenters.Count, Is.EqualTo(1));
 			Assert.That(reopenedPresenter.gameObject.activeSelf, Is.True);
-			Assert.AreEqual(presenter, reopenedPresenter); // Same instance
+			Assert.AreEqual(presenter, reopenedPresenter); // 동일한 인스턴스
 		}
 
 		/// <summary>
-		/// Verifies that CloseUi properly calls close lifecycle hooks.
-		/// This tests the correct API for closing (CloseUi, not LoadUiAsync).
+		/// CloseUi가 닫기 생명주기 훅을 올바르게 호출하는지 확인합니다.
+		/// 닫기를 위한 올바른 API(LoadUiAsync가 아닌 CloseUi)를 테스트합니다.
 		/// </summary>
 		[UnityTest]
 		public IEnumerator CloseUi_OnVisiblePresenter_CallsCloseLifecycleHooks()
 		{
-			// Arrange - Open the presenter first
+			// Arrange - 먼저 프레젠터를 엽니다
 			var openTask = _service.OpenUiAsync(typeof(TestUiPresenter));
 			yield return openTask.ToCoroutine();
 			var presenter = openTask.GetAwaiter().GetResult() as TestUiPresenter;
@@ -256,24 +256,24 @@ namespace Geuneda.UiService.Tests.PlayMode
 			var closeCountBefore = presenter.CloseCount;
 			var closeTransitionCountBefore = presenter.CloseTransitionCompletedCount;
 
-			// Act - Call CloseUi (the correct API for closing)
+			// Act - CloseUi를 호출합니다 (닫기를 위한 올바른 API)
 			_service.CloseUi(typeof(TestUiPresenter));
 			yield return presenter.CloseTransitionTask.ToCoroutine();
 
-			// Assert - Close lifecycle hooks should have been called
+			// Assert - 닫기 생명주기 훅이 호출되었어야 합니다
 			Assert.That(presenter.CloseCount, Is.EqualTo(closeCountBefore + 1));
 			Assert.That(presenter.CloseTransitionCompletedCount, Is.EqualTo(closeTransitionCountBefore + 1));
 		}
 
 		/// <summary>
-		/// Verifies that LoadUiAsync on an already-loaded but closed presenter with openAfter=true
-		/// does NOT open it (openAfter only applies to newly loaded presenters).
-		/// Use OpenUiAsync to open an already-loaded presenter.
+		/// 이미 로드되었지만 닫힌 프레젠터에 openAfter=true로 LoadUiAsync를 호출해도
+		/// 열리지 않는지 확인합니다 (openAfter는 새로 로드된 프레젠터에만 적용됩니다).
+		/// 이미 로드된 프레젠터를 열려면 OpenUiAsync를 사용하세요.
 		/// </summary>
 		[UnityTest]
 		public IEnumerator LoadUiAsync_OnClosedPresenter_WithOpenAfterTrue_DoesNotOpen()
 		{
-			// Arrange - Load but don't open (presenter is closed)
+			// Arrange - 로드하지만 열지 않습니다 (프레젠터는 닫힌 상태)
 			var loadTask1 = _service.LoadUiAsync(typeof(TestUiPresenter), openAfter: false);
 			yield return loadTask1.ToCoroutine();
 			var presenter = loadTask1.GetAwaiter().GetResult() as TestUiPresenter;
@@ -281,23 +281,23 @@ namespace Geuneda.UiService.Tests.PlayMode
 			Assert.That(_service.VisiblePresenters.Count, Is.EqualTo(0));
 			var openCountBefore = presenter.OpenCount;
 
-			// Act - Call LoadUiAsync with openAfter=true on already-loaded closed presenter
+			// Act - 이미 로드된 닫힌 프레젠터에 openAfter=true로 LoadUiAsync를 호출합니다
 			var loadTask2 = _service.LoadUiAsync(typeof(TestUiPresenter), openAfter: true);
 			yield return loadTask2.ToCoroutine();
 
-			// Assert - Presenter should remain closed (openAfter only applies to new loads)
+			// Assert - 프레젠터는 닫힌 상태를 유지해야 합니다 (openAfter는 새 로드에만 적용)
 			Assert.That(_service.VisiblePresenters.Count, Is.EqualTo(0));
 			Assert.That(presenter.OpenCount, Is.EqualTo(openCountBefore));
 		}
 
 		/// <summary>
-		/// Verifies that OpenUiAsync properly opens an already-loaded but closed presenter.
-		/// This is the correct way to open an already-loaded presenter.
+		/// OpenUiAsync가 이미 로드되었지만 닫힌 프레젠터를 올바르게 여는지 확인합니다.
+		/// 이것이 이미 로드된 프레젠터를 여는 올바른 방법입니다.
 		/// </summary>
 		[UnityTest]
 		public IEnumerator OpenUiAsync_OnClosedPresenter_CallsOpenLifecycleHooks()
 		{
-			// Arrange - Load but don't open (presenter is closed)
+			// Arrange - 로드하지만 열지 않습니다 (프레젠터는 닫힌 상태)
 			var loadTask = _service.LoadUiAsync(typeof(TestUiPresenter), openAfter: false);
 			yield return loadTask.ToCoroutine();
 			var presenter = loadTask.GetAwaiter().GetResult() as TestUiPresenter;
@@ -306,12 +306,12 @@ namespace Geuneda.UiService.Tests.PlayMode
 			var openCountBefore = presenter.OpenCount;
 			var openTransitionCountBefore = presenter.OpenTransitionCompletedCount;
 
-			// Act - Call OpenUiAsync (the correct API to open an already-loaded presenter)
+			// Act - OpenUiAsync를 호출합니다 (이미 로드된 프레젠터를 여는 올바른 API)
 			var openTask = _service.OpenUiAsync(typeof(TestUiPresenter));
 			yield return openTask.ToCoroutine();
 			yield return presenter.OpenTransitionTask.ToCoroutine();
 
-			// Assert - Open lifecycle hooks should have been called
+			// Assert - 열기 생명주기 훅이 호출되었어야 합니다
 			Assert.That(_service.VisiblePresenters.Count, Is.EqualTo(1));
 			Assert.That(presenter.OpenCount, Is.EqualTo(openCountBefore + 1));
 			Assert.That(presenter.OpenTransitionCompletedCount, Is.EqualTo(openTransitionCountBefore + 1));

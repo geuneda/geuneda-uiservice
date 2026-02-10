@@ -9,7 +9,7 @@ using Geuneda.UiService;
 namespace GeunedaEditor.UiService
 {
 	/// <summary>
-	/// Custom editor for UiPresenter to show quick actions in the inspector
+	/// 인스펙터에서 빠른 액션을 표시하기 위한 UiPresenter 커스텀 에디터입니다
 	/// </summary>
 	[CustomEditor(typeof(UiPresenter), true)]
 	public class UiPresenterEditor : Editor
@@ -22,13 +22,13 @@ namespace GeunedaEditor.UiService
 		{
 			var root = new VisualElement();
 			
-			// Draw default inspector
+			// 기본 인스펙터를 그립니다
 			InspectorElement.FillDefaultInspector(root, serializedObject, this);
 			
-			// Add spacing
+			// 간격 추가
 			root.Add(CreateSpacer(10));
 			
-			// Controls section header
+			// 컨트롤 섹션 헤더
 			var header = new Label("UI Presenter Controls");
 			header.style.unityFontStyleAndWeight = FontStyle.Bold;
 			header.style.fontSize = 12;
@@ -36,20 +36,20 @@ namespace GeunedaEditor.UiService
 			
 			root.Add(CreateSpacer(5));
 			
-			// Status display
+			// 상태 표시
 			var statusRow = CreateStatusDisplay();
 			root.Add(statusRow);
 			
 			root.Add(CreateSpacer(5));
 			
-			// Controls container (will be populated based on play mode)
+			// 컨트롤 컨테이너 (플레이 모드에 따라 채워집니다)
 			_controlsContainer = new VisualElement();
 			root.Add(_controlsContainer);
 			
-			// Update controls based on play mode
+			// 플레이 모드에 따라 컨트롤을 업데이트합니다
 			UpdateControls();
 			
-			// Schedule periodic updates in play mode
+			// 플레이 모드에서 주기적 업데이트를 예약합니다
 			root.schedule.Execute(() =>
 			{
 				if (target != null)
@@ -71,7 +71,7 @@ namespace GeunedaEditor.UiService
 			statusLabel.style.width = 100;
 			container.Add(statusLabel);
 			
-			// Status indicator circle
+			// 상태 표시 원
 			_statusIndicator = new VisualElement();
 			_statusIndicator.style.width = 12;
 			_statusIndicator.style.height = 12;
@@ -82,7 +82,7 @@ namespace GeunedaEditor.UiService
 			_statusIndicator.style.marginRight = 5;
 			container.Add(_statusIndicator);
 			
-			// Status text
+			// 상태 텍스트
 			_statusLabel = new Label();
 			_statusLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
 			container.Add(_statusLabel);
@@ -128,7 +128,7 @@ namespace GeunedaEditor.UiService
 			
 			_controlsContainer.Add(CreateSpacer(5));
 			
-			// First row of buttons
+			// 첫 번째 버튼 행
 			var row1 = new VisualElement();
 			row1.style.flexDirection = FlexDirection.Row;
 			
@@ -146,7 +146,7 @@ namespace GeunedaEditor.UiService
 			_controlsContainer.Add(row1);
 			_controlsContainer.Add(CreateSpacer(5));
 			
-			// Destroy button
+			// 파괴 버튼
 			var closeDestroyButton = new Button(() =>
 			{
 				if (EditorUtility.DisplayDialog("Destroy UI", 

@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 namespace GeunedaEditor.UiService
 {
 	/// <summary>
-	/// <see cref="NonDrawingView"/> custom inspector
+	/// <see cref="NonDrawingView"/> 커스텀 인스펙터
 	/// </summary>
 	[CanEditMultipleObjects, CustomEditor(typeof(NonDrawingView), false)]
 	public class NonDrawingViewEditor : GraphicEditor
@@ -18,12 +18,12 @@ namespace GeunedaEditor.UiService
 		{
 			var root = new VisualElement();
 
-			// Add script field
+			// 스크립트 필드를 추가합니다
 			var scriptField = new PropertyField(serializedObject.FindProperty("m_Script"));
 			scriptField.SetEnabled(false);
 			root.Add(scriptField);
 
-			// Add raycast controls using IMGUI container since it's from base class
+			// 기본 클래스의 레이캐스트 컨트롤을 IMGUI 컨테이너를 사용하여 추가합니다
 			var raycastContainer = new IMGUIContainer(() =>
 			{
 				serializedObject.Update();

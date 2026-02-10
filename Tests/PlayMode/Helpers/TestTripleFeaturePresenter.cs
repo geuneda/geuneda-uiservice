@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
-	/// Test presenter with three features
+	/// 세 개의 기능을 가진 테스트 프레젠터
 	/// </summary>
 	public class TestTripleFeaturePresenter : UiPresenter
 	{

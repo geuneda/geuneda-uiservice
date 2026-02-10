@@ -7,9 +7,9 @@ using UnityEngine;
 namespace Geuneda.UiService.Tests
 {
 	/// <summary>
-	/// Mock asset loader for testing without Addressables.
-	/// This is a Fake (not a Mock) because it has real behavior - it actually instantiates GameObjects.
-	/// NSubstitute cannot be used here because we need real Unity object lifecycle management.
+	/// Addressables 없이 테스트하기 위한 모의 에셋 로더.
+	/// 실제 동작(GameObject를 실제로 인스턴스화)을 가지고 있으므로 Mock이 아닌 Fake입니다.
+	/// 실제 Unity 오브젝트 생명주기 관리가 필요하므로 NSubstitute를 사용할 수 없습니다.
 	/// </summary>
 	public class MockAssetLoader : IUiAssetLoader
 	{
@@ -52,8 +52,8 @@ namespace Geuneda.UiService.Tests
 
 			var instance = UnityEngine.Object.Instantiate(prefab, parent);
 			
-			// Briefly activate to trigger Awake() on all components, then deactivate
-			// This mimics how Addressables instantiation works with active prefabs
+			// 모든 컴포넌트에서 Awake()를 트리거하기 위해 잠시 활성화한 후 비활성화
+			// Addressables가 활성 프리팹으로 인스턴스화하는 방식을 모방
 			var wasActive = instance.activeSelf;
 			if (!wasActive)
 			{

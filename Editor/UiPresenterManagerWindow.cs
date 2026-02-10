@@ -11,14 +11,14 @@ using Cysharp.Threading.Tasks;
 namespace GeunedaEditor.UiService
 {
 	/// <summary>
-	/// Unified editor window for managing UI presenters tracked by the UiService.
-	/// Provides a single source of truth for loaded and visible presenters.
+	/// UiService가 추적하는 UI 프레젠터를 관리하기 위한 통합 에디터 창입니다.
+	/// 로드된 프레젠터와 표시 중인 프레젠터의 단일 정보 소스를 제공합니다.
 	/// </summary>
 	public class UiPresenterManagerWindow : EditorWindow
 	{
 		private bool _autoRefresh = true;
 		private double _lastRefreshTime;
-		private const double RefreshInterval = 0.5; // seconds
+		private const double RefreshInterval = 0.5; // 초
 		
 		private const string StatsExplanation = 
 			"Stats Summary\n\n" +
@@ -147,7 +147,7 @@ namespace GeunedaEditor.UiService
 			return header;
 		}
 
-		// Column definitions: (minWidth, flexGrow) - Priority: Type (highest) > Actions > Status/Instance (lowest)
+		// 열 정의: (최소 너비, 확장 비율) - 우선순위: Type (최고) > Actions > Status/Instance (최저)
 		private static readonly (float minWidth, int flexGrow)[] ColumnDefs = 
 		{
 			(120, 6), // Type
@@ -263,7 +263,7 @@ namespace GeunedaEditor.UiService
 				row.style.backgroundColor = new Color(1, 1, 1, 0.03f);
 			}
 
-			// Type button (column 0) - clickable to select in hierarchy
+			// 타입 버튼 (열 0) - 클릭하면 하이어라키에서 선택됩니다
 			var typeButton = new Button(() => 
 			{
 				Selection.activeGameObject = instance.Presenter.gameObject;
@@ -278,7 +278,7 @@ namespace GeunedaEditor.UiService
 			typeButton.style.marginRight = 5;
 			row.Add(typeButton);
 
-			// Status (column 1)
+			// 상태 (열 1)
 			var statusContainer = new VisualElement();
 			ApplyColumnStyle(statusContainer, 1);
 			statusContainer.style.flexDirection = FlexDirection.Row;
@@ -302,7 +302,7 @@ namespace GeunedaEditor.UiService
 			statusContainer.Add(statusLabel);
 			row.Add(statusContainer);
 
-			// Actions (column 2)
+			// 액션 (열 2)
 			var actionsContainer = new VisualElement();
 			ApplyColumnStyle(actionsContainer, 2);
 			actionsContainer.style.flexDirection = FlexDirection.Row;
@@ -337,7 +337,7 @@ namespace GeunedaEditor.UiService
 			}
 			row.Add(actionsContainer);
 
-			// Instance (column 3)
+			// 인스턴스 (열 3)
 			var instanceLabel = new Label(string.IsNullOrEmpty(instance.Address) ? "(default)" : instance.Address);
 			ApplyColumnStyle(instanceLabel, 3);
 			instanceLabel.style.paddingLeft = 10;

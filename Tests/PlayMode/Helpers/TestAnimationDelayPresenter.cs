@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
-	/// Test presenter with AnimationDelayFeature for testing animation behavior
+	/// 애니메이션 동작 테스트를 위한 AnimationDelayFeature가 있는 테스트 프레젠터
 	/// </summary>
 	[RequireComponent(typeof(AnimationDelayFeature))]
 	[RequireComponent(typeof(Animation))]
@@ -15,7 +15,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 
 		private void Awake()
 		{
-			// Ensure Animation component exists
+			// Animation 컴포넌트가 존재하는지 확인
 			var animation = GetComponent<Animation>();
 			if (animation == null)
 			{
@@ -28,7 +28,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 				AnimationFeature = gameObject.AddComponent<AnimationDelayFeature>();
 			}
 
-			// Set animation reference via reflection
+			// 리플렉션을 통해 애니메이션 참조 설정
 			var animField = typeof(AnimationDelayFeature).GetField("_animation",
 				System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 			animField?.SetValue(AnimationFeature, animation);

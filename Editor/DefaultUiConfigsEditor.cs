@@ -4,8 +4,8 @@ using UnityEditor;
 namespace GeunedaEditor.UiService
 {
 	/// <summary>
-	/// Default UI Set identifiers for out-of-the-box usage.
-	/// Users can create their own enum and custom editor to override these defaults.
+	/// 기본 제공 사용을 위한 기본 UI 세트 식별자입니다.
+	/// 사용자는 자체 enum과 커스텀 에디터를 만들어 이 기본값을 재정의할 수 있습니다.
 	/// </summary>
 	public enum DefaultUiSetId
 	{
@@ -18,35 +18,35 @@ namespace GeunedaEditor.UiService
 	}
 
 	/// <summary>
-	/// Default implementation of the UiConfigs editor for Addressables-based loading.
-	/// This allows the library to work out-of-the-box without requiring user implementation.
-	/// Users can override by creating their own CustomEditor implementation for <see cref="AddressablesUiConfigs"/>.
+	/// Addressables 기반 로딩을 위한 UiConfigs 에디터의 기본 구현입니다.
+	/// 사용자 구현 없이 라이브러리가 바로 작동하도록 합니다.
+	/// 사용자는 <see cref="AddressablesUiConfigs"/>에 대한 자체 CustomEditor 구현을 만들어 재정의할 수 있습니다.
 	/// </summary>
 	[CustomEditor(typeof(AddressablesUiConfigs))]
 	public class DefaultAddressablesUiConfigsEditor : AddressablesUiConfigsEditor<DefaultUiSetId>
 	{
-		// No additional implementation needed - uses Addressables loader functionality by default
+		// 추가 구현 불필요 - 기본적으로 Addressables 로더 기능을 사용합니다
 	}
 
 	/// <summary>
-	/// Default implementation of the UiConfigs editor for Resources folder-based loading.
-	/// This allows the library to work out-of-the-box without requiring user implementation.
-	/// Users can override by creating their own CustomEditor implementation for <see cref="ResourcesUiConfigs"/>.
+	/// Resources 폴더 기반 로딩을 위한 UiConfigs 에디터의 기본 구현입니다.
+	/// 사용자 구현 없이 라이브러리가 바로 작동하도록 합니다.
+	/// 사용자는 <see cref="ResourcesUiConfigs"/>에 대한 자체 CustomEditor 구현을 만들어 재정의할 수 있습니다.
 	/// </summary>
 	[CustomEditor(typeof(ResourcesUiConfigs))]
 	public class DefaultResourcesUiConfigsEditor : ResourcesUiConfigsEditor<DefaultUiSetId>
 	{
-		// No additional implementation needed - uses Resources loader functionality by default
+		// 추가 구현 불필요 - 기본적으로 Resources 로더 기능을 사용합니다
 	}
 
 	/// <summary>
-	/// Default implementation of the UiConfigs editor for PrefabRegistry-based loading.
-	/// This allows the library to work out-of-the-box without requiring user implementation.
-	/// Users can override by creating their own CustomEditor implementation for <see cref="PrefabRegistryUiConfigs"/>.
+	/// PrefabRegistry 기반 로딩을 위한 UiConfigs 에디터의 기본 구현입니다.
+	/// 사용자 구현 없이 라이브러리가 바로 작동하도록 합니다.
+	/// 사용자는 <see cref="PrefabRegistryUiConfigs"/>에 대한 자체 CustomEditor 구현을 만들어 재정의할 수 있습니다.
 	/// </summary>
 	[CustomEditor(typeof(PrefabRegistryUiConfigs))]
 	public class DefaultPrefabRegistryUiConfigsEditor : PrefabRegistryUiConfigsEditor<DefaultUiSetId>
 	{
-		// No additional implementation needed - uses PrefabRegistry loader functionality by default
+		// 추가 구현 불필요 - 기본적으로 PrefabRegistry 로더 기능을 사용합니다
 	}
 }

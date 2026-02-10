@@ -3,43 +3,43 @@ using UnityEngine;
 namespace Geuneda.UiService
 {
 	/// <summary>
-	/// Base class for presenter features that can be attached to a <see cref="UiPresenter"/> to extend its functionality.
-	/// Inherit from this class to create custom features that hook into the presenter lifecycle.
-	/// For features that provide open/close transition delays, implement <see cref="ITransitionFeature"/>.
+	/// <see cref="UiPresenter"/>에 부착하여 기능을 확장할 수 있는 프레젠터 기능의 기본 클래스입니다.
+	/// 프레젠터 생명주기에 연결되는 커스텀 기능을 만들려면 이 클래스를 상속하세요.
+	/// 열기/닫기 전환 딜레이를 제공하는 기능의 경우 <see cref="ITransitionFeature"/>를 구현하세요.
 	/// </summary>
 	public abstract class PresenterFeatureBase : MonoBehaviour
 	{
 		/// <summary>
-		/// The presenter that owns this feature
+		/// 이 기능을 소유하는 프레젠터입니다
 		/// </summary>
 		protected UiPresenter Presenter { get; private set; }
 
 		/// <summary>
-		/// Called when the presenter is initialized. This is invoked once when the presenter is created.
+		/// 프레젠터가 초기화될 때 호출됩니다. 프레젠터가 생성될 때 한 번만 호출됩니다.
 		/// </summary>
-		/// <param name="presenter">The presenter that owns this feature</param>
+		/// <param name="presenter">이 기능을 소유하는 프레젠터</param>
 		public virtual void OnPresenterInitialized(UiPresenter presenter)
 		{
 			Presenter = presenter;
 		}
 
 		/// <summary>
-		/// Called when the presenter is being opened. This is invoked before the presenter becomes visible.
+		/// 프레젠터가 열리고 있을 때 호출됩니다. 프레젠터가 표시되기 전에 호출됩니다.
 		/// </summary>
 		public virtual void OnPresenterOpening() { }
 
 		/// <summary>
-		/// Called after the presenter has been opened and is now visible.
+		/// 프레젠터가 열린 후 현재 표시되고 있을 때 호출됩니다.
 		/// </summary>
 		public virtual void OnPresenterOpened() { }
 
 		/// <summary>
-		/// Called when the presenter is being closed. This is invoked before the presenter becomes hidden.
+		/// 프레젠터가 닫히고 있을 때 호출됩니다. 프레젠터가 숨겨지기 전에 호출됩니다.
 		/// </summary>
 		public virtual void OnPresenterClosing() { }
 
 		/// <summary>
-		/// Called after the presenter has been closed and is no longer visible.
+		/// 프레젠터가 닫힌 후 더 이상 표시되지 않을 때 호출됩니다.
 		/// </summary>
 		public virtual void OnPresenterClosed() { }
 	}

@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 namespace Geuneda.UiService.Views
 {
     /// <summary>
-    /// This view is responsible to handle all types of links (ex: hyperlinks) set in the <see cref="TMP_Text"/>
+    /// 이 뷰는 <see cref="TMP_Text"/>에 설정된 모든 유형의 링크(예: 하이퍼링크)를 처리하는 역할을 합니다
     /// </summary>
     [RequireComponent(typeof(TMP_Text))]
     public class InteractableTextView : MonoBehaviour, IPointerClickHandler
@@ -32,7 +32,7 @@ namespace Geuneda.UiService.Views
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            // Get Canvas Camera if using WorldCamera view
+            // WorldCamera 뷰를 사용하는 경우 Canvas 카메라를 가져옵니다
             var linkedText = -1;
 
             if (InteractableType == InteractableTextType.IntersectingLink)

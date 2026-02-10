@@ -5,9 +5,9 @@ using UnityEngine;
 namespace Geuneda.UiService
 {
 	/// <summary>
-	/// Feature that adds time-based delayed opening and closing to a <see cref="UiPresenter"/>.
-	/// Configure delays in seconds directly on this component.
-	/// Implements <see cref="ITransitionFeature"/> to allow the presenter to await transitions.
+	/// <see cref="UiPresenter"/>에 시간 기반 지연 열기/닫기를 추가하는 기능입니다.
+	/// 이 컴포넌트에서 직접 초 단위 딜레이를 설정할 수 있습니다.
+	/// <see cref="ITransitionFeature"/>를 구현하여 프레젠터가 전환을 대기할 수 있게 합니다.
 	/// </summary>
 	public class TimeDelayFeature : PresenterFeatureBase, ITransitionFeature
 	{
@@ -18,12 +18,12 @@ namespace Geuneda.UiService
 		private UniTaskCompletionSource _closeTransitionCompletion;
 
 		/// <summary>
-		/// Gets the delay in seconds before opening the presenter
+		/// 프레젠터를 열기 전 지연 시간(초)을 가져옵니다
 		/// </summary>
 		public float OpenDelayInSeconds => _openDelayInSeconds;
 
 		/// <summary>
-		/// Gets the delay in seconds before closing the presenter
+		/// 프레젠터를 닫기 전 지연 시간(초)을 가져옵니다
 		/// </summary>
 		public float CloseDelayInSeconds => _closeDelayInSeconds;
 
@@ -52,26 +52,26 @@ namespace Geuneda.UiService
 		}
 
 		/// <summary>
-		/// Called when the presenter's opening delay starts.
-		/// Override this in derived classes to add custom behavior.
+		/// 프레젠터의 열기 딜레이가 시작될 때 호출됩니다.
+		/// 파생 클래스에서 커스텀 동작을 추가하려면 재정의하세요.
 		/// </summary>
 		protected virtual void OnOpenStarted() { }
 
 		/// <summary>
-		/// Called when the presenter's opening delay is completed.
-		/// Override this in derived classes to add custom behavior.
+		/// 프레젠터의 열기 딜레이가 완료되었을 때 호출됩니다.
+		/// 파생 클래스에서 커스텀 동작을 추가하려면 재정의하세요.
 		/// </summary>
 		protected virtual void OnOpenedCompleted() { }
 
 		/// <summary>
-		/// Called when the presenter's closing delay starts.
-		/// Override this in derived classes to add custom behavior.
+		/// 프레젠터의 닫기 딜레이가 시작될 때 호출됩니다.
+		/// 파생 클래스에서 커스텀 동작을 추가하려면 재정의하세요.
 		/// </summary>
 		protected virtual void OnCloseStarted() { }
 
 		/// <summary>
-		/// Called when the presenter's closing delay is completed.
-		/// Override this in derived classes to add custom behavior.
+		/// 프레젠터의 닫기 딜레이가 완료되었을 때 호출됩니다.
+		/// 파생 클래스에서 커스텀 동작을 추가하려면 재정의하세요.
 		/// </summary>
 		protected virtual void OnClosedCompleted() { }
 
@@ -101,7 +101,7 @@ namespace Geuneda.UiService
 
 			if (this && gameObject)
 			{
-				// Note: Visibility (SetActive) is now handled by UiPresenter after all transitions complete
+				// 참고: 가시성(SetActive)은 이제 모든 전환이 완료된 후 UiPresenter가 처리합니다
 				OnClosedCompleted();
 			}
 			

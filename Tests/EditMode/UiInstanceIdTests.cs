@@ -9,10 +9,10 @@ namespace Geuneda.UiService.Tests
         [Test]
         public void Constructor_WithValidType_CreatesInstance()
         {
-            // Arrange & Act
+            // 준비 및 실행
             var instanceId = new UiInstanceId(typeof(TestUiPresenter), "test_address");
 
-            // Assert
+            // 검증
             Assert.AreEqual(typeof(TestUiPresenter), instanceId.PresenterType);
             Assert.AreEqual("test_address", instanceId.InstanceAddress);
         }
@@ -20,10 +20,10 @@ namespace Geuneda.UiService.Tests
         [Test]
         public void Constructor_WithEmptyAddress_CreatesDefaultInstance()
         {
-            // Arrange & Act
+            // 준비 및 실행
             var instanceId = new UiInstanceId(typeof(TestUiPresenter), string.Empty);
 
-            // Assert
+            // 검증
             Assert.AreEqual(string.Empty, instanceId.InstanceAddress);
             Assert.IsTrue(instanceId.IsDefault);
         }
@@ -31,21 +31,21 @@ namespace Geuneda.UiService.Tests
         [Test]
         public void Constructor_WithNullAddress_CreatesDefaultInstance()
         {
-            // Arrange & Act
+            // 준비 및 실행
             var instanceId = new UiInstanceId(typeof(TestUiPresenter), null);
 
-            // Assert
+            // 검증
             Assert.IsTrue(instanceId.IsDefault);
         }
 
         [Test]
         public void Equals_SameTypeAndAddress_ReturnsTrue()
         {
-            // Arrange
+            // 준비
             var id1 = new UiInstanceId(typeof(TestUiPresenter), "address");
             var id2 = new UiInstanceId(typeof(TestUiPresenter), "address");
 
-            // Assert
+            // 검증
             Assert.IsTrue(id1.Equals(id2));
             Assert.IsTrue(id1 == id2);
         }
@@ -53,11 +53,11 @@ namespace Geuneda.UiService.Tests
         [Test]
         public void Equals_DifferentType_ReturnsFalse()
         {
-            // Arrange
+            // 준비
             var id1 = new UiInstanceId(typeof(TestUiPresenter), "address");
             var id2 = new UiInstanceId(typeof(TestDataUiPresenter), "address");
 
-            // Assert
+            // 검증
             Assert.IsFalse(id1.Equals(id2));
             Assert.IsTrue(id1 != id2);
         }
@@ -65,35 +65,35 @@ namespace Geuneda.UiService.Tests
         [Test]
         public void Equals_DifferentAddress_ReturnsFalse()
         {
-            // Arrange
+            // 준비
             var id1 = new UiInstanceId(typeof(TestUiPresenter), "address1");
             var id2 = new UiInstanceId(typeof(TestUiPresenter), "address2");
 
-            // Assert
+            // 검증
             Assert.IsFalse(id1.Equals(id2));
         }
 
         [Test]
         public void GetHashCode_SameTypeAndAddress_ReturnsSameHash()
         {
-            // Arrange
+            // 준비
             var id1 = new UiInstanceId(typeof(TestUiPresenter), "address");
             var id2 = new UiInstanceId(typeof(TestUiPresenter), "address");
 
-            // Assert
+            // 검증
             Assert.AreEqual(id1.GetHashCode(), id2.GetHashCode());
         }
 
         [Test]
         public void ToString_ReturnsExpectedFormat()
         {
-            // Arrange
+            // 준비
             var instanceId = new UiInstanceId(typeof(TestUiPresenter), "my_instance");
 
-            // Act
+            // 실행
             var result = instanceId.ToString();
 
-            // Assert
+            // 검증
             Assert.IsTrue(result.Contains("TestUiPresenter"));
             Assert.IsTrue(result.Contains("my_instance"));
         }

@@ -3,8 +3,8 @@ using Cysharp.Threading.Tasks;
 namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
-	/// Mock feature that tracks lifecycle and can simulate transitions.
-	/// Implements ITransitionFeature to allow tests to control when transitions complete.
+	/// 생명주기를 추적하고 전환을 시뮬레이션할 수 있는 모의 기능.
+	/// 테스트에서 전환 완료 시점을 제어할 수 있도록 ITransitionFeature를 구현합니다.
 	/// </summary>
 	public class TrackingFeature : PresenterFeatureBase, ITransitionFeature
 	{
@@ -21,8 +21,8 @@ namespace Geuneda.UiService.Tests.PlayMode
 		public int OpenOrder { get; private set; }
 		
 		/// <summary>
-		/// When true, this feature will start a transition that must be manually completed.
-		/// When false, transitions complete immediately.
+		/// true일 때 이 기능은 수동으로 완료해야 하는 전환을 시작합니다.
+		/// false일 때 전환은 즉시 완료됩니다.
 		/// </summary>
 		public bool SimulateDelayedTransitions { get; set; }
 
@@ -70,8 +70,8 @@ namespace Geuneda.UiService.Tests.PlayMode
 		}
 
 		/// <summary>
-		/// Simulates the completion of an open transition.
-		/// Only effective when SimulateDelayedTransitions is true.
+		/// 열기 전환의 완료를 시뮬레이션합니다.
+		/// SimulateDelayedTransitions가 true일 때만 유효합니다.
 		/// </summary>
 		public void SimulateOpenTransitionComplete()
 		{
@@ -79,8 +79,8 @@ namespace Geuneda.UiService.Tests.PlayMode
 		}
 
 		/// <summary>
-		/// Simulates the completion of a close transition.
-		/// Only effective when SimulateDelayedTransitions is true.
+		/// 닫기 전환의 완료를 시뮬레이션합니다.
+		/// SimulateDelayedTransitions가 true일 때만 유효합니다.
 		/// </summary>
 		public void SimulateCloseTransitionComplete()
 		{

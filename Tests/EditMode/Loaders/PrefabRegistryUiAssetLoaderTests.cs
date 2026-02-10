@@ -40,13 +40,13 @@ namespace Geuneda.UiService.Tests
 		[Test]
 		public void RegisterPrefab_AddsPrefabToRegistry()
 		{
-			// Arrange
+			// 준비
 			const string address = "test/prefab";
 
-			// Act
+			// 실행
 			_loader.RegisterPrefab(address, _testPrefab);
 
-			// Assert - verify by successfully instantiating
+			// 검증 - 인스턴스화 성공으로 확인
 			var config = TestHelpers.CreateTestConfig(typeof(TestUiPresenter), address);
 			var task = _loader.InstantiatePrefab(config, _parentTransform);
 			var instance = task.GetAwaiter().GetResult();
@@ -54,22 +54,22 @@ namespace Geuneda.UiService.Tests
 			_createdObjects.Add(instance);
 			
 			Assert.IsNotNull(instance);
-			Assert.AreNotSame(_testPrefab, instance); // Should be a clone, not the original
+			Assert.AreNotSame(_testPrefab, instance); // 원본이 아닌 복제본이어야 함
 		}
 
 		[Test]
 		public void RegisterPrefab_OverwritesExistingEntry()
 		{
-			// Arrange
+			// 준비
 			const string address = "test/prefab";
 			var newPrefab = TestHelpers.CreateTestPresenterPrefab<TestUiPresenter>("NewPrefab");
 			_createdObjects.Add(newPrefab);
 
-			// Act
+			// 실행
 			_loader.RegisterPrefab(address, _testPrefab);
-			_loader.RegisterPrefab(address, newPrefab); // Overwrite
+			_loader.RegisterPrefab(address, newPrefab); // 덮어쓰기
 
-			// Assert
+			// 검증
 			var config = TestHelpers.CreateTestConfig(typeof(TestUiPresenter), address);
 			var task = _loader.InstantiatePrefab(config, _parentTransform);
 			var instance = task.GetAwaiter().GetResult();
@@ -82,10 +82,10 @@ namespace Geuneda.UiService.Tests
 		[Test]
 		public void InstantiatePrefab_ThrowsKeyNotFoundException_WhenPrefabNotRegistered()
 		{
-			// Arrange
+			// 준비
 			var config = TestHelpers.CreateTestConfig(typeof(TestUiPresenter), "unregistered/address");
 
-			// Act & Assert
+			// 실행 및 검증
 			Assert.Throws<KeyNotFoundException>(() =>
 			{
 				_loader.InstantiatePrefab(config, _parentTransform).GetAwaiter().GetResult();
@@ -95,60 +95,60 @@ namespace Geuneda.UiService.Tests
 		[Test]
 		public void InstantiatePrefab_ReturnsInactiveInstance()
 		{
-			// Arrange
+			// 준비
 			const string address = "test/prefab";
 			_loader.RegisterPrefab(address, _testPrefab);
 			var config = TestHelpers.CreateTestConfig(typeof(TestUiPresenter), address);
 
-			// Act
+			// 실행
 			var task = _loader.InstantiatePrefab(config, _parentTransform);
 			var instance = task.GetAwaiter().GetResult();
-			
+
 			_createdObjects.Add(instance);
 
-			// Assert
+			// 검증
 			Assert.IsFalse(instance.activeSelf);
 		}
 
 		[Test]
 		public void InstantiatePrefab_SetsCorrectParent()
 		{
-			// Arrange
+			// 준비
 			const string address = "test/prefab";
 			_loader.RegisterPrefab(address, _testPrefab);
 			var config = TestHelpers.CreateTestConfig(typeof(TestUiPresenter), address);
 
-			// Act
+			// 실행
 			var task = _loader.InstantiatePrefab(config, _parentTransform);
 			var instance = task.GetAwaiter().GetResult();
-			
+
 			_createdObjects.Add(instance);
 
-			// Assert
+			// 검증
 			Assert.AreEqual(_parentTransform, instance.transform.parent);
 		}
 
 		[Test]
 		public void UnloadAsset_DestroysGameObject()
 		{
-			// Arrange
+			// 준비
 			const string address = "test/prefab";
 			_loader.RegisterPrefab(address, _testPrefab);
 			var config = TestHelpers.CreateTestConfig(typeof(TestUiPresenter), address);
 			var task = _loader.InstantiatePrefab(config, _parentTransform);
 			var instance = task.GetAwaiter().GetResult();
 
-			// Act
+			// 실행
 			_loader.UnloadAsset(instance);
 
-			// Assert
-			Assert.IsTrue(instance == null); // Unity destroys the object
+			// 검증
+			Assert.IsTrue(instance == null); // Unity가 오브젝트를 파괴
 		}
 
 		[Test]
 		public void UnloadAsset_HandlesNullGracefully()
 		{
-			// Act & Assert - should not throw
+			// 실행 및 검증 - 예외가 발생하지 않아야 함
 			Assert.DoesNotThrow(() => _loader.UnloadAsset(null));
 		}
 	}

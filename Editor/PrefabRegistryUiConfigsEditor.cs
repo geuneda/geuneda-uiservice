@@ -12,7 +12,7 @@ using UnityEditor.UIElements;
 namespace GeunedaEditor.UiService
 {
 	/// <summary>
-	/// Implementation of <see cref="UiConfigsEditorBase{TSet}"/> that syncs with a <see cref="PrefabRegistryUiConfigs"/>.
+	/// <see cref="PrefabRegistryUiConfigs"/>와 동기화하는 <see cref="UiConfigsEditorBase{TSet}"/>의 구현입니다.
 	/// </summary>
 	public abstract class PrefabRegistryUiConfigsEditor<TSet> : UiConfigsEditorBase<TSet>
 		where TSet : Enum
@@ -25,8 +25,8 @@ namespace GeunedaEditor.UiService
 
 		protected override void OnEnable()
 		{
-			// Must initialize _prefabEntriesProperty before base.OnEnable() 
-			// because SyncConfigs() is called there and needs this property
+			// SyncConfigs()가 base.OnEnable()에서 호출되고 이 프로퍼티가 필요하므로
+			// base.OnEnable() 전에 _prefabEntriesProperty를 초기화해야 합니다
 			_prefabEntriesProperty = serializedObject.FindProperty("_prefabEntries");
 			base.OnEnable();
 		}
@@ -41,7 +41,7 @@ namespace GeunedaEditor.UiService
 
 			if (prefabConfigs == null) return;
 
-			// First pass: update addresses from prefab names
+			// 첫 번째 패스: 프리팹 이름으로부터 주소를 업데이트합니다
 			UpdateAddressesFromPrefabs();
 
 			foreach (var entry in prefabConfigs.PrefabEntries)
@@ -84,8 +84,8 @@ namespace GeunedaEditor.UiService
 		}
 
 		/// <summary>
-		/// Updates addresses in prefab entries to match their prefab names.
-		/// Called during SyncConfigs to ensure addresses are always derived from prefab names.
+		/// 프리팹 항목의 주소를 프리팹 이름과 일치하도록 업데이트합니다.
+		/// 주소가 항상 프리팹 이름에서 파생되도록 SyncConfigs 중에 호출됩니다.
 		/// </summary>
 		private void UpdateAddressesFromPrefabs()
 		{
@@ -115,16 +115,16 @@ namespace GeunedaEditor.UiService
 		}
 
 		/// <summary>
-		/// Adds multiple prefabs to the registry at once.
-		/// Validates that each prefab has a UiPresenter component and prevents duplicates.
+		/// 여러 프리팹을 한 번에 레지스트리에 추가합니다.
+		/// 각 프리팹에 UiPresenter 컴포넌트가 있는지 검증하고 중복을 방지합니다.
 		/// </summary>
-		/// <param name="prefabs">The prefabs to add</param>
+		/// <param name="prefabs">추가할 프리팹들</param>
 		private void AddPrefabs(IEnumerable<GameObject> prefabs)
 		{
 			serializedObject.Update();
 			var existingPrefabs = new HashSet<GameObject>();
 
-			// Collect existing prefabs to prevent duplicates
+			// 중복 방지를 위해 기존 프리팹을 수집합니다
 			for (int i = 0; i < _prefabEntriesProperty.arraySize; i++)
 			{
 				var itemProperty = _prefabEntriesProperty.GetArrayElementAtIndex(i);
@@ -143,21 +143,21 @@ namespace GeunedaEditor.UiService
 			{
 				if (prefab == null) continue;
 
-				// Skip duplicates
+				// 중복 건너뛰기
 				if (existingPrefabs.Contains(prefab))
 				{
 					skippedDuplicate++;
 					continue;
 				}
 
-				// Validate the prefab has a UiPresenter component
+				// 프리팹에 UiPresenter 컴포넌트가 있는지 검증합니다
 				if (prefab.GetComponent<UiPresenter>() == null)
 				{
 					skippedNoPresenter++;
 					continue;
 				}
 
-				// Add new entry
+				// 새 항목 추가
 				var newIndex = _prefabEntriesProperty.arraySize;
 				_prefabEntriesProperty.InsertArrayElementAtIndex(newIndex);
 				var newItem = _prefabEntriesProperty.GetArrayElementAtIndex(newIndex);
@@ -172,7 +172,7 @@ namespace GeunedaEditor.UiService
 			SyncConfigs();
 			_prefabListView?.RefreshItems();
 
-			// Show feedback if there were skipped items
+			// 건너뛴 항목이 있으면 피드백을 표시합니다
 			if (skippedNoPresenter > 0 || skippedDuplicate > 0)
 			{
 				var message = $"Added {addedCount} prefab(s).";
@@ -186,7 +186,7 @@ namespace GeunedaEditor.UiService
 		{
 			var root = base.CreateInspectorGUI();
 
-			// Add Prefab Entries section at the top of Section 2 (before the configs list)
+			// 섹션 2 상단에 프리팹 항목 섹션을 추가합니다 (구성 목록 앞)
 			var prefabSection = new VisualElement { style = { marginBottom = 10 } };
 			var helpBox = new HelpBox(
 				"Drag and drop UI Prefabs below. Addresses are automatically derived from prefab names. " +
@@ -195,7 +195,7 @@ namespace GeunedaEditor.UiService
 			helpBox.style.marginBottom = 5;
 			prefabSection.Add(helpBox);
 
-			// Create drop zone for batch prefab dropping
+			// 일괄 프리팹 드롭을 위한 드롭 영역을 생성합니다
 			var dropZone = CreateDropZone();
 			prefabSection.Add(dropZone);
 
@@ -218,7 +218,7 @@ namespace GeunedaEditor.UiService
 			_prefabListView.itemsRemoved += _ => SyncConfigs();
 			_prefabListView.itemIndexChanged += (_, _) => SyncConfigs();
 
-			// Insert after the visualizer section (index 1 in root)
+			// 시각화 섹션 뒤에 삽입합니다 (root에서 인덱스 1)
 			root.Insert(1, prefabSection);
 			root.Insert(2, _prefabListView);
 
@@ -226,7 +226,7 @@ namespace GeunedaEditor.UiService
 		}
 
 		/// <summary>
-		/// Creates a drop zone for batch prefab dropping.
+		/// 일괄 프리팹 드롭을 위한 드롭 영역을 생성합니다.
 		/// </summary>
 		private VisualElement CreateDropZone()
 		{
@@ -254,7 +254,7 @@ namespace GeunedaEditor.UiService
 			dropLabel.style.unityFontStyleAndWeight = FontStyle.Italic;
 			dropZone.Add(dropLabel);
 
-			// Register drag and drop callbacks
+			// 드래그 앤 드롭 콜백을 등록합니다
 			dropZone.RegisterCallback<DragEnterEvent>(evt =>
 			{
 				if (HasValidPrefabsInDrag())
@@ -328,7 +328,7 @@ namespace GeunedaEditor.UiService
 		{
 			var container = new VisualElement { style = { flexDirection = FlexDirection.Row, paddingBottom = 2, paddingTop = 2 } };
 			
-			// Read-only label showing the address (derived from prefab name)
+			// 주소를 표시하는 읽기 전용 레이블 (프리팹 이름에서 파생됨)
 			var addressLabel = new Label 
 			{ 
 				name = "address-label", 
@@ -361,7 +361,7 @@ namespace GeunedaEditor.UiService
 			var addressLabel = element.Q<Label>("address-label");
 			var prefabField = element.Q<ObjectField>("prefab-field");
 
-			// Display address as read-only label
+			// 주소를 읽기 전용 레이블로 표시합니다
 			var prefab = prefabProperty.objectReferenceValue as GameObject;
 			addressLabel.text = prefab != null ? $"[{prefab.name}]" : "[No Prefab]";
 
@@ -372,7 +372,7 @@ namespace GeunedaEditor.UiService
 			{
 				if (evt.newValue is GameObject newPrefab)
 				{
-					// Automatically update address from prefab name
+					// 프리팹 이름에서 자동으로 주소를 업데이트합니다
 					addressProperty.stringValue = newPrefab.name;
 					addressProperty.serializedObject.ApplyModifiedProperties();
 					addressLabel.text = $"[{newPrefab.name}]";

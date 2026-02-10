@@ -7,16 +7,16 @@ using UnityEngine;
 namespace Geuneda.UiService
 {
 	/// <summary>
-	/// Tags the <see cref="UiPresenter"/> as a <see cref="UiPresenterData{T}"/> to allow defining a specific state when
-	/// opening the UI via the <see cref="UiService"/>
+	/// <see cref="UiPresenter"/>를 <see cref="UiPresenterData{T}"/>로 태그하여
+	/// <see cref="UiService"/>를 통해 UI를 열 때 특정 상태를 정의할 수 있게 합니다
 	/// </summary>
 	public interface IUiPresenterData
 	{
 	}
 
 	/// <summary>
-	/// The root base of the UI Presenter of the <seealso cref="IUiService"/>
-	/// Implement this abstract class in order to execute the proper UI life cycle
+	/// <seealso cref="IUiService"/>의 UI 프레젠터 최상위 기본 클래스입니다.
+	/// 올바른 UI 생명주기를 실행하려면 이 추상 클래스를 구현하세요
 	/// </summary>
 	public abstract class UiPresenter : MonoBehaviour
 	{
@@ -26,30 +26,30 @@ namespace Geuneda.UiService
 		private UniTaskCompletionSource _closeTransitionCompletion;
 
 		/// <summary>
-		/// The instance address that uniquely identifies this presenter instance.
-		/// Empty string for default/singleton instances.
+		/// 이 프레젠터 인스턴스를 고유하게 식별하는 인스턴스 주소입니다.
+		/// 기본/싱글턴 인스턴스의 경우 빈 문자열입니다.
 		/// </summary>
 		internal string InstanceAddress { get; private set; } = string.Empty;
 
 		/// <summary>
-		/// Requests the open status of the <see cref="UiPresenter"/>
+		/// <see cref="UiPresenter"/>의 열림 상태를 요청합니다
 		/// </summary>
 		public bool IsOpen => gameObject.activeSelf;
 
 		/// <summary>
-		/// Task that completes when the open transition finishes.
-		/// Useful for external code that needs to await until the UI is fully ready.
+		/// 열기 전환이 완료되면 완료되는 태스크입니다.
+		/// UI가 완전히 준비될 때까지 대기해야 하는 외부 코드에 유용합니다.
 		/// </summary>
 		public UniTask OpenTransitionTask => _openTransitionCompletion?.Task ?? UniTask.CompletedTask;
 
 		/// <summary>
-		/// Task that completes when the close transition finishes.
-		/// Useful for external code that needs to await until the UI has fully closed.
+		/// 닫기 전환이 완료되면 완료되는 태스크입니다.
+		/// UI가 완전히 닫힐 때까지 대기해야 하는 외부 코드에 유용합니다.
 		/// </summary>
 		public UniTask CloseTransitionTask => _closeTransitionCompletion?.Task ?? UniTask.CompletedTask;
 
 		/// <summary>
-		/// Allows the ui presenter implementation to directly close the ui presenter without needing to call the service directly
+		/// UI 프레젠터 구현체가 서비스를 직접 호출하지 않고도 UI 프레젠터를 직접 닫을 수 있게 합니다
 		/// </summary>
 		protected void Close(bool destroy)
 		{
@@ -57,31 +57,31 @@ namespace Geuneda.UiService
 		}
 
 		/// <summary>
-		/// Allows the ui presenter implementation to have extra behaviour when it is initialized
+		/// UI 프레젠터 구현체가 초기화될 때 추가 동작을 수행할 수 있게 합니다
 		/// </summary>
 		protected virtual void OnInitialized() {}
 
 		/// <summary>
-		/// Allows the ui presenter implementation to have extra behaviour when it is opened
+		/// UI 프레젠터 구현체가 열릴 때 추가 동작을 수행할 수 있게 합니다
 		/// </summary>
 		protected virtual void OnOpened() {}
 
 		/// <summary>
-		/// Allows the ui presenter implementation to have extra behaviour when it is closed
+		/// UI 프레젠터 구현체가 닫힐 때 추가 동작을 수행할 수 있게 합니다
 		/// </summary>
 		protected virtual void OnClosed() {}
 
 		/// <summary>
-		/// Called after all open transitions (animations, delays) have completed.
-		/// Override this to react when the UI is fully visible and ready for interaction.
-		/// This is always called, even for presenters without transition features.
+		/// 모든 열기 전환(애니메이션, 딜레이)이 완료된 후 호출됩니다.
+		/// UI가 완전히 보이고 상호작용할 준비가 되었을 때 반응하려면 이 메서드를 재정의하세요.
+		/// 전환 기능이 없는 프레젠터에서도 항상 호출됩니다.
 		/// </summary>
 		protected virtual void OnOpenTransitionCompleted() {}
 
 		/// <summary>
-		/// Called after all close transitions (animations, delays) have completed.
-		/// Override this to react when the UI has finished its closing transition.
-		/// This is always called, even for presenters without transition features.
+		/// 모든 닫기 전환(애니메이션, 딜레이)이 완료된 후 호출됩니다.
+		/// UI가 닫기 전환을 완료했을 때 반응하려면 이 메서드를 재정의하세요.
+		/// 전환 기능이 없는 프레젠터에서도 항상 호출됩니다.
 		/// </summary>
 		protected virtual void OnCloseTransitionCompleted() {}
 
@@ -112,17 +112,17 @@ namespace Geuneda.UiService
 			OnOpened();
 			NotifyFeaturesOpened();
 
-			// Await all feature open transitions
+			// 모든 기능의 열기 전환을 대기합니다
 			await WaitForOpenTransitionsAsync();
 
-			// Check if this MonoBehaviour was destroyed during the wait (e.g., during Dispose)
+			// 대기 중에 이 MonoBehaviour가 파괴되었는지 확인합니다 (예: Dispose 중)
 			if (!this)
 			{
 				_openTransitionCompletion?.TrySetResult();
 				return;
 			}
 
-			// Always notify - consistent lifecycle for all presenters
+			// 항상 알림 - 모든 프레젠터에 대해 일관된 생명주기
 			OnOpenTransitionCompleted();
 
 			_openTransitionCompletion.TrySetResult();
@@ -136,35 +136,35 @@ namespace Geuneda.UiService
 			OnClosed();
 			NotifyFeaturesClosed();
 
-			// Check if this MonoBehaviour was destroyed (e.g., during Dispose)
-			// Using implicit bool conversion which is safe even for destroyed objects
+			// 이 MonoBehaviour가 파괴되었는지 확인합니다 (예: Dispose 중)
+			// 파괴된 오브젝트에도 안전한 암시적 bool 변환을 사용합니다
 			if (!this)
 			{
 				_closeTransitionCompletion.TrySetResult();
 				return;
 			}
 
-			// Await all feature close transitions
+			// 모든 기능의 닫기 전환을 대기합니다
 			await WaitForCloseTransitionsAsync();
 
-			// Check again after await - object may have been destroyed during the wait
+			// 대기 후 다시 확인 - 대기 중에 오브젝트가 파괴되었을 수 있습니다
 			if (!this)
 			{
 				_closeTransitionCompletion?.TrySetResult();
 				return;
 			}
 
-			// Always hide here - single point of responsibility
+			// 여기서 항상 숨김 - 단일 책임 지점
 			gameObject.SetActive(false);
 
-			// Always notify - consistent lifecycle for all presenters
+			// 항상 알림 - 모든 프레젠터에 대해 일관된 생명주기
 			OnCloseTransitionCompleted();
 
 			_closeTransitionCompletion.TrySetResult();
 
 			if (destroy)
 			{
-				// UI Service calls the Addressables.UnloadAsset that unloads the asset from the memory and destroys the game object
+				// UI 서비스가 Addressables.UnloadAsset을 호출하여 메모리에서 에셋을 언로드하고 게임 오브젝트를 파괴합니다
 				_uiService.UnloadUi(GetType(), InstanceAddress);
 			}
 		}
@@ -176,7 +176,7 @@ namespace Geuneda.UiService
 				return UniTask.CompletedTask;
 			}
 
-			// Collect all open transition tasks from features that implement ITransitionFeature
+			// ITransitionFeature를 구현하는 기능들로부터 모든 열기 전환 태스크를 수집합니다
 			List<UniTask> tasks = null;
 			foreach (var feature in _features)
 			{
@@ -201,7 +201,7 @@ namespace Geuneda.UiService
 				return UniTask.CompletedTask;
 			}
 
-			// Collect all close transition tasks from features that implement ITransitionFeature
+			// ITransitionFeature를 구현하는 기능들로부터 모든 닫기 전환 태스크를 수집합니다
 			List<UniTask> tasks = null;
 			foreach (var feature in _features)
 			{
@@ -274,14 +274,14 @@ namespace Geuneda.UiService
 
 	/// <inheritdoc cref="UiPresenter"/>
 	/// <remarks>
-	/// Extends the <see cref="UiPresenter"/> behaviour to hold data of type <typeparamref name="T"/>
+	/// <see cref="UiPresenter"/> 동작을 확장하여 <typeparamref name="T"/> 타입의 데이터를 보유합니다
 	/// </remarks>
 	public abstract class UiPresenter<T> : UiPresenter, IUiPresenterData where T : struct
 	{
 		private T _data;
 
 		/// <summary>
-		/// The Ui data defined when opened via the <see cref="UiService"/>
+		/// <see cref="UiService"/>를 통해 열릴 때 정의되는 UI 데이터입니다
 		/// </summary>
 		public T Data
 		{
@@ -294,7 +294,7 @@ namespace Geuneda.UiService
 		}
 
 		/// <summary>
-		/// Allows the ui presenter implementation to have extra behaviour when the data defined for the presenter is set
+		/// 프레젠터에 정의된 데이터가 설정될 때 UI 프레젠터 구현체가 추가 동작을 수행할 수 있게 합니다
 		/// </summary>
 		protected virtual void OnSetData() {}
 	}

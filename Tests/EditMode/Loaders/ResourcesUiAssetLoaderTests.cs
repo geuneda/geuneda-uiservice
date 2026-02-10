@@ -12,8 +12,8 @@ namespace Geuneda.UiService.Tests
 		private Transform _parentTransform;
 		private List<GameObject> _createdObjects;
 
-		// Note: These tests use a mock approach since we can't easily create Resources folder assets in tests.
-		// The loader will throw KeyNotFoundException for missing resources, which we verify.
+		// 참고: 테스트에서 Resources 폴더 에셋을 쉽게 생성할 수 없으므로 모의 접근 방식을 사용합니다.
+		// 로더는 누락된 리소스에 대해 KeyNotFoundException을 던지며, 이를 검증합니다.
 
 		[SetUp]
 		public void SetUp()
@@ -42,10 +42,10 @@ namespace Geuneda.UiService.Tests
 		[Test]
 		public void InstantiatePrefab_ThrowsKeyNotFoundException_WhenResourceNotFound()
 		{
-			// Arrange
+			// 준비
 			var config = TestHelpers.CreateTestConfig(typeof(TestUiPresenter), "nonexistent/resource/path");
 
-			// Act & Assert
+			// 실행 및 검증
 			Assert.Throws<KeyNotFoundException>(() =>
 			{
 				_loader.InstantiatePrefab(config, _parentTransform).GetAwaiter().GetResult();
@@ -55,33 +55,33 @@ namespace Geuneda.UiService.Tests
 		[Test]
 		public void UnloadAsset_HandlesNullGracefully()
 		{
-			// Act & Assert - should not throw
+			// 실행 및 검증 - 예외가 발생하지 않아야 함
 			Assert.DoesNotThrow(() => _loader.UnloadAsset(null));
 		}
 
 		[Test]
 		public void UnloadAsset_DestroysGameObject()
 		{
-			// Arrange - create a simple GameObject to test destruction
+			// 준비 - 파괴 테스트를 위한 간단한 GameObject 생성
 			var testObject = new GameObject("TestObject");
 			_createdObjects.Add(testObject);
 
-			// Act
+			// 실행
 			_loader.UnloadAsset(testObject);
 
-			// Assert
-			Assert.IsTrue(testObject == null); // Unity destroys the object
+			// 검증
+			Assert.IsTrue(testObject == null); // Unity가 오브젝트를 파괴
 		}
 
 		[Test]
 		public void InstantiatePrefab_UsesAddressAsResourcePath()
 		{
-			// Arrange
+			// 준비
 			const string resourcePath = "UI/TestPresenter";
 			var config = TestHelpers.CreateTestConfig(typeof(TestUiPresenter), resourcePath);
 
-			// Act & Assert
-			// This will throw KeyNotFoundException with the path in the message
+			// 실행 및 검증
+			// 메시지에 경로가 포함된 KeyNotFoundException을 던져야 함
 			var ex = Assert.Throws<KeyNotFoundException>(() =>
 			{
 				_loader.InstantiatePrefab(config, _parentTransform).GetAwaiter().GetResult();
@@ -93,13 +93,13 @@ namespace Geuneda.UiService.Tests
 		[Test]
 		public void MultipleInstances_CanBeCreated()
 		{
-			// This test verifies the loader doesn't have singleton restrictions
-			// We can't test with real Resources, but we verify the loader can be called multiple times
+			// 로더에 싱글톤 제한이 없는지 검증하는 테스트
+			// 실제 Resources로 테스트할 수 없지만, 로더가 여러 번 호출될 수 있는지 확인
 			
 			var loader1 = new ResourcesUiAssetLoader();
 			var loader2 = new ResourcesUiAssetLoader();
 
-			// Both should be independent instances
+			// 둘 다 독립적인 인스턴스여야 함
 			Assert.AreNotSame(loader1, loader2);
 		}
 	}

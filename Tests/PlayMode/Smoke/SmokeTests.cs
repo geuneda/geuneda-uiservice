@@ -6,8 +6,8 @@ using UnityEngine.TestTools;
 namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
-	/// Quick validation tests for critical paths.
-	/// Target runtime: ~30 seconds total.
+	/// 핵심 경로에 대한 빠른 검증 테스트입니다.
+	/// 목표 실행 시간: 총 ~30초.
 	/// </summary>
 	[TestFixture]
 	public class SmokeTests

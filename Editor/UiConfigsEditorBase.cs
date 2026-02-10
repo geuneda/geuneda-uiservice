@@ -12,9 +12,9 @@ using UnityEngine.UIElements;
 namespace GeunedaEditor.UiService
 {
 	/// <summary>
-	/// Base class for <see cref="UiConfigs"/> editors with shared logic for layer visualization and set management.
+	/// 레이어 시각화 및 세트 관리를 위한 공유 로직을 가진 <see cref="UiConfigs"/> 에디터의 기본 클래스입니다.
 	/// </summary>
-	/// <typeparam name="TSet">The enum type of the <see cref="UiSetConfig"/> id</typeparam>
+	/// <typeparam name="TSet"><see cref="UiSetConfig"/> id의 enum 타입</typeparam>
 	public abstract class UiConfigsEditorBase<TSet> : Editor
 		where TSet : Enum
 	{
@@ -46,7 +46,7 @@ namespace GeunedaEditor.UiService
 
 			SyncConfigs();
 			
-			// Ensure sets array matches enum size
+			// 세트 배열이 enum 크기와 일치하는지 확인합니다
 			ScriptableObjectInstance.SetSetsSize(Enum.GetNames(typeof(TSet)).Length);
 			
 			serializedObject.Update();
@@ -66,20 +66,20 @@ namespace GeunedaEditor.UiService
 			root.style.paddingLeft = 3;
 			root.style.paddingRight = 3;
 
-			// Section 0: Layer Visualizer (collapsible)
+			// 섹션 0: 레이어 시각화 도구 (접기 가능)
 			var visualizerSection = CreateVisualizerSection();
 			root.Add(visualizerSection);
 
-			// Section 1: UI Config Explanation
+			// 섹션 1: UI 구성 설명
 			var configHelpBox = new HelpBox(ConfigExplanation, HelpBoxMessageType.Info);
 			configHelpBox.style.marginBottom = 10;
 			root.Add(configHelpBox);
 
-			// Section 2: UI Configs List
+			// 섹션 2: UI 구성 목록
 			var configsListView = CreateConfigsListView();
 			root.Add(configsListView);
 
-			// Section 3: Separator
+			// 섹션 3: 구분선
 			var separator = new VisualElement();
 			separator.style.height = 1;
 			separator.style.backgroundColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
@@ -87,12 +87,12 @@ namespace GeunedaEditor.UiService
 			separator.style.marginBottom = 15;
 			root.Add(separator);
 
-			// Section 4: UI Set Explanation
+			// 섹션 4: UI 세트 설명
 			var setHelpBox = new HelpBox(SetExplanation, HelpBoxMessageType.Info);
 			setHelpBox.style.marginBottom = 10;
 			root.Add(setHelpBox);
 
-			// Section 5: UI Sets List
+			// 섹션 5: UI 세트 목록
 			var setsContainer = CreateSetsContainer();
 			root.Add(setsContainer);
 
@@ -204,11 +204,11 @@ namespace GeunedaEditor.UiService
 			header.style.marginBottom = 5;
 			setContainer.Add(header);
 
-			// Get the property for this set's UI entries
+			// 이 세트의 UI 항목 프로퍼티를 가져옵니다
 			var setProperty = SetsProperty.GetArrayElementAtIndex(setIndex);
 			var uiEntriesProperty = setProperty.FindPropertyRelative(nameof(UiSetConfigSerializable.UiEntries));
 
-			// ListView for presenters in this set
+			// 이 세트의 프레젠터 ListView
 			var presenterListView = new ListView
 			{
 				showBorder = true,
@@ -239,7 +239,7 @@ namespace GeunedaEditor.UiService
 			container.style.flexDirection = FlexDirection.Row;
 			container.style.alignItems = Align.Center;
 			
-			// Drag handle
+			// 드래그 핸들
 			var dragHandle = new Label("☰");
 			dragHandle.style.width = 20;
 			dragHandle.style.unityTextAlign = TextAnchor.MiddleCenter;
@@ -249,7 +249,7 @@ namespace GeunedaEditor.UiService
 			dragHandle.style.color = new Color(0.7f, 0.7f, 0.7f);
 			container.Add(dragHandle);
 			
-			// Dropdown
+			// 드롭다운
 			var dropdown = new DropdownField();
 			dropdown.style.flexGrow = 1;
 			dropdown.style.paddingTop = 3;
@@ -257,7 +257,7 @@ namespace GeunedaEditor.UiService
 			dropdown.name = "ui-type-dropdown";
 			container.Add(dropdown);
 			
-			// Delete button
+			// 삭제 버튼
 			var deleteButton = new Button { text = "×" };
 			deleteButton.style.width = 25;
 			deleteButton.style.height = 20;
@@ -283,7 +283,7 @@ namespace GeunedaEditor.UiService
 			var uiTypesByAddress = GetUiTypesByAddress();
 			dropdown.choices = new List<string>(addressList);
 
-			// Find matching address for type
+			// 타입에 일치하는 주소를 찾습니다
 			var currentTypeName = typeNameProperty.stringValue;
 			Type currentType = string.IsNullOrEmpty(currentTypeName) ? null : Type.GetType(currentTypeName);
 			

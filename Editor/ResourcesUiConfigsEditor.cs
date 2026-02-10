@@ -12,7 +12,7 @@ using UnityEditor.UIElements;
 namespace GeunedaEditor.UiService
 {
 	/// <summary>
-	/// Implementation of <see cref="UiConfigsEditorBase{TSet}"/> that syncs with the Resources folder.
+	/// Resources 폴더와 동기화하는 <see cref="UiConfigsEditorBase{TSet}"/>의 구현입니다.
 	/// </summary>
 	public abstract class ResourcesUiConfigsEditor<TSet> : UiConfigsEditorBase<TSet>
 		where TSet : Enum
@@ -28,7 +28,7 @@ namespace GeunedaEditor.UiService
 			_assetPathLookup = new Dictionary<string, string>();
 			var existingConfigs = ScriptableObjectInstance.Configs;
 
-			// Scan all Resources folders
+			// 모든 Resources 폴더를 스캔합니다
 			var guids = AssetDatabase.FindAssets("t:Prefab");
 			foreach (var guid in guids)
 			{

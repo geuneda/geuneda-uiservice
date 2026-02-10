@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
-	/// Test presenter with animation clips for testing clip-based delays
+	/// 클립 기반 지연 테스트를 위한 애니메이션 클립이 있는 테스트 프레젠터
 	/// </summary>
 	[RequireComponent(typeof(AnimationDelayFeature))]
 	[RequireComponent(typeof(Animation))]
@@ -25,15 +25,15 @@ namespace Geuneda.UiService.Tests.PlayMode
 				AnimationFeature = gameObject.AddComponent<AnimationDelayFeature>();
 			}
 
-			// Create a mock animation clip with known length
+			// 알려진 길이의 모의 애니메이션 클립 생성
 			var introClip = new AnimationClip();
 			introClip.legacy = true;
 			
-			// Add a dummy curve to give it length
+			// 길이를 부여하기 위한 더미 커브 추가
 			introClip.SetCurve("", typeof(Transform), "localPosition.x", 
 				AnimationCurve.Linear(0f, 0f, 0.1f, 1f));
 
-			// Set fields via reflection
+			// 리플렉션을 통해 필드 설정
 			var animField = typeof(AnimationDelayFeature).GetField("_animation",
 				System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 			var introField = typeof(AnimationDelayFeature).GetField("_introAnimationClip",

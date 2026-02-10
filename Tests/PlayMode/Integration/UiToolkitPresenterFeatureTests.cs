@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
-	/// Tests for UiToolkitPresenterFeature functionality.
+	/// UiToolkitPresenterFeature 기능에 대한 테스트입니다.
 	/// </summary>
 	[TestFixture]
 	public class UiToolkitPresenterFeatureTests
@@ -57,8 +57,8 @@ namespace Geuneda.UiService.Tests.PlayMode
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestUiToolkitPresenter;
 
-			// Assert - Root is the document's rootVisualElement
-			// Note: May be null if no panel is assigned, but should not throw
+			// Assert - Root는 document의 rootVisualElement입니다
+			// 참고: 패널이 할당되지 않은 경우 null일 수 있지만, 예외가 발생하면 안 됩니다
 			Assert.IsNotNull(presenter);
 			Assert.DoesNotThrow(() => { var _ = presenter.ToolkitFeature.Root; });
 		}
@@ -71,7 +71,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestUiToolkitPresenter;
 
-			// Assert - Feature lifecycle should have been invoked
+			// Assert - Feature 생명주기가 호출되었어야 합니다
 			Assert.IsNotNull(presenter);
 			Assert.IsTrue(presenter.WasOpened);
 		}
@@ -79,7 +79,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator UiToolkitFeature_WithMultipleFeatures_AllFeaturesWork()
 		{
-			// Arrange - Register presenter with multiple features
+			// Arrange - 여러 기능을 가진 프레젠터를 등록합니다
 			_mockLoader.RegisterPrefab<TestMultiFeatureToolkitPresenter>("multi_feature");
 			_service.AddUiConfig(TestHelpers.CreateTestConfig(typeof(TestMultiFeatureToolkitPresenter), "multi_feature", 0));
 
@@ -102,24 +102,24 @@ namespace Geuneda.UiService.Tests.PlayMode
 		yield return task.ToCoroutine();
 		var presenter = task.GetAwaiter().GetResult() as TestUiToolkitPresenter;
 
-		// Wait for UI Toolkit panel attachment
+		// UI Toolkit 패널 연결을 기다립니다
 		yield return TestHelpers.WaitForPanelAttachment(presenter);
 
 		var initialCallbackCount = presenter.SetupCallbackCount;
 
-		// Act - Close and reopen
+		// Act - 닫고 다시 엽니다
 		_service.CloseUi<TestUiToolkitPresenter>();
-		yield return null; // Wait a frame
+		yield return null; // 한 프레임 대기
 
 		var reopenTask = _service.OpenUiAsync(typeof(TestUiToolkitPresenter));
 		yield return reopenTask.ToCoroutine();
 
-		// Wait for panel reattachment after reopen
+		// 다시 열린 후 패널 재연결을 기다립니다
 		yield return TestHelpers.WaitForPanelAttachment(presenter);
 
-		// Assert - Callback should have been invoked again
-		Assert.Greater(presenter.SetupCallbackCount, initialCallbackCount, 
-			"Callback should be invoked on each open");
+		// Assert - 콜백이 다시 호출되었어야 합니다
+		Assert.Greater(presenter.SetupCallbackCount, initialCallbackCount,
+			"콜백은 열릴 때마다 호출되어야 합니다");
 	}
 
 	[UnityTest]
@@ -130,26 +130,26 @@ namespace Geuneda.UiService.Tests.PlayMode
 		yield return task.ToCoroutine();
 		var presenter = task.GetAwaiter().GetResult() as TestUiToolkitPresenter;
 
-		// Wait for UI Toolkit panel attachment
+		// UI Toolkit 패널 연결을 기다립니다
 		yield return TestHelpers.WaitForPanelAttachment(presenter);
 
-		// Remove the listener
+		// 리스너를 제거합니다
 		presenter.RemoveSetupListener();
 		var countAfterRemove = presenter.SetupCallbackCount;
 
-		// Act - Close and reopen
+		// Act - 닫고 다시 엽니다
 		_service.CloseUi<TestUiToolkitPresenter>();
 		yield return null;
 
 		var reopenTask = _service.OpenUiAsync(typeof(TestUiToolkitPresenter));
 		yield return reopenTask.ToCoroutine();
 
-		// Wait for panel reattachment after reopen
+		// 다시 열린 후 패널 재연결을 기다립니다
 		yield return TestHelpers.WaitForPanelAttachment(presenter);
 
-		// Assert - Callback count should not have changed
-		Assert.AreEqual(countAfterRemove, presenter.SetupCallbackCount, 
-			"Callback should not be invoked after removal");
+		// Assert - 콜백 카운트가 변경되지 않았어야 합니다
+		Assert.AreEqual(countAfterRemove, presenter.SetupCallbackCount,
+			"제거 후에는 콜백이 호출되지 않아야 합니다");
 	}
 	}
 }

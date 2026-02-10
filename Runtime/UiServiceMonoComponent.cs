@@ -3,7 +3,7 @@
 namespace Geuneda.UiService
 {
     /// <summary>
-    /// This class is responsible for updating the resolution and device orientation of the <see cref="UiService"/>
+    /// 이 클래스는 <see cref="UiService"/>의 해상도와 기기 방향을 업데이트하는 역할을 합니다
     /// </summary>
     public class UiServiceMonoComponent : MonoBehaviour
     {
@@ -28,9 +28,9 @@ namespace Geuneda.UiService
             }
             
             switch (Input.deviceOrientation) {
-                case DeviceOrientation.Unknown:            // Ignore
-                case DeviceOrientation.FaceUp:            // Ignore
-                case DeviceOrientation.FaceDown:        // Ignore
+                case DeviceOrientation.Unknown:            // 무시
+                case DeviceOrientation.FaceUp:            // 무시
+                case DeviceOrientation.FaceDown:        // 무시
                     break;
                 default:
                     if (_orientation != Input.deviceOrientation) 

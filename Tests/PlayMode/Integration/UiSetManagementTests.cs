@@ -21,8 +21,8 @@ namespace Geuneda.UiService.Tests.PlayMode
 			
 			_service = new UiService(_mockLoader);
 			
-			// IMPORTANT: UI set uses config addresses to ensure proper address matching
-			// between Load/Open/Close/Unload operations
+			// 중요: UI 세트는 Load/Open/Close/Unload 작업 간의 적절한 주소 매칭을 보장하기 위해
+			// 설정 주소를 사용합니다
 			var set = TestHelpers.CreateTestUiSet(1,
 				new UiInstanceId(typeof(TestUiPresenter), "test_presenter"),
 				new UiInstanceId(typeof(TestDataUiPresenter), "data_presenter")
@@ -63,7 +63,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator LoadUiSetAsync_PartiallyLoaded_LoadsOnlyMissing()
 		{
-			// Arrange - Pre-load one presenter
+			// Arrange - 프레젠터 하나를 미리 로드합니다
 			var task = _service.LoadUiAsync(typeof(TestUiPresenter));
 			yield return task.ToCoroutine();
 
@@ -74,7 +74,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 				yield return t.ToCoroutine();
 			}
 
-			// Assert - Only one additional load (total 2 instantiates)
+			// Assert - 추가 로드는 하나만 수행됩니다 (총 2회 인스턴스화)
 			Assert.AreEqual(2, _mockLoader.InstantiateCallCount);
 		}
 	
@@ -99,7 +99,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			// Act
 			_service.CloseAllUiSet(1);
 			
-			// Wait for close transitions to complete
+			// 닫기 전환이 완료될 때까지 대기합니다
 			yield return presenter1.CloseTransitionTask.ToCoroutine();
 			yield return presenter2.CloseTransitionTask.ToCoroutine();
 
@@ -142,7 +142,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			Assert.AreEqual(0, _service.GetLoadedPresenters().Count);
 		}
 
-		#region OpenUiSetAsync Tests
+		#region OpenUiSetAsync 테스트
 
 		[UnityTest]
 		public IEnumerator OpenUiSetAsync_ValidSet_OpensAllPresenters()
@@ -161,12 +161,12 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator OpenUiSetAsync_NotLoaded_LoadsAndOpensAll()
 		{
-			// Act - Open without pre-loading
+			// Act - 미리 로드하지 않고 열기
 			var task = _service.OpenUiSetAsync(1);
 			yield return task.ToCoroutine();
 			var presenters = task.GetAwaiter().GetResult();
 
-			// Assert - Should have loaded and opened both
+			// Assert - 둘 다 로드되고 열려야 합니다
 			Assert.AreEqual(2, presenters.Length);
 			Assert.AreEqual(2, _mockLoader.InstantiateCallCount);
 			Assert.AreEqual(2, _service.VisiblePresenters.Count);
@@ -188,15 +188,15 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator OpenUiSetAsync_ThenCloseAllUiSet_ClosesAll()
 		{
-			// Arrange - Open via set method
+			// Arrange - 세트 메서드를 통해 엽니다
 			var openTask = _service.OpenUiSetAsync(1);
 			yield return openTask.ToCoroutine();
 			var presenters = openTask.GetAwaiter().GetResult();
 
-			// Act - Close via set method
+			// Act - 세트 메서드를 통해 닫습니다
 			_service.CloseAllUiSet(1);
-			
-			// Wait for close transitions
+
+			// 닫기 전환을 기다립니다
 			foreach (var presenter in presenters)
 			{
 				yield return presenter.CloseTransitionTask.ToCoroutine();
@@ -208,17 +208,17 @@ namespace Geuneda.UiService.Tests.PlayMode
 
 		#endregion
 
-		#region Cross-Operation Compatibility Tests (Set + Individual methods)
+		#region 교차 작업 호환성 테스트 (세트 + 개별 메서드)
 
 		[UnityTest]
 		public IEnumerator OpenUiAsync_WithoutPreload_ThenCloseAllUiSet_ClosesCorrectly()
 		{
-			// This test verifies the fix for the core bug:
-			// When opening via OpenUiAsync(Type) without pre-loading via LoadUiSetAsync,
-			// CloseAllUiSet should still close the presenters correctly because
-			// ResolveInstanceAddress now uses config.Address instead of string.Empty
-			
-			// Act - Open directly without loading via set first
+			// 이 테스트는 핵심 버그 수정을 검증합니다:
+			// LoadUiSetAsync를 통해 미리 로드하지 않고 OpenUiAsync(Type)으로 열 때,
+			// ResolveInstanceAddress가 string.Empty 대신 config.Address를 사용하므로
+			// CloseAllUiSet이 프레젠터를 올바르게 닫아야 합니다
+
+			// Act - 세트를 통해 먼저 로드하지 않고 직접 엽니다
 			var openTask1 = _service.OpenUiAsync(typeof(TestUiPresenter));
 			yield return openTask1.ToCoroutine();
 			var presenter1 = openTask1.GetAwaiter().GetResult();
@@ -229,32 +229,32 @@ namespace Geuneda.UiService.Tests.PlayMode
 
 			Assert.AreEqual(2, _service.VisiblePresenters.Count);
 
-			// Act - Close via set method
+			// Act - 세트 메서드를 통해 닫습니다
 			_service.CloseAllUiSet(1);
-			
+
 			yield return presenter1.CloseTransitionTask.ToCoroutine();
 			yield return presenter2.CloseTransitionTask.ToCoroutine();
 
-			// Assert - Should close both, even though they were opened via individual methods
+			// Assert - 개별 메서드로 열었더라도 둘 다 닫아야 합니다
 			Assert.AreEqual(0, _service.VisiblePresenters.Count);
 		}
 
 		[UnityTest]
 		public IEnumerator OpenUiSetAsync_ThenCloseUi_ClosesIndividualPresenter()
 		{
-			// Verify that presenters opened via set can be closed individually
-			
-			// Arrange - Open via set
+			// 세트를 통해 열린 프레젠터를 개별적으로 닫을 수 있는지 확인합니다
+
+			// Arrange - 세트를 통해 엽니다
 			var openTask = _service.OpenUiSetAsync(1);
 			yield return openTask.ToCoroutine();
 			var presenters = openTask.GetAwaiter().GetResult();
 			var testPresenter = presenters.First(p => p is TestUiPresenter);
 
-			// Act - Close one presenter individually
+			// Act - 프레젠터 하나를 개별적으로 닫습니다
 			_service.CloseUi(typeof(TestUiPresenter));
 			yield return testPresenter.CloseTransitionTask.ToCoroutine();
 
-			// Assert - Only one should remain visible
+			// Assert - 하나만 표시 상태로 남아있어야 합니다
 			Assert.AreEqual(1, _service.VisiblePresenters.Count);
 			Assert.IsFalse(_service.IsVisible<TestUiPresenter>());
 			Assert.IsTrue(_service.IsVisible<TestDataUiPresenter>());
@@ -263,16 +263,16 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator LoadUiSetAsync_ThenOpenUiAsync_ThenCloseAllUiSet_ClosesAll()
 		{
-			// Verify the scenario: Load via set, open via individual, close via set
-			
-			// Arrange - Load via set
+			// 시나리오 검증: 세트로 로드, 개별로 열기, 세트로 닫기
+
+			// Arrange - 세트를 통해 로드합니다
 			var loadTasks = _service.LoadUiSetAsync(1);
 			foreach (var task in loadTasks)
 			{
 				yield return task.ToCoroutine();
 			}
 
-			// Open via individual methods
+			// 개별 메서드를 통해 엽니다
 			var openTask1 = _service.OpenUiAsync(typeof(TestUiPresenter));
 			yield return openTask1.ToCoroutine();
 			var presenter1 = openTask1.GetAwaiter().GetResult();
@@ -281,7 +281,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			yield return openTask2.ToCoroutine();
 			var presenter2 = openTask2.GetAwaiter().GetResult();
 
-			// Act - Close via set
+			// Act - 세트를 통해 닫습니다
 			_service.CloseAllUiSet(1);
 			
 			yield return presenter1.CloseTransitionTask.ToCoroutine();
@@ -294,16 +294,16 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator OpenUiAsync_WithoutPreload_ThenUnloadUiSet_UnloadsAll()
 		{
-			// Verify that UnloadUiSet works with presenters opened via individual methods
-			
-			// Arrange - Open directly without loading via set
+			// 개별 메서드로 열린 프레젠터에서 UnloadUiSet이 작동하는지 확인합니다
+
+			// Arrange - 세트를 통해 로드하지 않고 직접 엽니다
 			var openTask1 = _service.OpenUiAsync(typeof(TestUiPresenter));
 			yield return openTask1.ToCoroutine();
 			
 			var openTask2 = _service.OpenUiAsync(typeof(TestDataUiPresenter));
 			yield return openTask2.ToCoroutine();
 
-			// Act - Unload via set (should close and unload)
+			// Act - 세트를 통해 언로드합니다 (닫기와 언로드가 수행되어야 합니다)
 			_service.UnloadUiSet(1);
 
 			// Assert
@@ -313,19 +313,19 @@ namespace Geuneda.UiService.Tests.PlayMode
 
 		#endregion
 
-		#region ResolveInstanceAddress Consistency Tests
+		#region ResolveInstanceAddress 일관성 테스트
 
 		[UnityTest]
 		public IEnumerator OpenUiAsync_UsesConfigAddressWhenNotLoaded()
 		{
-			// This tests that ResolveInstanceAddress returns config.Address
-			// when no instance is loaded yet
-			
-			// Act - Open without loading first
+			// 인스턴스가 아직 로드되지 않았을 때
+			// ResolveInstanceAddress가 config.Address를 반환하는지 테스트합니다
+
+			// Act - 먼저 로드하지 않고 엽니다
 			var openTask = _service.OpenUiAsync(typeof(TestUiPresenter));
 			yield return openTask.ToCoroutine();
 
-			// Assert - Verify the presenter was loaded with the config address
+			// Assert - 프레젠터가 설정 주소로 로드되었는지 확인합니다
 			var loaded = _service.GetLoadedPresenters();
 			Assert.AreEqual(1, loaded.Count);
 			Assert.AreEqual("test_presenter", loaded[0].Address);
@@ -334,7 +334,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator LoadUiAsync_WithoutAddress_UsesConfigAddress()
 		{
-			// Verify that LoadUiAsync(Type) without explicit address uses config.Address
+			// 명시적 주소 없이 LoadUiAsync(Type)이 config.Address를 사용하는지 확인합니다
 			
 			// Act
 			var loadTask = _service.LoadUiAsync(typeof(TestUiPresenter));
@@ -348,29 +348,29 @@ namespace Geuneda.UiService.Tests.PlayMode
 
 		#endregion
 
-		#region Unload Set with Open Presenters
+		#region 열린 프레젠터가 있는 세트 언로드
 
 		[UnityTest]
 		public IEnumerator UnloadUiSet_WithOpenPresenters_UnloadsAll()
 		{
-			// Verify that UnloadUiSet works even when presenters are still open
-			
-			// Arrange - Open via set
+			// 프레젠터가 아직 열려있을 때도 UnloadUiSet이 작동하는지 확인합니다
+
+			// Arrange - 세트를 통해 엽니다
 			var openTask = _service.OpenUiSetAsync(1);
 			yield return openTask.ToCoroutine();
 			
 			Assert.AreEqual(2, _service.VisiblePresenters.Count);
 
-			// Act - Unload while still open
+			// Act - 아직 열려있는 상태에서 언로드합니다
 			_service.UnloadUiSet(1);
 
-			// Assert - Should unload (and implicitly close)
+			// Assert - 언로드되어야 합니다 (암묵적으로 닫기도 수행)
 			Assert.AreEqual(0, _service.GetLoadedPresenters().Count);
 		}
 
 		#endregion
 
-		#region OpenUiSetAsync Edge Cases
+		#region OpenUiSetAsync 엣지 케이스
 
 		[Test]
 		public void OpenUiSetAsync_InvalidSetId_ThrowsKeyNotFoundException()
@@ -383,15 +383,15 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator OpenUiSetAsync_CalledTwice_DoesNotDuplicatePresenters()
 		{
-			// First open
+			// 첫 번째 열기
 			var task1 = _service.OpenUiSetAsync(1);
 			yield return task1.ToCoroutine();
 			
-			// Second open (should not duplicate)
+			// 두 번째 열기 (중복되면 안 됩니다)
 			var task2 = _service.OpenUiSetAsync(1);
 			yield return task2.ToCoroutine();
 			
-			// Assert - still only 2 presenters
+			// Assert - 여전히 프레젠터 2개만 있어야 합니다
 			Assert.AreEqual(2, _service.VisiblePresenters.Count);
 			Assert.AreEqual(2, _service.GetLoadedPresenters().Count);
 		}

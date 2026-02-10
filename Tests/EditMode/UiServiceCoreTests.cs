@@ -4,8 +4,8 @@ using System;
 namespace Geuneda.UiService.Tests
 {
     /// <summary>
-    /// EditMode tests for UiService constructor and basic initialization.
-    /// Tests that require Init() (which calls DontDestroyOnLoad) are in PlayMode tests.
+    /// UiService 생성자 및 기본 초기화를 위한 EditMode 테스트.
+    /// Init()(DontDestroyOnLoad를 호출하는)이 필요한 테스트는 PlayMode 테스트에 있습니다.
     /// </summary>
     [TestFixture]
     public class UiServiceCoreTests
@@ -28,30 +28,30 @@ namespace Geuneda.UiService.Tests
         [Test]
         public void Constructor_WithDefaultParams_CreatesService()
         {
-            // Act
+            // 실행
             _service = new UiService();
 
-            // Assert
+            // 검증
             Assert.IsNotNull(_service);
         }
 
         [Test]
         public void Constructor_WithCustomAssetLoader_UsesCustomLoader()
         {
-            // Act
+            // 실행
             _service = new UiService(_mockLoader);
 
-            // Assert
+            // 검증
             Assert.IsNotNull(_service);
         }
 
         [Test]
         public void Init_WithNullConfigs_ThrowsArgumentNullException()
         {
-            // Arrange
+            // 준비
             _service = new UiService(_mockLoader);
 
-            // Act & Assert
+            // 실행 및 검증
             Assert.Throws<ArgumentNullException>(() => _service.Init(null));
         }
     }

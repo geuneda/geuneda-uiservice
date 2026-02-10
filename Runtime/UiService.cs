@@ -18,9 +18,9 @@ namespace Geuneda.UiService
 		public static readonly UnityEvent<Vector2, Vector2> OnResolutionChanged = new ();
 
 		/// <summary>
-		/// Internal static reference to the most recently created UiService instance.
-		/// Used by editor tools to access the active service during play mode.
-		/// Only accessible to editor code within this package.
+		/// 가장 최근에 생성된 UiService 인스턴스에 대한 내부 정적 참조입니다.
+		/// 에디터 도구가 플레이 모드 중에 활성 서비스에 접근하는 데 사용됩니다.
+		/// 이 패키지 내의 에디터 코드에서만 접근 가능합니다.
 		/// </summary>
 		internal static UiService CurrentService { get; private set; }
 		
@@ -48,10 +48,10 @@ namespace Geuneda.UiService
 		{
 			_assetLoader = assetLoader;
 			
-			// Set static reference for editor/debugging access
+			// 에디터/디버깅 접근을 위한 정적 참조 설정
 			CurrentService = this;
 			
-			// Initialize readonly wrappers to avoid allocations on property access
+			// 프로퍼티 접근 시 할당을 방지하기 위해 읽기 전용 래퍼를 초기화합니다
 			_uiSetsReadOnly = new ReadOnlyDictionary<int, UiSetConfig>(_uiSets);
 			_visiblePresentersReadOnly = new ReadOnlyCollection<UiInstanceId>(_visibleUiList);
 		}
@@ -121,11 +121,11 @@ namespace Geuneda.UiService
 		}
 		
 		/// <summary>
-		/// Requests the UI of given type <typeparamref name="T"/> with the specified instance address
+		/// 지정된 인스턴스 주소와 함께 <typeparamref name="T"/> 타입의 UI를 요청합니다
 		/// </summary>
-		/// <param name="instanceAddress">Optional instance address. Use null for default/singleton instance.</param>
+		/// <param name="instanceAddress">선택적 인스턴스 주소입니다. 기본/싱글턴 인스턴스의 경우 null을 사용하세요.</param>
 		/// <exception cref="KeyNotFoundException">
-		/// Thrown if the service does NOT contain an <see cref="UiPresenter"/> of the given type and instance address
+		/// 서비스에 지정된 타입과 인스턴스 주소의 <see cref="UiPresenter"/>가 없는 경우 발생합니다
 		/// </exception>
 		public T GetUi<T>(string instanceAddress) where T : UiPresenter
 		{
@@ -143,9 +143,9 @@ namespace Geuneda.UiService
 		}
 		
 		/// <summary>
-		/// Requests the visible state of the given UI type <typeparamref name="T"/> with the specified instance address
+		/// 지정된 인스턴스 주소와 함께 <typeparamref name="T"/> UI 타입의 표시 상태를 요청합니다
 		/// </summary>
-		/// <param name="instanceAddress">Optional instance address. Use null for default/singleton instance.</param>
+		/// <param name="instanceAddress">선택적 인스턴스 주소입니다. 기본/싱글턴 인스턴스의 경우 null을 사용하세요.</param>
 		public bool IsVisible<T>(string instanceAddress) where T : UiPresenter
 		{
 			var instanceId = new UiInstanceId(typeof(T), instanceAddress);
@@ -177,25 +177,25 @@ namespace Geuneda.UiService
 		}
 		
 		/// <summary>
-		/// Adds a UI presenter to the service with an optional instance address
+		/// 선택적 인스턴스 주소와 함께 UI 프레젠터를 서비스에 추가합니다
 		/// </summary>
-		/// <param name="ui">The UI presenter to add</param>
-		/// <param name="layer">The layer to include the UI presenter in</param>
-		/// <param name="instanceAddress">Optional instance address. Use null for default/singleton instance.</param>
-		/// <param name="openAfter">Whether to open the UI presenter after adding it</param>
+		/// <param name="ui">추가할 UI 프레젠터</param>
+		/// <param name="layer">UI 프레젠터를 포함할 레이어</param>
+		/// <param name="instanceAddress">선택적 인스턴스 주소입니다. 기본/싱글턴 인스턴스의 경우 null을 사용하세요.</param>
+		/// <param name="openAfter">추가 후 UI 프레젠터를 열지 여부</param>
 		public void AddUi<T>(T ui, int layer, string instanceAddress, bool openAfter = false) where T : UiPresenter
 		{
 			var type = ui.GetType().UnderlyingSystemType;
 			var instanceId = new UiInstanceId(type, instanceAddress);
 
-			// Check if already exists
+			// 이미 존재하는지 확인합니다
 			if (TryFindPresenter(type, instanceAddress, out _))
 			{
 				Debug.LogWarning($"The Ui {instanceId} was already added");
 				return;
 			}
 			
-			// Add to type-indexed collection
+			// 타입 인덱스 컬렉션에 추가합니다
 			if (!_uiPresenters.TryGetValue(type, out var instanceList))
 			{
 				instanceList = new List<UiInstance>();
@@ -203,7 +203,7 @@ namespace Geuneda.UiService
 			}
 			instanceList.Add(new UiInstance(type, instanceAddress, ui));
 			
-			// Ensure Canvas sorting order matches layer
+			// Canvas 정렬 순서가 레이어와 일치하는지 확인합니다
 			EnsureCanvasSortingOrder(ui.gameObject, layer);
 
 			ui.Init(this, instanceAddress);
@@ -233,11 +233,11 @@ namespace Geuneda.UiService
 		}
 		
 		/// <summary>
-		/// Removes the UI of the specified type and instance address from the service without unloading it
+		/// 지정된 타입과 인스턴스 주소의 UI를 언로드하지 않고 서비스에서 제거합니다
 		/// </summary>
-		/// <param name="type">The type of UI to remove</param>
-		/// <param name="instanceAddress">Optional instance address. Use null for default/singleton instance.</param>
-		/// <returns>True if the UI was removed, false otherwise</returns>
+		/// <param name="type">제거할 UI의 타입</param>
+		/// <param name="instanceAddress">선택적 인스턴스 주소입니다. 기본/싱글턴 인스턴스의 경우 null을 사용하세요.</param>
+		/// <returns>UI가 제거되었으면 true, 그렇지 않으면 false</returns>
 		public bool RemoveUi(Type type, string instanceAddress)
 		{
 			var instanceId = new UiInstanceId(type, instanceAddress);
@@ -248,14 +248,14 @@ namespace Geuneda.UiService
 				return false;
 			}
 
-			// Find and remove the instance
+			// 인스턴스를 찾아 제거합니다
 			for (int i = 0; i < instanceList.Count; i++)
 			{
 				if (instanceList[i].Address == instanceAddress)
 				{
 					instanceList.RemoveAt(i);
 					
-					// Clean up empty type entry
+					// 빈 타입 항목을 정리합니다
 					if (instanceList.Count == 0)
 					{
 						_uiPresenters.Remove(type);
@@ -302,7 +302,7 @@ namespace Geuneda.UiService
 		/// <inheritdoc />
 		public async UniTask<UiPresenter> LoadUiAsync(Type type, bool openAfter = false, CancellationToken cancellationToken = default)
 		{
-			// Use config.Address as the default/singleton instance address to ensure consistency with UI set operations. ResolveInstanceAddress is only for existing instances
+			// UI 세트 작업과의 일관성을 보장하기 위해 config.Address를 기본/싱글턴 인스턴스 주소로 사용합니다. ResolveInstanceAddress는 기존 인스턴스에만 사용됩니다
 			if (!_uiConfigs.TryGetValue(type, out var config))
 			{
 				throw new KeyNotFoundException($"The UiConfig of type {type} was not added to the service. Call {nameof(AddUiConfig)} first");
@@ -311,13 +311,13 @@ namespace Geuneda.UiService
 		}
 		
 		/// <summary>
-		/// Loads the UI of the specified type asynchronously with an optional instance address
+		/// 선택적 인스턴스 주소와 함께 지정된 타입의 UI를 비동기적으로 로드합니다
 		/// </summary>
-		/// <param name="type">The type of UI to load</param>
-		/// <param name="instanceAddress">Optional instance address. Use null for default/singleton instance.</param>
-		/// <param name="openAfter">Whether to open the UI after loading</param>
-		/// <param name="cancellationToken">Cancellation token to cancel the operation</param>
-		/// <returns>A task that completes with the loaded UI</returns>
+		/// <param name="type">로드할 UI의 타입</param>
+		/// <param name="instanceAddress">선택적 인스턴스 주소입니다. 기본/싱글턴 인스턴스의 경우 null을 사용하세요.</param>
+		/// <param name="openAfter">로드 후 UI를 열지 여부</param>
+		/// <param name="cancellationToken">작업을 취소하기 위한 취소 토큰</param>
+		/// <returns>로드된 UI로 완료되는 태스크</returns>
 		public async UniTask<UiPresenter> LoadUiAsync(Type type, string instanceAddress, bool openAfter = false, CancellationToken cancellationToken = default)
 		{
 			if (!_uiConfigs.TryGetValue(type, out var config))
@@ -334,10 +334,10 @@ namespace Geuneda.UiService
 				return existingUi;
 			}
 
-			// Parent directly to _uiParent - no layer GameObjects needed
+			// _uiParent에 직접 부모 설정 - 레이어 GameObject가 필요 없습니다
 			var gameObject = await _assetLoader.InstantiatePrefab(config, _uiParent, cancellationToken);
 
-			// Double check if the same UiPresenter was already loaded. This can happen if the coder spam calls LoadUiAsync
+			// 동일한 UiPresenter가 이미 로드되었는지 이중 확인합니다. 개발자가 LoadUiAsync를 반복 호출할 때 발생할 수 있습니다
 			if (TryFindPresenter(type, instanceAddress, out var uiDouble))
 			{
 				_assetLoader.UnloadAsset(gameObject);
@@ -393,10 +393,10 @@ namespace Geuneda.UiService
 		}
 		
 		/// <summary>
-		/// Unloads the UI of the specified type and instance address
+		/// 지정된 타입과 인스턴스 주소의 UI를 언로드합니다
 		/// </summary>
-		/// <param name="type">The type of UI to unload</param>
-		/// <param name="instanceAddress">Optional instance address. Use null for default/singleton instance.</param>
+		/// <param name="type">언로드할 UI의 타입</param>
+		/// <param name="instanceAddress">선택적 인스턴스 주소입니다. 기본/싱글턴 인스턴스의 경우 null을 사용하세요.</param>
 		public void UnloadUi(Type type, string instanceAddress)
 		{
 			var instanceId = new UiInstanceId(type, instanceAddress);
@@ -436,20 +436,20 @@ namespace Geuneda.UiService
 		/// <inheritdoc />
 		public async UniTask<UiPresenter> OpenUiAsync(Type type, CancellationToken cancellationToken = default)
 		{
-			// Use config.Address as the default/singleton instance address to ensure consistency with UI set operations. ResolveInstanceAddress is only for existing instances
+			// UI 세트 작업과의 일관성을 보장하기 위해 config.Address를 기본/싱글턴 인스턴스 주소로 사용합니다. ResolveInstanceAddress는 기존 인스턴스에만 사용됩니다
 			if (!_uiConfigs.TryGetValue(type, out var config))
 			{
 				throw new KeyNotFoundException($"The UiConfig of type {type} was not added to the service. Call {nameof(AddUiConfig)} first");
 			}
 			return await OpenUiAsync(type, config.Address, cancellationToken);
 		}
-		
+
 		/// <summary>
-		/// Opens a UI presenter asynchronously with an optional instance address
+		/// 선택적 인스턴스 주소와 함께 UI 프레젠터를 비동기적으로 엽니다
 		/// </summary>
-		/// <param name="type">The type of UI presenter to open</param>
-		/// <param name="instanceAddress">Optional instance address. Use null for default/singleton instance.</param>
-		/// <param name="cancellationToken">Cancellation token to cancel the operation</param>
+		/// <param name="type">열 UI 프레젠터의 타입</param>
+		/// <param name="instanceAddress">선택적 인스턴스 주소입니다. 기본/싱글턴 인스턴스의 경우 null을 사용하세요.</param>
+		/// <param name="cancellationToken">작업을 취소하기 위한 취소 토큰</param>
 		public async UniTask<UiPresenter> OpenUiAsync(Type type, string instanceAddress, CancellationToken cancellationToken = default)
 		{
 			var ui = await GetOrLoadUiAsync(type, instanceAddress, cancellationToken);
@@ -470,21 +470,21 @@ namespace Geuneda.UiService
 		/// <inheritdoc />
 		public async UniTask<UiPresenter> OpenUiAsync<TData>(Type type, TData initialData, CancellationToken cancellationToken = default) where TData : struct
 		{
-			// Use config.Address as the default/singleton instance address to ensure consistency with UI set operations. ResolveInstanceAddress is only for existing instances
+			// UI 세트 작업과의 일관성을 보장하기 위해 config.Address를 기본/싱글턴 인스턴스 주소로 사용합니다. ResolveInstanceAddress는 기존 인스턴스에만 사용됩니다
 			if (!_uiConfigs.TryGetValue(type, out var config))
 			{
 				throw new KeyNotFoundException($"The UiConfig of type {type} was not added to the service. Call {nameof(AddUiConfig)} first");
 			}
 			return await OpenUiAsync(type, config.Address, initialData, cancellationToken);
 		}
-		
+
 		/// <summary>
-		/// Opens a UI presenter asynchronously with initial data and an optional instance address
+		/// 초기 데이터와 선택적 인스턴스 주소와 함께 UI 프레젠터를 비동기적으로 엽니다
 		/// </summary>
-		/// <param name="type">The type of UI presenter to open</param>
-		/// <param name="instanceAddress">Optional instance address. Use null for default/singleton instance.</param>
-		/// <param name="initialData">The initial data to set</param>
-		/// <param name="cancellationToken">Cancellation token to cancel the operation</param>
+		/// <param name="type">열 UI 프레젠터의 타입</param>
+		/// <param name="instanceAddress">선택적 인스턴스 주소입니다. 기본/싱글턴 인스턴스의 경우 null을 사용하세요.</param>
+		/// <param name="initialData">설정할 초기 데이터</param>
+		/// <param name="cancellationToken">작업을 취소하기 위한 취소 토큰</param>
 		public async UniTask<UiPresenter> OpenUiAsync<TData>(Type type, string instanceAddress, TData initialData, CancellationToken cancellationToken = default) where TData : struct
 		{
 			var ui = await GetOrLoadUiAsync(type, instanceAddress, cancellationToken);
@@ -524,11 +524,11 @@ namespace Geuneda.UiService
 		}
 		
 		/// <summary>
-		/// Closes a UI presenter with an optional instance address and optionally destroys its assets
+		/// 선택적 인스턴스 주소와 함께 UI 프레젠터를 닫고 선택적으로 에셋을 파괴합니다
 		/// </summary>
-		/// <param name="type">The type of UI presenter to close</param>
-		/// <param name="instanceAddress">Optional instance address. Use null for default/singleton instance.</param>
-		/// <param name="destroy">Whether to destroy the UI presenter's assets</param>
+		/// <param name="type">닫을 UI 프레젠터의 타입</param>
+		/// <param name="instanceAddress">선택적 인스턴스 주소입니다. 기본/싱글턴 인스턴스의 경우 null을 사용하세요.</param>
+		/// <param name="destroy">UI 프레젠터의 에셋을 파괴할지 여부</param>
 		public void CloseUi(Type type, string instanceAddress, bool destroy = false)
 		{
 			var instanceId = new UiInstanceId(type, instanceAddress);
@@ -609,7 +609,7 @@ namespace Geuneda.UiService
 		}
 
 		/// <summary>
-		/// Disposes of the UI service, cleaning up all resources and unsubscribing from events.
+		/// UI 서비스를 폐기하고, 모든 리소스를 정리하며 이벤트 구독을 해제합니다.
 		/// </summary>
 		public void Dispose()
 		{
@@ -620,16 +620,16 @@ namespace Geuneda.UiService
 
 			_disposed = true;
 
-			// Clear static reference
+			// 정적 참조를 정리합니다
 			if (CurrentService == this)
 			{
 				CurrentService = null;
 			}
 
-			// Close all visible UI
+			// 모든 표시 중인 UI를 닫습니다
 			CloseAllUi();
 
-			// Unload all UI presenters
+			// 모든 UI 프레젠터를 언로드합니다
 			var presenterInstances = new List<UiInstanceId>();
 			foreach (var kvp in _uiPresenters)
 			{
@@ -652,16 +652,16 @@ namespace Geuneda.UiService
 				}
 			}
 
-			// Clear all collections
+			// 모든 컬렉션을 정리합니다
 			_uiPresenters.Clear();
 			_visibleUiList.Clear();
 			_uiConfigs.Clear();
 			_uiSets.Clear();
 
-			// Clean up static events
-			// Note: We don't call RemoveAllListeners on static UnityEvents as it would affect other instances
+			// 정적 이벤트를 정리합니다
+			// 참고: 정적 UnityEvent에 RemoveAllListeners를 호출하면 다른 인스턴스에 영향을 줄 수 있으므로 호출하지 않습니다
 
-			// Destroy UI parent GameObject
+			// UI 부모 GameObject를 파괴합니다
 			if (_uiParent != null)
 			{
 				Object.Destroy(_uiParent.gameObject);
@@ -670,12 +670,12 @@ namespace Geuneda.UiService
 		}
 
 		/// <summary>
-		/// Attempts to find a presenter by type and address
+		/// 타입과 주소로 프레젠터를 찾으려고 시도합니다
 		/// </summary>
-		/// <param name="type">The type of UI presenter to find</param>
-		/// <param name="address">The instance address</param>
-		/// <param name="presenter">The found presenter, or null if not found</param>
-		/// <returns>True if the presenter was found, false otherwise</returns>
+		/// <param name="type">찾을 UI 프레젠터의 타입</param>
+		/// <param name="address">인스턴스 주소</param>
+		/// <param name="presenter">찾은 프레젠터, 찾지 못하면 null</param>
+		/// <returns>프레젠터를 찾았으면 true, 그렇지 않으면 false</returns>
 		private bool TryFindPresenter(Type type, string address, out UiPresenter presenter)
 		{
 			if (_uiPresenters.TryGetValue(type, out var instances))
@@ -732,23 +732,23 @@ namespace Geuneda.UiService
 		}
 
 		/// <summary>
-		/// Resolves the instance address for a given type when operating on an already-loaded presenter.
-		/// This is used by operations that need to find an existing instance (GetUi, IsVisible, CloseUi, etc.).
-		/// 
-		/// Priority:
-		/// 1. If no instances exist, return string.Empty (default/singleton)
-		/// 2. If exactly one instance exists, return that instance's address
-		/// 3. If multiple instances exist, return the first one found (with warning)
-		/// 
-		/// Note: This method should NOT be used for Load/Open operations that create new instances.
+		/// 이미 로드된 프레젠터에 대해 작업할 때 주어진 타입의 인스턴스 주소를 확인합니다.
+		/// 기존 인스턴스를 찾아야 하는 작업(GetUi, IsVisible, CloseUi 등)에서 사용됩니다.
+		///
+		/// 우선순위:
+		/// 1. 인스턴스가 없으면 string.Empty를 반환합니다 (기본/싱글턴)
+		/// 2. 인스턴스가 정확히 하나이면 해당 인스턴스의 주소를 반환합니다
+		/// 3. 인스턴스가 여러 개이면 첫 번째를 반환합니다 (경고와 함께)
+		///
+		/// 참고: 이 메서드는 새 인스턴스를 생성하는 Load/Open 작업에 사용하면 안 됩니다.
 		/// </summary>
-		/// <param name="type">The type of UI presenter to resolve</param>
-		/// <returns>The resolved instance address</returns>
+		/// <param name="type">확인할 UI 프레젠터의 타입</param>
+		/// <returns>확인된 인스턴스 주소</returns>
 		private string ResolveInstanceAddress(Type type)
 		{
 			if (!_uiPresenters.TryGetValue(type, out var instances))
 			{
-				// No instances loaded - return empty string for default/singleton instance
+				// 로드된 인스턴스가 없음 - 기본/싱글턴 인스턴스를 위해 빈 문자열 반환
 				return string.Empty;
 			}
 			
@@ -757,7 +757,7 @@ namespace Geuneda.UiService
 				return instances[0].Address;
 			}
 			
-			// Multiple instances found - log warning and return the first
+			// 여러 인스턴스 발견 - 경고를 기록하고 첫 번째를 반환
 			var instanceNames = new List<string>(instances.Count);
 			foreach (var instance in instances)
 			{

@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
-	/// Tests for presenter features (TimeDelayFeature, AnimationDelayFeature) and transition lifecycle hooks.
+	/// 프레젠터 기능(TimeDelayFeature, AnimationDelayFeature) 및 전환 생명주기 훅에 대한 테스트.
 	/// </summary>
 	[TestFixture]
 	public class PresenterFeatureTests
@@ -41,12 +41,12 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator Feature_OnPresenterInitialized_CalledOnLoad()
 		{
-			// Act
+			// 실행
 			var task = _service.LoadUiAsync(typeof(TestPresenterWithFeature));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestPresenterWithFeature;
 
-			// Assert
+			// 검증
 			Assert.IsNotNull(presenter);
 			Assert.IsTrue(presenter.Feature.WasInitialized);
 			Assert.AreEqual(presenter, presenter.Feature.ReceivedPresenter);
@@ -55,69 +55,69 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator Feature_OnPresenterOpening_CalledBeforeOpen()
 		{
-			// Act
+			// 실행
 			var task = _service.OpenUiAsync(typeof(TestPresenterWithFeature));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestPresenterWithFeature;
 
-			// Assert
+			// 검증
 			Assert.IsTrue(presenter.Feature.WasOpening);
 		}
 
 		[UnityTest]
 		public IEnumerator Feature_OnPresenterOpened_CalledAfterOpen()
 		{
-			// Act
+			// 실행
 			var task = _service.OpenUiAsync(typeof(TestPresenterWithFeature));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestPresenterWithFeature;
 
-			// Assert
+			// 검증
 			Assert.IsTrue(presenter.Feature.WasOpened);
 		}
 
 		[UnityTest]
 		public IEnumerator Feature_OnPresenterClosing_CalledOnClose()
 		{
-			// Arrange
+			// 준비
 			var task = _service.OpenUiAsync(typeof(TestPresenterWithFeature));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestPresenterWithFeature;
 
-			// Act
+			// 실행
 			_service.CloseUi(typeof(TestPresenterWithFeature));
 
-			// Assert
+			// 검증
 			Assert.IsTrue(presenter.Feature.WasClosing);
 		}
 
 		[UnityTest]
 		public IEnumerator Feature_OnPresenterClosed_CalledAfterClose()
 		{
-			// Arrange
+			// 준비
 			var task = _service.OpenUiAsync(typeof(TestPresenterWithFeature));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestPresenterWithFeature;
 
-			// Act
+			// 실행
 			_service.CloseUi(typeof(TestPresenterWithFeature));
 
-			// Assert
+			// 검증
 			Assert.IsTrue(presenter.Feature.WasClosed);
 		}
 
 		[UnityTest]
 		public IEnumerator OnOpenTransitionCompleted_AlwaysCalledForPresentersWithoutFeatures()
 		{
-			// Arrange - Using presenter with non-transition feature (no ITransitionFeature)
+			// 준비 - 비전환 기능을 가진 프레젠터 사용 (ITransitionFeature 없음)
 			var task = _service.OpenUiAsync(typeof(TestPresenterWithFeature));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestPresenterWithFeature;
 
-			// Wait a frame for async process to complete
+			// 비동기 프로세스 완료를 위해 한 프레임 대기
 			yield return null;
 
-			// Assert - OnOpenTransitionCompleted should always be called
+			// 검증 - OnOpenTransitionCompleted가 항상 호출되어야 함
 			Assert.IsTrue(presenter.WasOpenTransitionCompleted);
 			Assert.AreEqual(1, presenter.OpenTransitionCompletedCount);
 		}
@@ -125,21 +125,21 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator OnCloseTransitionCompleted_AlwaysCalledForPresentersWithoutFeatures()
 		{
-			// Arrange
+			// 준비
 			var task = _service.OpenUiAsync(typeof(TestPresenterWithFeature));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestPresenterWithFeature;
 
-			// Wait for open transition to complete
+			// 열기 전환 완료 대기
 			yield return null;
 
-			// Act
+			// 실행
 			_service.CloseUi(typeof(TestPresenterWithFeature));
 			
-			// Wait for close transition to complete
+			// 닫기 전환 완료 대기
 			yield return null;
 
-			// Assert - OnCloseTransitionCompleted should always be called
+			// 검증 - OnCloseTransitionCompleted가 항상 호출되어야 함
 			Assert.IsTrue(presenter.WasCloseTransitionCompleted);
 			Assert.AreEqual(1, presenter.CloseTransitionCompletedCount);
 		}
@@ -147,81 +147,81 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator TransitionFeature_PresenterAwaitsOpenTransition()
 		{
-			// Arrange
+			// 준비
 			var task = _service.OpenUiAsync(typeof(TestPresenterWithTransitionFeature));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestPresenterWithTransitionFeature;
 
-			// Transition not yet complete
+			// 전환이 아직 완료되지 않음
 			Assert.IsFalse(presenter.WasOpenTransitionCompleted);
 
-			// Act - Complete the transition
+			// 실행 - 전환 완료
 			presenter.TransitionFeature.CompleteOpenTransition();
 			
-			// Wait for presenter to process
+			// 프레젠터 처리 대기
 			yield return null;
 
-			// Assert
+			// 검증
 			Assert.IsTrue(presenter.WasOpenTransitionCompleted);
 		}
 
 		[UnityTest]
 		public IEnumerator TransitionFeature_PresenterAwaitsCloseTransition()
 		{
-			// Arrange
+			// 준비
 			var task = _service.OpenUiAsync(typeof(TestPresenterWithTransitionFeature));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestPresenterWithTransitionFeature;
 			
-			// Complete open transition first
+			// 먼저 열기 전환 완료
 			presenter.TransitionFeature.CompleteOpenTransition();
 			yield return null;
 
-			// Act - Close and verify transition is awaited
+			// 실행 - 닫기 및 전환이 대기되는지 확인
 			_service.CloseUi(typeof(TestPresenterWithTransitionFeature));
 			yield return null;
 
-			// Close transition not yet complete
+			// 닫기 전환이 아직 완료되지 않음
 			Assert.IsFalse(presenter.WasCloseTransitionCompleted);
-			Assert.IsTrue(presenter.gameObject.activeSelf); // Still visible during transition
+			Assert.IsTrue(presenter.gameObject.activeSelf); // 전환 중에는 여전히 표시
 
-			// Complete the transition
+			// 전환 완료
 			presenter.TransitionFeature.CompleteCloseTransition();
 			yield return null;
 
-			// Assert
+			// 검증
 			Assert.IsTrue(presenter.WasCloseTransitionCompleted);
-			Assert.IsFalse(presenter.gameObject.activeSelf); // Hidden after transition
+			Assert.IsFalse(presenter.gameObject.activeSelf); // 전환 후 숨김
 		}
 
 		[UnityTest]
 		public IEnumerator TransitionFeature_GameObjectHiddenOnlyAfterTransitionCompletes()
 		{
-			// Arrange
+			// 준비
 			var task = _service.OpenUiAsync(typeof(TestPresenterWithTransitionFeature));
 			yield return task.ToCoroutine();
 			var presenter = task.GetAwaiter().GetResult() as TestPresenterWithTransitionFeature;
 			presenter.TransitionFeature.CompleteOpenTransition();
 			yield return null;
 
-			// Act - Start close
+			// 실행 - 닫기 시작
 			_service.CloseUi(typeof(TestPresenterWithTransitionFeature));
 			yield return null;
 
-			// Assert - Still visible during transition
+			// 검증 - 전환 중에는 여전히 표시
 			Assert.IsTrue(presenter.gameObject.activeSelf);
 
-			// Complete transition
+			// 전환 완료
 			presenter.TransitionFeature.CompleteCloseTransition();
 			yield return null;
 
-			// Assert - Now hidden
+			// 검증 - 이제 숨김
 			Assert.IsFalse(presenter.gameObject.activeSelf);
 		}
 	}
 
 	/// <summary>
-	/// Test presenter with a mock feature (non-transition) for testing basic feature lifecycle
+	/// 기본 기능 생명주기 테스트를 위한 모의 기능(비전환)이 있는 테스트 프레젠터
 	/// </summary>
 	[RequireComponent(typeof(MockPresenterFeature))]
 	public class TestPresenterWithFeature : UiPresenter
@@ -255,7 +255,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 	}
 
 	/// <summary>
-	/// Test presenter with a mock transition feature for testing ITransitionFeature
+	/// ITransitionFeature 테스트를 위한 모의 전환 기능이 있는 테스트 프레젠터
 	/// </summary>
 	[RequireComponent(typeof(MockTransitionFeature))]
 	public class TestPresenterWithTransitionFeature : UiPresenter
@@ -285,7 +285,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 	}
 
 	/// <summary>
-	/// Mock feature for testing basic feature lifecycle (does not implement ITransitionFeature)
+	/// 기본 기능 생명주기 테스트를 위한 모의 기능 (ITransitionFeature를 구현하지 않음)
 	/// </summary>
 	public class MockPresenterFeature : PresenterFeatureBase
 	{
@@ -325,7 +325,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 	}
 
 	/// <summary>
-	/// Mock feature that implements ITransitionFeature for testing transition awaiting
+	/// 전환 대기 테스트를 위한 ITransitionFeature를 구현하는 모의 기능
 	/// </summary>
 	public class MockTransitionFeature : PresenterFeatureBase, ITransitionFeature
 	{

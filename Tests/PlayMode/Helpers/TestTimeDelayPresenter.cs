@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Geuneda.UiService.Tests.PlayMode
 {
 	/// <summary>
-	/// Test presenter with TimeDelayFeature for testing delay behavior
+	/// 지연 동작 테스트를 위한 TimeDelayFeature가 있는 테스트 프레젠터
 	/// </summary>
 	[RequireComponent(typeof(TimeDelayFeature))]
 	public class TestTimeDelayPresenter : UiPresenter
@@ -20,7 +20,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 				DelayFeature = gameObject.AddComponent<TimeDelayFeature>();
 			}
 			
-			// Set short delays for testing
+			// 테스트를 위한 짧은 지연 시간 설정
 			SetDelayValues(0.1f, 0.05f);
 		}
 
