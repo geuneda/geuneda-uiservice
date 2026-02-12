@@ -1,121 +1,121 @@
-# Advanced Topics
+# 고급 주제
 
-This document covers advanced features including performance optimization and helper components.
+이 문서에서는 성능 최적화와 헬퍼 컴포넌트를 포함한 고급 기능을 다룹니다.
 
-## Table of Contents
+## 목차
 
-- [Helper Views](#helper-views)
-- [Performance Optimization](#performance-optimization)
-- [Known Limitations](#known-limitations)
+- [헬퍼 뷰](#헬퍼-뷰)
+- [성능 최적화](#성능-최적화)
+- [알려진 제한사항](#알려진-제한사항)
 
 ---
 
-## Helper Views
+## 헬퍼 뷰
 
-Built-in components for common UI needs.
+일반적인 UI 요구사항을 위한 내장 컴포넌트입니다.
 
 ### SafeAreaHelperView
 
-Automatically adjusts UI for device safe areas (notches, Dynamic Island, rounded corners).
+기기 안전 영역(노치, Dynamic Island, 둥근 모서리)에 맞게 UI를 자동으로 조정합니다.
 
 ```csharp
-// Add to any RectTransform that should respect safe areas
+// 안전 영역을 고려해야 하는 모든 RectTransform에 추가
 gameObject.AddComponent<SafeAreaHelperView>();
 ```
 
-**Use for:** Header bars, bottom navigation, fullscreen content that shouldn't be obscured.
+**용도:** 헤더 바, 하단 네비게이션, 가려지면 안 되는 전체 화면 콘텐츠.
 
 ### NonDrawingView
 
-An invisible graphic that blocks raycasts without rendering. Reduces draw calls.
+렌더링 없이 레이캐스트를 차단하는 보이지 않는 그래픽. 드로우 콜을 줄입니다.
 
 ```csharp
-// Use instead of Image with alpha=0
+// 알파=0인 Image 대신 사용
 gameObject.AddComponent<NonDrawingView>();
 ```
 
-**Use for:** Invisible touch blockers, modal backgrounds that don't need visuals.
+**용도:** 보이지 않는 터치 차단기, 시각적 요소가 필요 없는 모달 배경.
 
 ### AdjustScreenSizeFitterView
 
-Responsive sizing between min and max constraints.
+최소 및 최대 제약 사이에서 반응형 크기 조정.
 
 ```csharp
 var fitter = gameObject.AddComponent<AdjustScreenSizeFitterView>();
-// Configure in Inspector: min/max width and height
+// 인스펙터에서 설정: 최소/최대 너비 및 높이
 ```
 
-**Use for:** Panels that should adapt to screen size while staying within bounds.
+**용도:** 화면 크기에 적응하면서 범위 내에 유지해야 하는 패널.
 
 ### InteractableTextView
 
-Makes TextMeshPro text interactive with clickable links.
+TextMeshPro 텍스트를 클릭 가능한 링크로 인터랙티브하게 만듭니다.
 
 ```csharp
-// Add to TextMeshPro component
+// TextMeshPro 컴포넌트에 추가
 gameObject.AddComponent<InteractableTextView>();
 
-// In your TMP text, use <link> tags:
+// TMP 텍스트에서 <link> 태그 사용:
 // "Visit our <link=https://example.com>website</link>!"
 ```
 
-**Use for:** Terms of service, clickable URLs, in-game hyperlinks.
+**용도:** 이용 약관, 클릭 가능한 URL, 게임 내 하이퍼링크.
 
 ---
 
-## Performance Optimization
+## 성능 최적화
 
-### Loading Strategies
+### 로딩 전략
 
-| Strategy | When to Use | Tradeoff |
-|----------|-------------|----------|
-| **On-demand** | Rare UIs, large assets | Loads when needed, may hitch |
-| **Preload** | Frequent UIs, critical path | Instant display, uses memory |
-| **Preload Sets** | Scene-specific UI groups | Batch efficiency, memory overhead |
+| 전략 | 사용 시점 | 트레이드오프 |
+|------|----------|------------|
+| **온디맨드** | 드문 UI, 큰 에셋 | 필요 시 로드, 끊김 발생 가능 |
+| **사전 로드** | 자주 쓰는 UI, 핵심 경로 | 즉시 표시, 메모리 사용 |
+| **세트 사전 로드** | 씬별 UI 그룹 | 일괄 효율성, 메모리 오버헤드 |
 
 ```csharp
-// On-demand (lazy)
+// 온디맨드 (지연)
 await _uiService.OpenUiAsync<SettingsMenu>();
 
-// Preload (eager)
+// 사전 로드 (즉시)
 await _uiService.LoadUiAsync<GameHud>();
-// Later: instant open
+// 나중에: 즉시 열기
 await _uiService.OpenUiAsync<GameHud>();
 
-// Preload sets
+// 세트 사전 로드
 var tasks = _uiService.LoadUiSetAsync(setId: 1);
 await UniTask.WhenAll(tasks);
 ```
 
-### Memory Management
+### 메모리 관리
 
 ```csharp
-// Close but keep in memory (fast reopen)
+// 닫기 (메모리에 유지, 빠른 재열기)
 _uiService.CloseUi<Shop>(destroy: false);
 
-// Close and free memory
+// 닫기 및 메모리 해제
 _uiService.CloseUi<Shop>(destroy: true);
 
-// Or explicitly unload
+// 또는 명시적으로 언로드
 _uiService.UnloadUi<Shop>();
 ```
 
-**When to destroy:**
-- ✅ Large assets (>5MB)
-- ✅ Level-specific UI when changing levels
-- ✅ One-time tutorials
-- ❌ Frequently reopened UI (Settings, Pause)
-- ❌ Small, lightweight presenters
+**파괴해야 하는 경우:**
+- 큰 에셋 (>5MB)
+- 레벨 변경 시 레벨 전용 UI
+- 일회성 튜토리얼
+- 자주 다시 여는 UI는 파괴하지 않음 (설정, 일시정지)
+- 작고 가벼운 프레젠터는 파괴하지 않음
 
-### Parallel Loading
+### 병렬 로딩
 
 ```csharp
-// ❌ SLOW - Sequential (3s if each takes 1s)
+// 느림 - 순차 (각각 1초면 3초)
 await _uiService.OpenUiAsync<Hud>();
 await _uiService.OpenUiAsync<Minimap>();
 await _uiService.OpenUiAsync<Chat>();
 
-// ✅ FAST - Parallel (1s total)
+// 빠름 - 병렬 (총 1초)
 await UniTask.WhenAll(
     _uiService.OpenUiAsync<Hud>(),
     _uiService.OpenUiAsync<Minimap>(),
@@ -123,37 +123,37 @@ await UniTask.WhenAll(
 );
 ```
 
-### Preload During Loading Screens
+### 로딩 화면에서 사전 로드
 
 ```csharp
 public async UniTask LoadLevel()
 {
     await _uiService.OpenUiAsync<LoadingScreen>();
-    
-    // Load UI and level in parallel
+
+    // UI와 레벨을 병렬로 로드
     var uiTask = UniTask.WhenAll(
         _uiService.LoadUiAsync<GameHud>(),
         _uiService.LoadUiAsync<PauseMenu>()
     );
     var levelTask = SceneManager.LoadSceneAsync("GameLevel").ToUniTask();
-    
+
     await UniTask.WhenAll(uiTask, levelTask);
-    
+
     _uiService.CloseUi<LoadingScreen>();
 }
 ```
 
-### Avoid Repeated Opens
+### 반복 열기 방지
 
 ```csharp
-// ❌ BAD - Opens every frame if held
+// 잘못된 예 - 누르고 있으면 매 프레임마다 열림
 void Update()
 {
     if (Input.GetKeyDown(KeyCode.Escape))
         _uiService.OpenUiAsync<PauseMenu>().Forget();
 }
 
-// ✅ GOOD - Check first
+// 올바른 예 - 먼저 확인
 void Update()
 {
     if (Input.GetKeyDown(KeyCode.Escape) && !_uiService.IsVisible<PauseMenu>())
@@ -161,70 +161,69 @@ void Update()
 }
 ```
 
-### Scene Cleanup
+### 씬 정리
 
 ```csharp
 async void OnLevelComplete()
 {
-    // Close gameplay layer
+    // 게임플레이 레이어 닫기
     _uiService.CloseAllUi(layer: 1);
-    
-    // Unload gameplay UI set
+
+    // 게임플레이 UI 세트 언로드
     _uiService.UnloadUiSet(setId: 2);
-    
-    // Load end-of-level UI
+
+    // 레벨 완료 UI 로드
     await _uiService.OpenUiAsync<LevelCompleteScreen>();
 }
 ```
 
-### Feature Performance
+### 피처 성능
 
-**Prefer TimeDelayFeature** for simple delays (lighter):
+**간단한 딜레이에는 TimeDelayFeature를 선호** (더 가벼움):
 ```csharp
 [RequireComponent(typeof(TimeDelayFeature))]
 public class SimplePopup : UiPresenter { }
 ```
 
-**Use AnimationDelayFeature** only for actual animations:
+**실제 애니메이션에만 AnimationDelayFeature를 사용**:
 ```csharp
 [RequireComponent(typeof(AnimationDelayFeature))]
 public class ComplexAnimatedPopup : UiPresenter { }
 ```
 
-**Best practices:**
-- Keep delays under 0.5s for responsiveness
-- Disable Animator components when UI is closed
-- Avoid unnecessary features - each adds overhead
+**모범 사례:**
+- 반응성을 위해 딜레이를 0.5초 이하로 유지
+- UI가 닫혀 있을 때 Animator 컴포넌트를 비활성화
+- 불필요한 피처를 피하기 - 각각 오버헤드 추가
 
-### Monitoring
+### 모니터링
 
 ```csharp
-// Check loaded count
+// 로드된 수 확인
 var loaded = _uiService.GetLoadedPresenters();
 Debug.Log($"Loaded: {loaded.Count}");
 
-// Check visible count
+// 보이는 수 확인
 Debug.Log($"Visible: {_uiService.VisiblePresenters.Count}");
 ```
 
-**Red flags:**
-- More than 10 presenters loaded simultaneously
-- Loading same UI multiple times per second
-- Memory not decreasing after `UnloadUi`
+**경고 신호:**
+- 10개 이상의 프레젠터가 동시에 로드됨
+- 같은 UI가 초당 여러 번 로드됨
+- `UnloadUi` 후 메모리가 줄어들지 않음
 
-Use Unity Profiler to monitor:
-- `Memory.Allocations` - GC spikes during open
-- `Memory.Total` - Memory after load/unload
-- `Loading.AsyncLoad` - Slow-loading assets
+Unity Profiler로 모니터링할 항목:
+- `Memory.Allocations` - 열기 시 GC 스파이크
+- `Memory.Total` - 로드/언로드 후 메모리
+- `Loading.AsyncLoad` - 느린 에셋 로딩
 
 ---
 
-## Known Limitations
+## 알려진 제한사항
 
-| Limitation | Description | Workaround |
-|------------|-------------|------------|
-| **Layer Range** | Layers must be 0-1000 | Use values within this range |
-| **UI Toolkit Version** | UI Toolkit features require Unity 6000.0+ | Use uGUI for older versions |
-| **WebGL Task.Delay** | Standard `Task.Delay` fails on WebGL | Package uses UniTask automatically |
-| **Synchronous Loading** | `LoadSynchronously` blocks main thread | Use sparingly for critical startup UIs |
-
+| 제한사항 | 설명 | 우회 방법 |
+|---------|------|----------|
+| **레이어 범위** | 레이어는 0-1000이어야 함 | 이 범위 내의 값 사용 |
+| **UI Toolkit 버전** | UI Toolkit 기능은 Unity 6000.0+ 필요 | 이전 버전에서는 uGUI 사용 |
+| **WebGL Task.Delay** | 표준 `Task.Delay`는 WebGL에서 실패 | 패키지가 자동으로 UniTask 사용 |
+| **동기 로딩** | `LoadSynchronously`는 메인 스레드를 차단 | 핵심 시작 UI에만 제한적으로 사용 |

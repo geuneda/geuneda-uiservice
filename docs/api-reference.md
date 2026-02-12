@@ -1,68 +1,68 @@
-# API Reference
+# API 레퍼런스
 
-Complete API documentation for the UI Service.
+UI Service의 전체 API 문서입니다.
 
-## Table of Contents
+## 목차
 
-- [IUiService Interface](#iuiservice-interface)
-- [Loading and Unloading](#loading-and-unloading)
-- [Opening and Closing](#opening-and-closing)
-- [UI Sets Operations](#ui-sets-operations)
-- [Query Methods](#query-methods)
-- [Async Operations](#async-operations)
-- [Runtime Configuration](#runtime-configuration)
-
----
-
-## IUiService Interface
-
-The main interface for all UI operations.
-
-### Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `VisiblePresenters` | `IReadOnlyList<UiInstanceId>` | All currently visible presenter instances |
-| `UiSets` | `IReadOnlyDictionary<int, UiSetConfig>` | All registered UI sets |
-
-### Methods Overview
-
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `GetLoadedPresenters()` | `List<UiInstance>` | All presenters currently in memory |
-| `GetUi<T>()` | `T` | Get loaded presenter by type |
-| `IsVisible<T>()` | `bool` | Check if presenter is visible |
-| `LoadUiAsync<T>()` | `UniTask<T>` | Load presenter into memory |
-| `OpenUiAsync<T>()` | `UniTask<T>` | Open presenter (loads if needed) |
-| `CloseUi<T>()` | `void` | Close presenter |
-| `UnloadUi<T>()` | `void` | Unload presenter from memory |
+- [IUiService 인터페이스](#iuiservice-인터페이스)
+- [로딩 및 언로딩](#로딩-및-언로딩)
+- [열기 및 닫기](#열기-및-닫기)
+- [UI 세트 작업](#ui-세트-작업)
+- [쿼리 메서드](#쿼리-메서드)
+- [비동기 작업](#비동기-작업)
+- [런타임 설정](#런타임-설정)
 
 ---
 
-## Loading and Unloading
+## IUiService 인터페이스
+
+모든 UI 작업을 위한 메인 인터페이스입니다.
+
+### 프로퍼티
+
+| 프로퍼티 | 타입 | 설명 |
+|---------|------|------|
+| `VisiblePresenters` | `IReadOnlyList<UiInstanceId>` | 현재 보이는 모든 프레젠터 인스턴스 |
+| `UiSets` | `IReadOnlyDictionary<int, UiSetConfig>` | 등록된 모든 UI 세트 |
+
+### 메서드 개요
+
+| 메서드 | 반환 타입 | 설명 |
+|--------|----------|------|
+| `GetLoadedPresenters()` | `List<UiInstance>` | 현재 메모리에 있는 모든 프레젠터 |
+| `GetUi<T>()` | `T` | 타입으로 로드된 프레젠터 가져오기 |
+| `IsVisible<T>()` | `bool` | 프레젠터가 보이는지 확인 |
+| `LoadUiAsync<T>()` | `UniTask<T>` | 프레젠터를 메모리에 로드 |
+| `OpenUiAsync<T>()` | `UniTask<T>` | 프레젠터 열기 (필요 시 로드) |
+| `CloseUi<T>()` | `void` | 프레젠터 닫기 |
+| `UnloadUi<T>()` | `void` | 메모리에서 프레젠터 언로드 |
+
+---
+
+## 로딩 및 언로딩
 
 ### LoadUiAsync
 
-Load a UI presenter into memory without opening it.
+UI 프레젠터를 열지 않고 메모리에 로드합니다.
 
 ```csharp
-// Load into memory (stays hidden)
+// 메모리에 로드 (숨김 유지)
 var inventory = await _uiService.LoadUiAsync<InventoryPresenter>();
 
-// Load and immediately open
+// 로드 후 즉시 열기
 var inventory = await _uiService.LoadUiAsync<InventoryPresenter>(openAfter: true);
 
-// With cancellation
+// 취소 지원
 var cts = new CancellationTokenSource();
 var inventory = await _uiService.LoadUiAsync<InventoryPresenter>(
-    openAfter: false, 
+    openAfter: false,
     cancellationToken: cts.Token
 );
 ```
 
-**Signatures:**
+**시그니처:**
 ```csharp
-UniTask<T> LoadUiAsync<T>(bool openAfter = false, CancellationToken cancellationToken = default) 
+UniTask<T> LoadUiAsync<T>(bool openAfter = false, CancellationToken cancellationToken = default)
     where T : UiPresenter;
 
 UniTask<UiPresenter> LoadUiAsync(Type type, bool openAfter = false, CancellationToken cancellationToken = default);
@@ -70,41 +70,41 @@ UniTask<UiPresenter> LoadUiAsync(Type type, bool openAfter = false, Cancellation
 
 ### UnloadUi
 
-Unload a presenter from memory (releases Addressables reference).
+메모리에서 프레젠터를 언로드합니다 (Addressables 참조 해제).
 
 ```csharp
-// Unload by type
+// 타입으로 언로드
 _uiService.UnloadUi<InventoryPresenter>();
 
-// Unload by instance
+// 인스턴스로 언로드
 _uiService.UnloadUi(inventoryPresenter);
 
-// Unload by Type object
+// Type 객체로 언로드
 _uiService.UnloadUi(typeof(InventoryPresenter));
 ```
 
-**Note:** Unloading a visible presenter will close it first.
+**참고:** 보이는 프레젠터를 언로드하면 먼저 닫힙니다.
 
 ---
 
-## Opening and Closing
+## 열기 및 닫기
 
 ### OpenUiAsync
 
-Open a presenter, loading it first if necessary.
+프레젠터를 열고, 필요하면 먼저 로드합니다.
 
 ```csharp
-// Basic open
+// 기본 열기
 var shop = await _uiService.OpenUiAsync<ShopPresenter>();
 
-// Open with initial data - automatically triggers OnSetData()
+// 초기 데이터와 함께 열기 - 자동으로 OnSetData() 트리거
 var questData = new QuestData { QuestId = 101, Title = "Dragon Slayer" };
 var quest = await _uiService.OpenUiAsync<QuestPresenter, QuestData>(questData);
 
-// Update data at any time - also triggers OnSetData()
+// 언제든지 데이터 업데이트 - 역시 OnSetData() 트리거
 quest.Data = new QuestData { QuestId = 102, Title = "Updated Quest" };
 
-// With cancellation
+// 취소 지원
 var cts = new CancellationTokenSource();
 try
 {
@@ -116,39 +116,39 @@ catch (OperationCanceledException)
 }
 ```
 
-**Signatures:**
+**시그니처:**
 ```csharp
-UniTask<T> OpenUiAsync<T>(CancellationToken cancellationToken = default) 
+UniTask<T> OpenUiAsync<T>(CancellationToken cancellationToken = default)
     where T : UiPresenter;
 
-UniTask<T> OpenUiAsync<T, TData>(TData initialData, CancellationToken cancellationToken = default) 
-    where T : class, IUiPresenterData 
+UniTask<T> OpenUiAsync<T, TData>(TData initialData, CancellationToken cancellationToken = default)
+    where T : class, IUiPresenterData
     where TData : struct;
 ```
 
 ### CloseUi
 
-Close a visible presenter.
+보이는 프레젠터를 닫습니다.
 
 ```csharp
-// Close but keep in memory (fast to reopen)
+// 닫기 (메모리에 유지, 빠른 재열기)
 _uiService.CloseUi<ShopPresenter>();
 _uiService.CloseUi<ShopPresenter>(destroy: false);
 
-// Close and unload from memory
+// 닫기 및 메모리에서 언로드
 _uiService.CloseUi<ShopPresenter>(destroy: true);
 
-// Close by instance
+// 인스턴스로 닫기
 _uiService.CloseUi(shopPresenter);
 _uiService.CloseUi(shopPresenter, destroy: true);
 ```
 
-**Transition Behavior:**
-- If the presenter has `ITransitionFeature` components (e.g., `TimeDelayFeature`, `AnimationDelayFeature`), the close will wait for all transitions to complete before hiding the GameObject.
-- Use `presenter.CloseTransitionTask` to await the full close process including transitions.
+**전환 동작:**
+- 프레젠터에 `ITransitionFeature` 컴포넌트(예: `TimeDelayFeature`, `AnimationDelayFeature`)가 있으면, 닫기는 모든 전환이 완료된 후 GameObject를 숨깁니다.
+- `presenter.CloseTransitionTask`를 사용하여 전환을 포함한 전체 닫기 프로세스를 대기할 수 있습니다.
 
 ```csharp
-// Wait for close transition to complete
+// 닫기 전환 완료 대기
 _uiService.CloseUi<AnimatedPopup>();
 await presenter.CloseTransitionTask;
 Debug.Log("Popup fully closed with animation");
@@ -156,32 +156,32 @@ Debug.Log("Popup fully closed with animation");
 
 ### CloseAllUi
 
-Close multiple presenters at once.
+여러 프레젠터를 한 번에 닫습니다.
 
 ```csharp
-// Close all visible UI
+// 보이는 모든 UI 닫기
 _uiService.CloseAllUi();
 
-// Close all UI in a specific layer
+// 특정 레이어의 모든 UI 닫기
 _uiService.CloseAllUi(layer: 2);
 ```
 
 ---
 
-## UI Sets Operations
+## UI 세트 작업
 
 ### LoadUiSetAsync
 
-Load all presenters in a set.
+세트의 모든 프레젠터를 로드합니다.
 
 ```csharp
-// Returns array of tasks - load in parallel
+// 태스크 배열 반환 - 병렬로 로드
 IList<UniTask<UiPresenter>> loadTasks = _uiService.LoadUiSetAsync(setId: 1);
 
-// Wait for all to complete
+// 모두 완료될 때까지 대기
 var presenters = await UniTask.WhenAll(loadTasks);
 
-// Or process as they complete
+// 또는 완료되는 대로 처리
 foreach (var task in loadTasks)
 {
     var presenter = await task;
@@ -191,27 +191,27 @@ foreach (var task in loadTasks)
 
 ### OpenUiSetAsync
 
-Open all presenters in a set, loading them if necessary.
+세트의 모든 프레젠터를 열고, 필요하면 로드합니다.
 
 ```csharp
-// Opens all UIs in parallel, returns when all are open
+// 모든 UI를 병렬로 열고, 모두 열릴 때까지 대기
 UiPresenter[] presenters = await _uiService.OpenUiSetAsync(setId: 1);
 
-// With cancellation
+// 취소 지원
 var cts = new CancellationTokenSource();
 var presenters = await _uiService.OpenUiSetAsync(setId: 1, cts.Token);
 ```
 
-**Signature:**
+**시그니처:**
 ```csharp
 UniTask<UiPresenter[]> OpenUiSetAsync(int setId, CancellationToken cancellationToken = default);
 ```
 
-**Note:** This method ensures proper address handling so that `CloseAllUiSet` and `UnloadUiSet` work correctly afterwards.
+**참고:** 이 메서드는 적절한 주소 처리를 보장하여 이후 `CloseAllUiSet`과 `UnloadUiSet`이 올바르게 작동합니다.
 
 ### CloseAllUiSet
 
-Close all presenters in a set.
+세트의 모든 프레젠터를 닫습니다.
 
 ```csharp
 _uiService.CloseAllUiSet(setId: 1);
@@ -219,7 +219,7 @@ _uiService.CloseAllUiSet(setId: 1);
 
 ### UnloadUiSet
 
-Unload all presenters in a set from memory.
+메모리에서 세트의 모든 프레젠터를 언로드합니다.
 
 ```csharp
 _uiService.UnloadUiSet(setId: 1);
@@ -227,12 +227,12 @@ _uiService.UnloadUiSet(setId: 1);
 
 ### RemoveUiSet
 
-Remove and return all presenters from a set.
+세트의 모든 프레젠터를 제거하고 반환합니다.
 
 ```csharp
 List<UiPresenter> removed = _uiService.RemoveUiSet(setId: 2);
 
-// Clean up manually if needed
+// 필요한 경우 수동으로 정리
 foreach (var presenter in removed)
 {
     Destroy(presenter.gameObject);
@@ -241,11 +241,11 @@ foreach (var presenter in removed)
 
 ---
 
-## Query Methods
+## 쿼리 메서드
 
 ### GetUi
 
-Get a loaded presenter by type.
+타입으로 로드된 프레젠터를 가져옵니다.
 
 ```csharp
 var hud = _uiService.GetUi<GameHudPresenter>();
@@ -256,11 +256,11 @@ if (hud != null)
 }
 ```
 
-**Throws:** `KeyNotFoundException` if not loaded.
+**예외:** 로드되지 않은 경우 `KeyNotFoundException` 발생.
 
 ### IsVisible
 
-Check if a presenter is currently visible.
+프레젠터가 현재 보이는지 확인합니다.
 
 ```csharp
 if (_uiService.IsVisible<MainMenuPresenter>())
@@ -268,7 +268,7 @@ if (_uiService.IsVisible<MainMenuPresenter>())
     Debug.Log("Main menu is showing");
 }
 
-// Use before opening to avoid duplicates
+// 중복을 피하기 위해 열기 전에 확인
 if (!_uiService.IsVisible<PauseMenu>())
 {
     await _uiService.OpenUiAsync<PauseMenu>();
@@ -277,7 +277,7 @@ if (!_uiService.IsVisible<PauseMenu>())
 
 ### GetLoadedPresenters
 
-Get all presenters currently loaded in memory.
+현재 메모리에 로드된 모든 프레젠터를 가져옵니다.
 
 ```csharp
 List<UiInstance> loaded = _uiService.GetLoadedPresenters();
@@ -287,13 +287,13 @@ foreach (var instance in loaded)
     Debug.Log($"Loaded: {instance.Type.Name} [{instance.Address}]");
 }
 
-// Check if specific type is loaded
+// 특정 타입이 로드되었는지 확인
 bool isLoaded = loaded.Any(p => p.Type == typeof(InventoryPresenter));
 ```
 
 ### VisiblePresenters
 
-Get all currently visible presenters.
+현재 보이는 모든 프레젠터를 가져옵니다.
 
 ```csharp
 IReadOnlyList<UiInstanceId> visible = _uiService.VisiblePresenters;
@@ -308,41 +308,41 @@ foreach (var id in visible)
 
 ---
 
-## Async Operations
+## 비동기 작업
 
-All async operations use UniTask for better performance and WebGL compatibility.
+모든 비동기 작업은 더 나은 성능과 WebGL 호환성을 위해 UniTask를 사용합니다.
 
-### Sequential Loading
+### 순차 로딩
 
 ```csharp
-// Load one after another
+// 하나씩 로드
 var menu = await _uiService.OpenUiAsync<MainMenuPresenter>();
 var settings = await _uiService.OpenUiAsync<SettingsPresenter>();
 ```
 
-### Parallel Loading
+### 병렬 로딩
 
 ```csharp
-// Load multiple UI simultaneously (faster)
+// 여러 UI를 동시에 로드 (더 빠름)
 var menuTask = _uiService.OpenUiAsync<MainMenuPresenter>();
 var hudTask = _uiService.OpenUiAsync<GameHudPresenter>();
 var chatTask = _uiService.OpenUiAsync<ChatPresenter>();
 
 await UniTask.WhenAll(menuTask, hudTask, chatTask);
 
-// Access results
+// 결과 접근
 var menu = menuTask.GetAwaiter().GetResult();
 ```
 
-### Cancellation
+### 취소
 
 ```csharp
 var cts = new CancellationTokenSource();
 
-// Start loading
+// 로딩 시작
 var loadTask = _uiService.OpenUiAsync<HeavyPresenter>(cts.Token);
 
-// Cancel after timeout
+// 타임아웃 후 취소
 cts.CancelAfter(TimeSpan.FromSeconds(5));
 
 try
@@ -354,27 +354,27 @@ catch (OperationCanceledException)
     Debug.Log("Loading was cancelled");
 }
 
-// Or cancel manually
+// 또는 수동으로 취소
 cts.Cancel();
 ```
 
 ### Fire-and-Forget
 
 ```csharp
-// When you don't need to await
+// await가 필요 없을 때
 _uiService.OpenUiAsync<NotificationPresenter>().Forget();
 ```
 
 ---
 
-## Runtime Configuration
+## 런타임 설정
 
 ### AddUiConfig
 
-Add a UI configuration at runtime.
+런타임에 UI 설정을 추가합니다.
 
 ```csharp
-// Note: Actual UiConfig constructor may vary
+// 참고: 실제 UiConfig 생성자는 다를 수 있습니다
 var config = new UiConfig
 {
     PresenterType = typeof(DynamicPopup),
@@ -388,7 +388,7 @@ _uiService.AddUiConfig(config);
 
 ### AddUiSet
 
-Add a UI set configuration at runtime.
+런타임에 UI 세트 설정을 추가합니다.
 
 ```csharp
 var setConfig = new UiSetConfig(setId: 10);
@@ -397,58 +397,58 @@ _uiService.AddUiSet(setConfig);
 
 ### AddUi
 
-Add an already-instantiated presenter to the service.
+이미 인스턴스화된 프레젠터를 서비스에 추가합니다.
 
 ```csharp
-// Instantiate manually
+// 수동으로 인스턴스화
 var dynamicUi = Instantiate(uiPrefab).GetComponent<UiPresenter>();
 
-// Add to service
+// 서비스에 추가
 _uiService.AddUi(dynamicUi, layer: 3, openAfter: true);
 ```
 
 ### RemoveUi
 
-Remove a presenter from the service without unloading.
+언로드하지 않고 서비스에서 프레젠터를 제거합니다.
 
 ```csharp
-// Remove by type
+// 타입으로 제거
 bool removed = _uiService.RemoveUi<DynamicPopup>();
 
-// Remove by instance
+// 인스턴스로 제거
 bool removed = _uiService.RemoveUi(dynamicPresenter);
 
-// Remove by Type object
+// Type 객체로 제거
 bool removed = _uiService.RemoveUi(typeof(DynamicPopup));
 ```
 
 ---
 
-## IUiServiceInit Interface
+## IUiServiceInit 인터페이스
 
-Extended interface for initialization and disposal.
+초기화와 해제를 위한 확장 인터페이스입니다.
 
 ### Init
 
-Initialize the service with configuration.
+설정으로 서비스를 초기화합니다.
 
 ```csharp
 IUiServiceInit uiService = new UiService();
 uiService.Init(uiConfigs);
 
-// Or with custom loader
+// 또는 커스텀 로더 사용
 var loader = new AddressablesUiAssetLoader();
 IUiServiceInit uiService = new UiService(loader);
 uiService.Init(uiConfigs);
 
-// Using other built-in loaders
+// 다른 내장 로더 사용
 var prefabLoader = new PrefabRegistryUiAssetLoader();
 var resourcesLoader = new ResourcesUiAssetLoader();
 ```
 
-### IUiAssetLoader Interface
+### IUiAssetLoader 인터페이스
 
-Custom asset loading strategies can be implemented using this interface.
+이 인터페이스를 사용하여 커스텀 에셋 로딩 전략을 구현할 수 있습니다.
 
 ```csharp
 public interface IUiAssetLoader
@@ -460,12 +460,11 @@ public interface IUiAssetLoader
 
 ### Dispose
 
-Clean up all resources.
+모든 리소스를 정리합니다.
 
 ```csharp
-// Closes all UI, unloads assets, destroys root GameObject
+// 모든 UI를 닫고, 에셋을 언로드하고, 루트 GameObject를 파괴합니다
 uiService.Dispose();
 ```
 
-**Note:** Always call `Dispose()` when done with the service (e.g., in `OnDestroy`).
-
+**참고:** 서비스 사용이 끝나면 항상 `Dispose()`를 호출하세요 (예: `OnDestroy`에서).
