@@ -23,8 +23,6 @@
 
 **메뉴:** `Tools → UI Service → Presenter Manager`
 
-![UiConfigs Inspector](presenter-manager.png)
-
 플레이 모드에서 활성 및 로드된 UI 프레젠터를 실시간으로 관리합니다:
 - 모든 로드된 프레젠터와 현재 상태(열림/닫힘) 확인
 - 인스턴스별 빠른 열기/닫기/언로드 작업
@@ -34,8 +32,6 @@
 ### UiConfigs 인스펙터
 
 **메뉴:** `Tools → UI Service → Select Ui Configs`
-
-![UiConfigs Inspector](uiconfigs-inspector.gif)
 
 `UiConfigs` 에셋을 선택하면 향상된 인스펙터를 볼 수 있습니다:
 - 시각적 레이어 계층 구조

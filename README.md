@@ -6,8 +6,6 @@
 
 > **바로가기**: [설치](#설치-방법) | [빠른 시작](#빠른-시작) | [문서](docs/README.md) | [예제](#예제) | [문제 해결](docs/troubleshooting.md)
 
-![UiService Demo](docs/demo.gif)
-
 ## 왜 이 패키지를 사용해야 하나요?
 
 Unity 게임에서 UI를 관리하다 보면 직접 참조의 난맥, 분산된 열기/닫기 로직, 수동 생명주기 관리 등의 문제에 부딪힙니다. 이 **UI Service**는 이러한 문제를 해결합니다:
@@ -215,33 +213,6 @@ _uiService.CloseUi<MainMenuPresenter>();
 ```
 
 전체 설정 가이드는 [시작하기](docs/getting-started.md)를 참조하세요.
-
----
-
-## 예제
-
-패키지에는 `Samples~` 폴더에 예제 구현이 포함되어 있습니다.
-
-### 샘플 가져오기
-
-1. Unity Package Manager 열기 (`Window` -> `Package Manager`)
-2. "Geuneda UI Service" 패키지 선택
-3. "Samples" 탭으로 이동
-4. 원하는 샘플 옆의 "Import" 클릭
-
-### 사용 가능한 샘플
-
-| 샘플 | 설명 |
-|------|------|
-| **BasicUiFlow** | 기본 프레젠터 생명주기와 버튼 인터랙션 |
-| **DataPresenter** | `UiPresenter<T>`를 사용한 데이터 기반 UI |
-| **DelayedPresenter** | 시간 및 애니메이션 지연 피처 |
-| **UiToolkit** | UI Toolkit (UI Elements) 통합 |
-| **DelayedUiToolkit** | 여러 피처를 결합한 고급 패턴 |
-| **UiSets** | UI 그룹 관리 (HUD: 체력바, 재화 등) |
-| **MultiInstance** | 같은 UI 타입의 다중 인스턴스 (알림 팝업 등) |
-| **CustomFeatures** | 커스텀 피처 만들기 (페이드, 스케일, 사운드) |
-| **AssetLoadingStrategies** | PrefabRegistry, Addressables, Resources 비교 |
 
 ---
 
