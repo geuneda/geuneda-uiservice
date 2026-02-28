@@ -175,9 +175,9 @@ namespace GeunedaEditor.UiService
 			// 건너뛴 항목이 있으면 피드백을 표시합니다
 			if (skippedNoPresenter > 0 || skippedDuplicate > 0)
 			{
-				var message = $"Added {addedCount} prefab(s).";
-				if (skippedDuplicate > 0) message += $" Skipped {skippedDuplicate} duplicate(s).";
-				if (skippedNoPresenter > 0) message += $" Skipped {skippedNoPresenter} without UiPresenter.";
+				var message = $"{addedCount}개 프리팹이 추가되었습니다.";
+				if (skippedDuplicate > 0) message += $" {skippedDuplicate}개 중복 항목을 건너뛰었습니다.";
+				if (skippedNoPresenter > 0) message += $" UiPresenter가 없는 {skippedNoPresenter}개 항목을 건너뛰었습니다.";
 				Debug.Log($"[PrefabRegistryUiConfigs] {message}");
 			}
 		}
@@ -189,8 +189,8 @@ namespace GeunedaEditor.UiService
 			// 섹션 2 상단에 프리팹 항목 섹션을 추가합니다 (구성 목록 앞)
 			var prefabSection = new VisualElement { style = { marginBottom = 10 } };
 			var helpBox = new HelpBox(
-				"Drag and drop UI Prefabs below. Addresses are automatically derived from prefab names. " +
-				"Only prefabs with a UiPresenter component are accepted.", 
+				"아래에 UI 프리팹을 드래그 앤 드롭하세요. 주소는 프리팹 이름에서 자동으로 파생됩니다. " +
+				"UiPresenter 컴포넌트가 있는 프리팹만 허용됩니다.",
 				HelpBoxMessageType.Info);
 			helpBox.style.marginBottom = 5;
 			prefabSection.Add(helpBox);
@@ -204,7 +204,7 @@ namespace GeunedaEditor.UiService
 				showBorder = true,
 				showAddRemoveFooter = true,
 				reorderable = true,
-				headerTitle = "Embedded Prefab Registry",
+				headerTitle = "임베디드 프리팹 레지스트리",
 				showFoldoutHeader = true,
 				virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight,
 				fixedItemHeight = 24
@@ -249,7 +249,7 @@ namespace GeunedaEditor.UiService
 			dropZone.style.justifyContent = Justify.Center;
 			dropZone.style.alignItems = Align.Center;
 
-			var dropLabel = new Label("Drop Prefabs Here (supports multiple)");
+			var dropLabel = new Label("여기에 프리팹을 드롭하세요 (다중 선택 지원)");
 			dropLabel.style.color = new Color(0.7f, 0.7f, 0.7f);
 			dropLabel.style.unityFontStyleAndWeight = FontStyle.Italic;
 			dropZone.Add(dropLabel);
@@ -264,7 +264,7 @@ namespace GeunedaEditor.UiService
 					dropZone.style.borderBottomColor = new Color(0.3f, 0.8f, 0.3f, 0.8f);
 					dropZone.style.borderLeftColor = new Color(0.3f, 0.8f, 0.3f, 0.8f);
 					dropZone.style.borderRightColor = new Color(0.3f, 0.8f, 0.3f, 0.8f);
-					dropLabel.text = "Release to add prefabs";
+					dropLabel.text = "프리팹을 놓아서 추가하세요";
 					dropLabel.style.color = new Color(0.8f, 1f, 0.8f);
 				}
 			});
@@ -302,7 +302,7 @@ namespace GeunedaEditor.UiService
 			dropZone.style.borderBottomColor = new Color(0.4f, 0.4f, 0.4f, 0.8f);
 			dropZone.style.borderLeftColor = new Color(0.4f, 0.4f, 0.4f, 0.8f);
 			dropZone.style.borderRightColor = new Color(0.4f, 0.4f, 0.4f, 0.8f);
-			dropLabel.text = "Drop Prefabs Here (supports multiple)";
+			dropLabel.text = "여기에 프리팹을 드롭하세요 (다중 선택 지원)";
 			dropLabel.style.color = new Color(0.7f, 0.7f, 0.7f);
 		}
 
@@ -363,7 +363,7 @@ namespace GeunedaEditor.UiService
 
 			// 주소를 읽기 전용 레이블로 표시합니다
 			var prefab = prefabProperty.objectReferenceValue as GameObject;
-			addressLabel.text = prefab != null ? $"[{prefab.name}]" : "[No Prefab]";
+			addressLabel.text = prefab != null ? $"[{prefab.name}]" : "[프리팹 없음]";
 
 			prefabField.Unbind();
 			prefabField.BindProperty(prefabProperty);
@@ -379,7 +379,7 @@ namespace GeunedaEditor.UiService
 				}
 				else
 				{
-					addressLabel.text = "[No Prefab]";
+					addressLabel.text = "[프리팹 없음]";
 				}
 				SyncConfigs();
 			});

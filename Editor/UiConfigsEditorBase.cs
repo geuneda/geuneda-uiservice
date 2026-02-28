@@ -27,17 +27,17 @@ namespace GeunedaEditor.UiService
 		protected VisualElement VisualizerContainer;
 		protected string VisualizerSearchFilter = "";
 
-		protected virtual string ConfigExplanation => 
-			"UI Presenter Configurations\n\n" +
-			"Lists all UI Presenter prefabs in the game with their sorting layer values. " +
-			"The Layer field controls the rendering order - higher values appear closer to the camera. " +
-			"For presenters with Canvas or UIDocument components, this value directly maps to the UI sorting order.";
+		protected virtual string ConfigExplanation =>
+			"UI 프레젠터 설정\n\n" +
+			"게임 내 모든 UI 프레젠터 프리팹과 정렬 레이어 값을 나열합니다. " +
+			"Layer 필드는 렌더링 순서를 제어하며, 값이 클수록 카메라에 가깝게 표시됩니다. " +
+			"Canvas 또는 UIDocument 컴포넌트가 있는 프레젠터의 경우, 이 값이 UI 정렬 순서에 직접 매핑됩니다.";
 
 		protected virtual string SetExplanation =>
-			"UI Set Configurations\n\n" +
-			"UI Sets group multiple presenter instances that should be displayed together. " +
-			"When a set is activated via UiService, all its presenters are loaded and shown simultaneously. " +
-			"Presenters are loaded in the order listed (top to bottom).";
+			"UI 세트 설정\n\n" +
+			"UI 세트는 함께 표시되어야 하는 여러 프레젠터 인스턴스를 그룹화합니다. " +
+			"UiService를 통해 세트가 활성화되면 모든 프레젠터가 동시에 로드되고 표시됩니다. " +
+			"프레젠터는 나열된 순서대로(위에서 아래로) 로드됩니다.";
 
 		protected virtual void OnEnable()
 		{
@@ -110,7 +110,7 @@ namespace GeunedaEditor.UiService
 			{
 				showBorder = true,
 				showFoldoutHeader = true,
-				headerTitle = "UI Presenter Configs",
+				headerTitle = "UI 프레젠터 설정",
 				showAddRemoveFooter = false,
 				showBoundCollectionSize = false,
 				reorderable = false,
@@ -408,7 +408,7 @@ namespace GeunedaEditor.UiService
 			toggleButton.style.width = 25;
 			toggleButton.style.marginRight = 5;
 			
-			var titleLabel = new Label("UI Layer Hierarchy Visualizer");
+			var titleLabel = new Label("UI 레이어 계층 구조 시각화");
 			titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
 			titleLabel.style.flexGrow = 1;
 			
@@ -442,7 +442,7 @@ namespace GeunedaEditor.UiService
 			var spacer = new VisualElement { style = { flexGrow = 1 } };
 			toolbar.Add(spacer);
 			
-			var searchLabel = new Label("Search:") { style = { marginRight = 5, unityTextAlign = TextAnchor.MiddleCenter } };
+			var searchLabel = new Label("검색:") { style = { marginRight = 5, unityTextAlign = TextAnchor.MiddleCenter } };
 			toolbar.Add(searchLabel);
 			
 			var searchField = new ToolbarSearchField { style = { width = 200 }, value = VisualizerSearchFilter };
@@ -493,7 +493,7 @@ namespace GeunedaEditor.UiService
 			var configs = ScriptableObjectInstance?.Configs;
 			if (configs == null || configs.Count == 0)
 			{
-				scrollView.Add(new HelpBox("No UI configurations found", HelpBoxMessageType.Info));
+				scrollView.Add(new HelpBox("UI 설정을 찾을 수 없습니다", HelpBoxMessageType.Info));
 				return;
 			}
 			
@@ -547,13 +547,13 @@ namespace GeunedaEditor.UiService
 			textContainer.style.borderBottomLeftRadius = 3;
 			textContainer.style.borderBottomRightRadius = 3;
 			
-			var layerLabel = new Label($"Layer {layer}");
+			var layerLabel = new Label($"레이어 {layer}");
 			layerLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
 			layerLabel.style.fontSize = 13;
 			layerLabel.style.color = Color.white;
 			textContainer.Add(layerLabel);
 			
-			var countLabel = new Label($"({configs.Count} UI{(configs.Count > 1 ? "s" : "")})");
+			var countLabel = new Label($"({configs.Count}개 UI)");
 			countLabel.style.fontSize = 11;
 			countLabel.style.color = Color.white;
 			countLabel.style.marginLeft = 5;
@@ -587,13 +587,13 @@ namespace GeunedaEditor.UiService
 		private VisualElement CreateVisualizerStatistics(List<UiConfig> configs)
 		{
 			var container = new VisualElement { style = { marginTop = 10, marginLeft = 5, marginBottom = 10 } };
-			container.Add(new Label("Statistics") { style = { unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 5 } });
-			
+			container.Add(new Label("통계") { style = { unityFontStyleAndWeight = FontStyle.Bold, marginBottom = 5 } });
+
 			var stats = new VisualElement { style = { marginLeft = 15 } };
-			stats.Add(new Label($"Total UIs: {configs.Count}"));
-			stats.Add(new Label($"Layers Used: {configs.Select(c => c.Layer).Distinct().Count()}"));
-			stats.Add(new Label($"Synchronous Loads: {configs.Count(c => c.LoadSynchronously)}"));
-			stats.Add(new Label($"Async Loads: {configs.Count(c => !c.LoadSynchronously)}"));
+			stats.Add(new Label($"전체 UI: {configs.Count}"));
+			stats.Add(new Label($"사용 중인 레이어: {configs.Select(c => c.Layer).Distinct().Count()}"));
+			stats.Add(new Label($"동기 로드: {configs.Count(c => c.LoadSynchronously)}"));
+			stats.Add(new Label($"비동기 로드: {configs.Count(c => !c.LoadSynchronously)}"));
 			
 			container.Add(stats);
 			return container;

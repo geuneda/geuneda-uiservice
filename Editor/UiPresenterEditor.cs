@@ -29,7 +29,7 @@ namespace GeunedaEditor.UiService
 			root.Add(CreateSpacer(10));
 			
 			// 컨트롤 섹션 헤더
-			var header = new Label("UI Presenter Controls");
+			var header = new Label("UI 프레젠터 컨트롤");
 			header.style.unityFontStyleAndWeight = FontStyle.Bold;
 			header.style.fontSize = 12;
 			root.Add(header);
@@ -67,7 +67,7 @@ namespace GeunedaEditor.UiService
 			container.style.flexDirection = FlexDirection.Row;
 			container.style.alignItems = Align.Center;
 			
-			var statusLabel = new Label("Status:");
+			var statusLabel = new Label("상태:");
 			statusLabel.style.width = 100;
 			container.Add(statusLabel);
 			
@@ -99,7 +99,7 @@ namespace GeunedaEditor.UiService
 				return;
 			
 			var isOpen = presenter.IsOpen;
-			_statusLabel.text = isOpen ? "OPEN" : "CLOSED";
+			_statusLabel.text = isOpen ? "열림" : "닫힘";
 			_statusIndicator.style.backgroundColor = isOpen ? new Color(0, 1, 0) : new Color(1, 0, 0);
 		}
 
@@ -117,7 +117,7 @@ namespace GeunedaEditor.UiService
 			}
 			else
 			{
-				var helpBox = new HelpBox("UI controls are only available in Play Mode", HelpBoxMessageType.Info);
+				var helpBox = new HelpBox("UI 컨트롤은 플레이 모드에서만 사용할 수 있습니다", HelpBoxMessageType.Info);
 				_controlsContainer.Add(helpBox);
 			}
 		}
@@ -132,12 +132,12 @@ namespace GeunedaEditor.UiService
 			var row1 = new VisualElement();
 			row1.style.flexDirection = FlexDirection.Row;
 			
-			var openButton = new Button(() => presenter.InternalOpen()) { text = "Open UI" };
+			var openButton = new Button(() => presenter.InternalOpen()) { text = "UI 열기" };
 			openButton.style.flexGrow = 1;
 			openButton.style.height = 30;
 			row1.Add(openButton);
 			
-			var closeButton = new Button(() => presenter.InternalClose(false)) { text = "Close UI" };
+			var closeButton = new Button(() => presenter.InternalClose(false)) { text = "UI 닫기" };
 			closeButton.style.flexGrow = 1;
 			closeButton.style.height = 30;
 			closeButton.style.marginLeft = 5;
@@ -149,12 +149,12 @@ namespace GeunedaEditor.UiService
 			// 파괴 버튼
 			var closeDestroyButton = new Button(() =>
 			{
-				if (EditorUtility.DisplayDialog("Destroy UI", 
-					"Are you sure you want to destroy this UI?", "Yes", "Cancel"))
+				if (EditorUtility.DisplayDialog("UI 제거",
+					"이 UI를 제거하시겠습니까?", "확인", "취소"))
 				{
 					presenter.InternalClose(true);
 				}
-			}) { text = "Close & Destroy" };
+			}) { text = "닫기 및 제거" };
 			closeDestroyButton.style.height = 25;
 			
 			_controlsContainer.Add(closeDestroyButton);
