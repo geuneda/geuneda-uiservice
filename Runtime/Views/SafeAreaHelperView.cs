@@ -29,7 +29,12 @@ namespace Geuneda.UiService.Views
 		internal void OnValidate()
 		{
 			_rectTransform = _rectTransform ? _rectTransform : GetComponent<RectTransform>();
-			_refResolution = transform.root.GetComponent<CanvasScaler>().referenceResolution;
+			// 프리팹 편집 모드처럼 루트에 CanvasScaler가 없는 컨텍스트에서는 OnValidate가 NRE로 터지지 않도록 가드합니다
+			var canvasScaler = transform.root.GetComponent<CanvasScaler>();
+			if (canvasScaler != null)
+			{
+				_refResolution = canvasScaler.referenceResolution;
+			}
 			_initAnchoredPosition = _rectTransform.anchoredPosition;
 			_initSizeDelta = _rectTransform.sizeDelta;
 		}
