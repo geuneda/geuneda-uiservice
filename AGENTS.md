@@ -42,7 +42,7 @@
   - `PresenterFeatureBase`를 사용하면 프레젠터 프리팹에 컴포넌트를 추가하여 생명주기에 연결할 수 있습니다.
   - `ITransitionFeature` 인터페이스: 열기/닫기 전환 지연을 제공하는 피처용 (프레젠터가 이를 대기).
   - 내장 전환 피처: `TimeDelayFeature`, `AnimationDelayFeature`.
-  - UI Toolkit 지원: `UiToolkitPresenterFeature` (`UIDocument`를 통해)는 안전한 요소 쿼리를 위한 `AddVisualTreeAttachedListener(callback)`을 제공합니다. 콜백은 UI Toolkit이 프레젠터가 비활성화/재활성화될 때 요소를 재생성하기 때문에 매번 열기 시 호출됩니다.
+  - UI Toolkit 지원: `UiToolkitPresenterFeature` (`UIDocument`를 통해)는 안전한 요소 쿼리를 위한 `AddVisualTreeAttachedListener(callback)`을 제공합니다. 콜백은 UI Toolkit이 프레젠터가 비활성화/재활성화될 때 요소를 재생성하기 때문에 매번 열기 시 호출됩니다. Unity 6.5(6000.5)+ 에서는 동일 API 의 `PanelRenderer` 기반 대체 피처 `UiToolkitPanelRendererFeature`를 대신 사용할 수 있습니다 (`#if UNITY_6000_5_OR_NEWER` 가드; `Document` 대신 `Panel` 노출, 루트는 `RegisterUIReloadCallback`으로 수신).
 - **헬퍼 뷰**: `Runtime/Views/*` (`GameLovers.UiService.Views`)
   - `SafeAreaHelperView`: 안전 영역(노치)에 따라 앵커/크기를 조정합니다.
   - `NonDrawingView`: 렌더링 없이 레이캐스트를 대상으로 합니다 (`Graphic` 확장).

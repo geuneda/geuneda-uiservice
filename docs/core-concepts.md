@@ -349,6 +349,8 @@ public class AnimatedPopup : UiPresenter
 
 > **주의:** UI Toolkit은 프레젠터 GameObject가 비활성화/재활성화될 때 **비주얼 요소를 재생성**합니다. `AddVisualTreeAttachedListener`를 통해 등록된 콜백은 이를 처리하기 위해 **매번 열기 시** 호출됩니다.
 
+> **Unity 6.5+ (PanelRenderer):** Unity 6.5(6000.5)부터 `UIDocument`를 대체하는 `PanelRenderer`를 쓰려면 동일 API 의 `UiToolkitPanelRendererFeature`를 대신 부착하세요. `Document`(UIDocument) 대신 `Panel`(PanelRenderer)을 노출하는 점만 다르고, `AddVisualTreeAttachedListener` 사용법은 동일합니다. PanelRenderer 는 `rootVisualElement`가 없어 `RegisterUIReloadCallback`으로 루트를 받습니다. `#if UNITY_6000_5_OR_NEWER`로 가드되어 6.5 미만에서는 컴파일되지 않습니다.
+
 **프로퍼티:**
 - `Document` - 연결된 `UIDocument`
 - `Root` - 루트 `VisualElement` (패널 연결 전에는 null일 수 있음)

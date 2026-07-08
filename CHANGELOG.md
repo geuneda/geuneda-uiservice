@@ -4,6 +4,11 @@
 형식은 [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)를 기반으로 하며
 이 프로젝트는 [Semantic Versioning](http://semver.org/spec/v2.0.0.html)을 준수합니다.
 
+## [1.3.0] - 2026-07-08
+
+**신규**:
+- Unity 6.5(6000.5)+ 에서 `UIDocument`를 대체하는 `PanelRenderer` 기반 `UiToolkitPanelRendererFeature`를 추가했습니다. 기존 `UiToolkitPresenterFeature`(UIDocument)와 동일한 `AddVisualTreeAttachedListener(callback)` API 를 노출하므로 프레젠터 코드는 피처 타입만 교체하면 됩니다. PanelRenderer 는 `rootVisualElement` 프로퍼티가 없어 `RegisterUIReloadCallback` 콜백으로 루트 `VisualElement`를 공급합니다. `#if UNITY_6000_5_OR_NEWER`로 가드되어 6.5 미만 버전에는 영향을 주지 않습니다.
+
 ## [1.2.0] - 2026-01-07
 
 **신규**:
