@@ -32,7 +32,8 @@ namespace Geuneda.UiService.Views
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            // WorldCamera 뷰를 사용하는 경우 Canvas 카메라를 가져옵니다
+            // 카메라 인자로 null을 넘기므로 Screen Space - Overlay Canvas 기준으로 링크를 찾습니다.
+            // Screen Space - Camera 또는 World Space Canvas에서는 Canvas 카메라를 사용하지 않습니다
             var linkedText = -1;
 
             if (InteractableType == InteractableTextType.IntersectingLink)

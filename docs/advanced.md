@@ -174,8 +174,7 @@ public class LevelLoader
 | 항목 | 내용 |
 |------|------|
 | 설정은 타입당 하나 | 같은 프레젠터 타입을 다른 프리팹으로 나눠 등록할 수 없음. 다중 인스턴스는 같은 프리팹을 인스턴스 주소로 구분 |
-| `LoadSynchronously` 미저장 | `UiConfigs` 에셋은 이 값을 저장하지 않음. 동기 로드는 `AddUiConfig` 로 직접 등록해야 함 |
-| `AddUi` 와 설정 | 설정 없이 `AddUi` 로만 넣은 프레젠터는 `UnloadUi`, `CloseAllUi(int)`, `Close(destroy: true)` 에서 `KeyNotFoundException` 발생 |
+| `AddUi` 와 언로드 | `AddressablesUiAssetLoader` 를 쓸 때 Addressables 로 인스턴스화하지 않고 `AddUi` 로 넣은 프레젠터는 `Addressables.ReleaseInstance` 가 처리하지 못하므로 로더가 `Object.Destroy` 로 파괴함(v1.3.1). GameObject 를 남기려면 `RemoveUi` 를 씀 |
 | `PanelRenderer` 레이어 | 레이어 정렬은 `Canvas`, `UIDocument` 에만 적용 |
 | 정적 이벤트 | `OnResolutionChanged`, `OnOrientationChanged` 는 `Dispose()` 후에도 리스너가 남음 |
 | 프레젠터 인스펙터 버튼 | 서비스를 거치지 않아 `VisiblePresenters` 와 어긋날 수 있음 |

@@ -6,8 +6,8 @@
 
 - 패키지: `com.geuneda.uiservice` (버전은 `package.json` 기준)
 - Unity: 6000.0+ (`UiToolkitPanelRendererFeature` 는 6000.5+)
-- 의존성(`package.json`): `com.unity.addressables` 2.6.0, `com.cysharp.unitask` 2.5.10
-- 런타임 asmdef 는 TextMeshPro 와 uGUI 도 참조합니다(`Views/`). 이 둘은 `package.json` 에 선언되어 있지 않습니다.
+- 의존성(`package.json`): `com.unity.addressables` 2.6.0, `com.cysharp.unitask` 2.5.10, `com.unity.ugui` 2.0.0
+- 런타임 asmdef 는 TextMeshPro 와 uGUI 도 사용합니다(`Views/`). Unity 6 에서는 둘 다 `com.unity.ugui` 에 포함됩니다.
 - 어셈블리: `Runtime/Geuneda.UiService.asmdef`, `Editor/Geuneda.UiService.Editor.asmdef`, `Tests/EditMode/Geuneda.UiService.Tests.asmdef`, `Tests/PlayMode/Geuneda.UiService.Tests.PlayMode.asmdef`
 - 네임스페이스: 런타임 `Geuneda.UiService`, 헬퍼 뷰 `Geuneda.UiService.Views`, 에디터 `GeunedaEditor.UiService`
 - `Runtime/AssemblyInfo.cs` 가 internal 멤버를 `Geuneda.UiService.Editor` 와 `Geuneda.UiService.Tests.PlayMode` 에 노출합니다.
@@ -48,9 +48,9 @@
   - 주소 없는 Get/IsVisible/Close/Unload/Remove 는 내부 `ResolveInstanceAddress(type)` 을 씁니다. 인스턴스가 여러 개면 경고 후 첫 번째를 고릅니다.
 - `UiPresenter.Close(destroy)` 는 자신의 `InstanceAddress` 로 `CloseUi` 를 호출하고, 닫기 전환이 끝난 뒤 `UnloadUi(GetType(), InstanceAddress)` 를 호출합니다.
 - 레이어: `AddUi` 시 프레젠터 루트의 `Canvas.sortingOrder` 또는 `UIDocument.sortingOrder` 를 설정합니다. `PanelRenderer` 는 처리하지 않습니다.
-- `LoadSynchronously`: `UiConfig` 에는 있지만 `UiConfigSerializable` 이 저장하지 않으므로 `UiConfigs.Configs` 에서 읽으면 항상 `false` 입니다. `LoadSynchronouslyAttribute` 는 에디터 동기화 때만 읽힙니다.
-- `UnloadUi(Type, string)` 와 `CloseAllUi(int)` 는 `_uiConfigs[type]` 인덱서를 쓰므로 설정 없이 `AddUi` 로만 넣은 타입에서 `KeyNotFoundException` 이 납니다.
-- `LoadUiSetAsync` 는 세트가 없으면 빈 목록을 반환합니다(XML 주석의 예외 설명과 다름). `UnloadUiSet`, `CloseAllUiSet` 은 인덱서를 써서 예외가 납니다.
+- `LoadSynchronously`: `UiConfigSerializable` 에 저장됩니다(1.3.1). 필드 추가 전에 저장된 에셋은 `false` 로 읽히며, 설정 인스펙터를 열어 동기화하면 `LoadSynchronouslyAttribute` 값이 저장됩니다. `LoadSynchronouslyAttribute` 는 에디터 동기화 때만 읽힙니다.
+- `CloseAllUi(int)` 는 설정이 있으면 `UiConfig.Layer` 를, 없으면 `AddUi` 에 넘긴 레이어(내부 `_uiLayers`)를 씁니다. `UnloadUi` 는 설정을 조회하지 않으므로 설정 없이 `AddUi` 로만 넣은 타입도 언로드할 수 있습니다.
+- `LoadUiSetAsync` 는 세트가 없으면 빈 목록을 반환합니다. `UnloadUiSet`, `CloseAllUiSet` 은 인덱서를 써서 예외가 납니다.
 - 정적 이벤트 `UiService.OnResolutionChanged`/`OnOrientationChanged` 는 `UiServiceMonoComponent` 가 발생시키며, `Dispose()` 는 리스너를 지우지 않습니다.
 - `Dispose()`: 표시 중인 UI 닫기, 모든 인스턴스 언로드 시도(실패는 경고), 컬렉션 정리, 루트 파괴. `CurrentService` 가 자신이면 `null` 로 되돌립니다.
 - UI Toolkit: 프레젠터가 비활성화/재활성화되면 `UIDocument` 가 요소를 다시 만듭니다. `UiToolkitPresenterFeature` 는 `OnPresenterInitialized`, `OnPresenterOpened`, `AttachToPanelEvent` 에서 리스너를 호출하므로 한 번 열 때 여러 번 호출될 수 있습니다.

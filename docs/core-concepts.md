@@ -328,7 +328,7 @@ uiService.UnloadUi(typeof(TooltipPresenter), "skill");             // IUiService
 | `UiType` | 프레젠터 타입 |
 | `LoadSynchronously` | `AddressablesUiAssetLoader` 가 `WaitForCompletion()` 으로 동기 로드할지 여부 |
 
-`UiConfigs` 에셋에는 `Address`, `Layer`, 타입 이름(`AssemblyQualifiedName`)만 저장됩니다. `LoadSynchronously` 는 저장되지 않아 에셋에서 읽은 설정은 항상 `false` 입니다. `[LoadSynchronously]` 어트리뷰트는 설정 인스펙터의 표시(`[SYNC]`)와 통계에만 반영됩니다. 동기 로드가 필요하면 `AddUiConfig` 로 `LoadSynchronously = true` 인 설정을 직접 등록합니다.
+`UiConfigs` 에셋에는 `Address`, `Layer`, 타입 이름(`AssemblyQualifiedName`), `LoadSynchronously` 가 저장됩니다. 설정 인스펙터가 동기화할 때 프레젠터 클래스의 `[LoadSynchronously]` 어트리뷰트 여부를 `LoadSynchronously` 에 기록하고, 인스펙터의 표시(`[SYNC]`)와 통계에도 반영합니다. 런타임은 어트리뷰트를 직접 읽지 않으므로 어트리뷰트를 붙이거나 뗀 뒤에는 설정 인스펙터를 열어 다시 동기화해야 합니다. 1.3.1 이전에 저장된 에셋은 이 값이 없어 `false` 로 읽힙니다.
 
 ### 런타임 설정
 
@@ -347,7 +347,8 @@ _uiService.AddUi(popup, layer: 3, openAfter: true);
 ```
 
 - 같은 타입의 설정을 다시 추가하면 경고만 남고 무시됩니다.
-- `AddUi` 로 추가한 프레젠터도 `UnloadUi`, `CloseAllUi(int layer)`, `Close(destroy: true)` 를 쓰려면 같은 타입의 `UiConfig` 가 등록되어 있어야 합니다. 서비스가 이 메서드들에서 타입의 설정을 조회하기 때문입니다.
+- 설정 없이 `AddUi` 로만 추가한 프레젠터도 `UnloadUi`, `CloseAllUi(int layer)`, `Close(destroy: true)` 를 쓸 수 있습니다. `CloseAllUi(int layer)` 는 설정이 있으면 `UiConfig.Layer` 를, 없으면 `AddUi` 에 넘긴 레이어를 기준으로 닫습니다.
+- 언로드는 로더의 `UnloadAsset` 으로 GameObject 를 정리합니다. `AddressablesUiAssetLoader` 는 `Addressables.ReleaseInstance` 를 쓰고, Addressables 로 인스턴스화하지 않은 프레젠터(`Instantiate` 후 `AddUi`)는 `ReleaseInstance` 가 처리하지 못하므로 로더가 `Object.Destroy` 로 직접 파괴합니다. GameObject 를 남기고 서비스에서만 빼려면 `RemoveUi` 를 씁니다.
 - `AddUi` 의 인스턴스 주소는 빈 문자열이고 `OpenUiAsync<T>()` 는 설정 주소를 사용하므로, `AddUi` 로 넣은 프레젠터를 나중에 열려면 `openAfter: true` 를 쓰거나 `UiService.OpenUiAsync(typeof(T), string.Empty)` 로 엽니다.
 
 ---

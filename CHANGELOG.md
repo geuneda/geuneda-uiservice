@@ -4,6 +4,16 @@
 형식은 [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)를 기반으로 하며
 이 프로젝트는 [Semantic Versioning](http://semver.org/spec/v2.0.0.html)을 준수합니다.
 
+## [1.3.1] - 2026-10-12
+
+**수정**:
+- `UiConfigs` 에셋이 `LoadSynchronously` 를 저장하지 않아 `[LoadSynchronously]` 어트리뷰트가 런타임에 효과가 없던 문제를 수정했습니다. `UiConfigSerializable` 에 `LoadSynchronously` 필드를 추가했으며, 기존 에셋은 `false` 로 읽힙니다. 설정 인스펙터를 열어 동기화하면 어트리뷰트 값이 저장됩니다.
+- 설정 없이 `AddUi` 로 추가한 프레젠터에서 `UnloadUi`, `Close(destroy: true)`, `CloseAllUi(int)` 가 `KeyNotFoundException` 을 던지던 문제를 수정했습니다. `CloseAllUi(int)` 는 설정이 없으면 `AddUi` 에 전달된 레이어를 사용합니다.
+- `AddressablesUiAssetLoader.UnloadAsset` 이 Addressables 로 만들지 않은 인스턴스(`Instantiate` 후 `AddUi` 한 프레젠터)를 파괴하지 않던 문제를 수정했습니다. `Addressables.ReleaseInstance` 가 `false` 를 돌려주면 `Object.Destroy` 로 파괴합니다.
+- `Init` 이 주소가 비어 있고 타입도 null 인 설정을 만나면 `ArgumentException` 대신 `NullReferenceException` 이 나던 문제를 수정했습니다.
+- `package.json` 에 런타임 어셈블리가 사용하는 `com.unity.ugui`(uGUI, TextMeshPro) 의존성을 추가했습니다.
+- 실제 동작과 맞지 않던 XML 주석을 정정했습니다(`AssemblyInfo`, `UiConfig`, `IUiServiceInit.Init` 생성 메뉴 경로, `LoadUiSetAsync`, `CloseUi`, `InteractableTextView`).
+
 ## [1.3.0] - 2026-07-08
 
 **신규**:
@@ -66,7 +76,7 @@
 
 **신규**:
 - 성능 추적을 위한 `IUiAnalytics` 인터페이스와 `UiAnalytics` 구현을 추가했습니다.
-- 세 개의 에디터 윈도우를 추가했습니다: `UiAnalyticsWindow`, `UiServiceHierarchyWindow`
+- 에디터 윈도우를 추가했습니다: `UiAnalyticsWindow`, `UiServiceHierarchyWindow`
 - `UiConfigsEditor` 인스펙터에 새로운 "UI 레이어 계층 구조 시각화" 섹션을 추가했습니다.
 - Scene 뷰에서 시각적 디버깅을 위한 `UiPresenterSceneGizmos`를 추가했습니다.
 - 빠른 열기/닫기 버튼이 있는 `UiPresenterEditor` 커스텀 인스펙터를 추가했습니다.

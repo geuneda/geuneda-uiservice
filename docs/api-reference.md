@@ -254,7 +254,7 @@ Unity 6000.5 이상(`#if UNITY_6000_5_OR_NEWER`). `[RequireComponent(typeof(Pane
 | `List<UiConfig> Configs { get; set; }` | 직렬화된 설정을 변환해 반환. 호출마다 새 리스트 |
 | `List<UiSetConfig> Sets { get; }` | 직렬화된 세트를 변환해 반환. 타입을 찾지 못한 항목은 제외 |
 | `void SetSetsSize(int size)` | 세트 수를 맞추고, 설정에 없는 타입을 가리키는 항목을 제거 |
-| `struct UiConfigSerializable` | 직렬화 형태 (`Address`, `Layer`, 타입 이름 `UiType`). `UiConfig` 와 암시적 변환 |
+| `struct UiConfigSerializable` | 직렬화 형태 (`Address`, `Layer`, 타입 이름 `UiType`, `LoadSynchronously`). `UiConfig` 와 암시적 변환 |
 
 파생 타입과 생성 메뉴:
 
@@ -283,7 +283,7 @@ Unity 6000.5 이상(`#if UNITY_6000_5_OR_NEWER`). `[RequireComponent(typeof(Pane
 
 ### LoadSynchronouslyAttribute
 
-프레젠터 클래스에 붙이는 표시용 어트리뷰트입니다. 설정 인스펙터가 동기화할 때 `UiConfig.LoadSynchronously` 를 채우지만 에셋에는 저장되지 않으므로 런타임 로딩에는 영향이 없습니다. 자세한 내용은 [핵심 개념 - UI 설정](core-concepts.md#ui-설정).
+프레젠터 클래스에 붙이는 어트리뷰트입니다. 설정 인스펙터가 동기화할 때 `UiConfig.LoadSynchronously` 를 채워 에셋에 저장하며, `AddressablesUiAssetLoader` 가 이 값으로 동기 로드합니다. 런타임에는 어트리뷰트를 직접 읽지 않으므로 어트리뷰트를 붙이거나 뗀 뒤에는 설정 인스펙터를 열어 다시 동기화해야 합니다. 자세한 내용은 [핵심 개념 - UI 설정](core-concepts.md#ui-설정).
 
 ---
 
@@ -299,7 +299,7 @@ public interface IUiAssetLoader
 
 | 구현 | 인스턴스화 | 해제 |
 |------|-----------|------|
-| `AddressablesUiAssetLoader` | `Addressables.InstantiateAsync(config.Address, ...)`. `LoadSynchronously` 면 `WaitForCompletion()`. 실패 시 `OperationException` 을 던짐 | `Addressables.ReleaseInstance` |
+| `AddressablesUiAssetLoader` | `Addressables.InstantiateAsync(config.Address, ...)`. `LoadSynchronously` 면 `WaitForCompletion()`. 실패 시 `OperationException` 을 던짐 | `Addressables.ReleaseInstance`. Addressables 인스턴스가 아니면 `Object.Destroy` |
 | `ResourcesUiAssetLoader` | `Resources.Load<GameObject>(config.Address)` 결과를 캐시해 `Instantiate`. 없으면 `KeyNotFoundException` | `Object.DestroyImmediate` |
 | `PrefabRegistryUiAssetLoader` | 등록된 프리팹을 `Instantiate`. 미등록 주소면 `KeyNotFoundException` | `Object.DestroyImmediate` |
 

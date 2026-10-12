@@ -15,7 +15,7 @@ UniTask 는 Unity 레지스트리에 없어서 의존성으로 자동 설치되�
 }
 ```
 
-Package Manager 의 `+` > `Add package from git URL` 에 위 URL 을 넣어도 됩니다. 특정 버전에 고정하려면 URL 끝에 `#<태그>` 를 붙입니다(레포에 실제로 있는 태그만 쓸 수 있습니다). Addressables 는 Unity 레지스트리에서 자동으로 설치됩니다.
+Package Manager 의 `+` > `Add package from git URL` 에 위 URL 을 넣어도 됩니다. 특정 버전에 고정하려면 URL 끝에 `#<태그>` 를 붙입니다(레포에 실제로 있는 태그만 쓸 수 있습니다). Addressables 와 uGUI 는 Unity 레지스트리에서 자동으로 설치됩니다.
 
 ## 빠른 시작
 
@@ -109,7 +109,7 @@ Package Manager 의 `+` > `Add package from git URL` 에 위 URL 을 넣어도 �
 - Unity 6000.0 이상 (`UiToolkitPanelRendererFeature` 는 Unity 6000.5 이상에서만 컴파일됩니다)
 - `com.unity.addressables` 2.6.0
 - `com.cysharp.unitask` 2.5.10
-- 헬퍼 뷰는 uGUI(`UnityEngine.UI`)와 TextMeshPro(`TMPro`)를 사용합니다. Unity 6 에서는 `com.unity.ugui` 에 TextMeshPro 가 포함되어 있습니다. 이 의존성은 `package.json` 에 선언되어 있지 않으므로 프로젝트에 `com.unity.ugui` 가 있어야 합니다.
+- `com.unity.ugui` 2.0.0. 헬퍼 뷰가 uGUI(`UnityEngine.UI`)와 TextMeshPro(`TMPro`)를 사용하며, Unity 6 에서는 TextMeshPro 가 `com.unity.ugui` 에 포함되어 있습니다.
 
 ## 라이선스
 

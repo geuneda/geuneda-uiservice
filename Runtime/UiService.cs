@@ -29,6 +29,8 @@ namespace Geuneda.UiService
 		private readonly IList<UiInstanceId> _visibleUiList = new List<UiInstanceId>();
 		private readonly IDictionary<int, UiSetConfig> _uiSets = new Dictionary<int, UiSetConfig>();
 		private readonly IDictionary<Type, IList<UiInstance>> _uiPresenters = new Dictionary<Type, IList<UiInstance>>();
+		// AddUi로 전달된 레이어입니다. UiConfig 없이 추가된 프레젠터의 레이어를 확인하는 데 사용합니다
+		private readonly IDictionary<UiInstanceId, int> _uiLayers = new Dictionary<UiInstanceId, int>();
 
 		private readonly IReadOnlyDictionary<int, UiSetConfig> _uiSetsReadOnly;
 		private readonly IReadOnlyList<UiInstanceId> _visiblePresentersReadOnly;
@@ -71,7 +73,7 @@ namespace Geuneda.UiService
 			{
 				if (string.IsNullOrEmpty(uiConfig.Address))
 				{
-					throw new ArgumentException($"UiConfig for type '{uiConfig.UiType.Name}' has empty address. This UI will fail to load.");
+					throw new ArgumentException($"UiConfig for type '{uiConfig.UiType?.Name ?? "null"}' has empty address. This UI will fail to load.");
 				}
 				if (uiConfig.UiType == null)
 				{
@@ -202,7 +204,8 @@ namespace Geuneda.UiService
 				_uiPresenters[type] = instanceList;
 			}
 			instanceList.Add(new UiInstance(type, instanceAddress, ui));
-			
+			_uiLayers[instanceId] = layer;
+
 			// Canvas 정렬 순서가 레이어와 일치하는지 확인합니다
 			EnsureCanvasSortingOrder(ui.gameObject, layer);
 
@@ -254,7 +257,8 @@ namespace Geuneda.UiService
 				if (instanceList[i].Address == instanceAddress)
 				{
 					instanceList.RemoveAt(i);
-					
+					_uiLayers.Remove(instanceId);
+
 					// 빈 타입 항목을 정리합니다
 					if (instanceList.Count == 0)
 					{
@@ -405,9 +409,7 @@ namespace Geuneda.UiService
 			{
 				throw new KeyNotFoundException($"Cannot unload UI {instanceId}. It is not loaded.");
 			}
-			
-			var config = _uiConfigs[type];
-			
+
 			RemoveUi(type, instanceAddress);
 
 			_assetLoader.UnloadAsset(ui.gameObject);
@@ -568,7 +570,18 @@ namespace Geuneda.UiService
 			{
 				var instanceId = _visibleUiList[i];
 
-				if (_uiConfigs[instanceId.PresenterType].Layer == layer)
+				// UiConfig가 있으면 설정의 레이어를, 없으면 AddUi로 전달된 레이어를 사용합니다
+				int uiLayer;
+				if (_uiConfigs.TryGetValue(instanceId.PresenterType, out var config))
+				{
+					uiLayer = config.Layer;
+				}
+				else if (!_uiLayers.TryGetValue(instanceId, out uiLayer))
+				{
+					continue;
+				}
+
+				if (uiLayer == layer)
 				{
 					if (TryFindPresenter(instanceId.PresenterType, instanceId.InstanceAddress, out var presenter))
 					{
@@ -654,6 +667,7 @@ namespace Geuneda.UiService
 
 			// 모든 컬렉션을 정리합니다
 			_uiPresenters.Clear();
+			_uiLayers.Clear();
 			_visibleUiList.Clear();
 			_uiConfigs.Clear();
 			_uiSets.Clear();

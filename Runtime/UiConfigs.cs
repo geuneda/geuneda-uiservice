@@ -10,7 +10,7 @@ namespace Geuneda.UiService
 {
 	/// <summary>
 	/// <seealso cref="UiPresenter"/>의 모든 중요 데이터를 포함하는 구성을 나타냅니다.
-	/// Id는 UiIdsGenerator 코드 생성기가 생성한 UI의 정수 표현입니다
+	/// 서비스는 <see cref="UiType"/>을 키로 구성을 등록하며, 타입당 하나의 구성만 가집니다
 	/// </summary>
 	[Serializable]
 	public struct UiConfig
@@ -99,6 +99,8 @@ namespace Geuneda.UiService
 			public string Address;
 			public int Layer;
 			public string UiType;
+			// 이 필드가 추가되기 전에 저장된 에셋은 기본값 false로 읽힙니다
+			public bool LoadSynchronously;
 
 			public static implicit operator UiConfig(UiConfigSerializable serializable)
 			{
@@ -107,7 +109,7 @@ namespace Geuneda.UiService
 					Address = serializable.Address,
 					Layer = serializable.Layer,
 					UiType = Type.GetType(serializable.UiType),
-					LoadSynchronously = false
+					LoadSynchronously = serializable.LoadSynchronously
 				};
 			}
 
@@ -117,7 +119,8 @@ namespace Geuneda.UiService
 				{
 					Address = config.Address,
 					Layer = config.Layer,
-					UiType = config.UiType.AssemblyQualifiedName
+					UiType = config.UiType.AssemblyQualifiedName,
+					LoadSynchronously = config.LoadSynchronously
 				};
 			}
 		}

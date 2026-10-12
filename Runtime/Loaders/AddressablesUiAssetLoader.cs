@@ -37,7 +37,17 @@ namespace Geuneda.UiService
 		/// <inheritdoc />
 		public void UnloadAsset(GameObject asset)
 		{
-			Addressables.ReleaseInstance(asset);
+			if (asset == null)
+			{
+				return;
+			}
+
+			// Addressables 로 만들지 않은 인스턴스(AddUi 로 직접 넣은 프레젠터 등)는 ReleaseInstance 가
+			// 파괴하지 않고 false 를 돌려주므로 직접 파괴합니다
+			if (!Addressables.ReleaseInstance(asset))
+			{
+				Object.Destroy(asset);
+			}
 		}
 	}
 }

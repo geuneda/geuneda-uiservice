@@ -159,8 +159,7 @@ namespace Geuneda.UiService
 		/// UI는 먼저 로드된 순서대로 반환됩니다.
 		/// </summary>
 		/// <param name="setId">로드할 UI 세트의 ID.</param>
-		/// <returns>로드된 각 UI로 완료되는 태스크 배열.</returns>
-		/// <exception cref="KeyNotFoundException">서비스에 지정된 ID의 UI 세트가 없는 경우 발생합니다.</exception>
+		/// <returns>로드된 각 UI로 완료되는 태스크 목록. 서비스에 지정된 ID의 UI 세트가 없으면 빈 목록을 반환합니다.</returns>
 		IList<UniTask<UiPresenter>> LoadUiSetAsync(int setId);
 
 		/// <summary>
@@ -261,7 +260,6 @@ namespace Geuneda.UiService
 		/// </summary>
 		/// <param name="uiPresenter">닫을 UI 프레젠터.</param>
 		/// <param name="destroy">UI 프레젠터의 에셋을 파괴할지 여부.</param>
-		/// <returns>UI 프레젠터가 닫히면 완료되는 태스크.</returns>
 		void CloseUi<T>(T uiPresenter, bool destroy = false) where T : UiPresenter;
 
 		/// <summary>
@@ -269,7 +267,6 @@ namespace Geuneda.UiService
 		/// </summary>
 		/// <param name="type">닫을 UI 프레젠터의 타입.</param>
 		/// <param name="destroy">UI 프레젠터의 에셋을 파괴할지 여부.</param>
-		/// <returns>UI 프레젠터가 닫히면 완료되는 태스크.</returns>
 		void CloseUi(Type type, bool destroy = false);
 
 		/// <summary>
@@ -310,7 +307,7 @@ namespace Geuneda.UiService
 		/// <param name="configs">서비스를 초기화할 UI 구성.</param>
 		/// <remarks>
 		/// 게임의 UI를 구성하려면 다음과 같이 UiConfigs ScriptableObject를 생성해야 합니다:
-		/// - Project View에서 우클릭 > Create > ScriptableObjects > Configs > UiConfigs
+		/// - Project View에서 우클릭 > Create > ScriptableObjects > Configs > UiConfigs > Addressables / Resources / PrefabRegistry 중 하나
 		/// - 중복된 UI 구성이나 UI 세트는 경고를 기록하지만 예외를 발생시키지 않습니다
 		/// - 0 미만 또는 1000 초과의 레이어 번호는 경고를 기록합니다
 		/// - 빈 어드레서블 주소 또는 null UI 타입은 ArgumentException을 발생시킵니다
