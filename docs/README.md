@@ -1,101 +1,60 @@
 # UI Service 문서
 
-GameLovers UI Service 문서에 오신 것을 환영합니다. 이 가이드는 Unity 프로젝트에서 UI Service를 효과적으로 사용하는 데 필요한 모든 내용을 다룹니다.
+설치와 최소 예제는 패키지 [README](../README.md)에 있습니다. 이 폴더는 상세 문서입니다.
 
-## 빠른 탐색
-
-| 문서 | 설명 |
+| 문서 | 내용 |
 |------|------|
-| [시작하기](getting-started.md) | 설치, 설정, 첫 번째 UI 프레젠터 |
-| [핵심 개념](core-concepts.md) | 프레젠터, 레이어, 세트, 피처, 설정 |
-| [API 레퍼런스](api-reference.md) | 예제가 포함된 전체 API 문서 |
-| [고급 주제](advanced.md) | 성능 최적화, 헬퍼 뷰 |
-| [문제 해결](troubleshooting.md) | 일반적인 문제와 해결 방법 |
+| [시작하기](getting-started.md) | 설치, 설정 에셋, 프리팹 준비, 첫 프레젠터, 데이터 프레젠터 |
+| [핵심 개념](core-concepts.md) | 서비스 인터페이스, 생명주기, 피처, 레이어, 세트, 다중 인스턴스, 설정, 에디터 도구 |
+| [API 레퍼런스](api-reference.md) | 공개 API 시그니처와 동작 |
+| [고급 주제](advanced.md) | 헬퍼 뷰, 커스텀 로더, 로딩 전략 |
+| [문제 해결](troubleshooting.md) | 자주 겪는 문제와 해결 방법 |
 
-## 개요
-
-UI Service는 Unity 게임에서 UI를 관리하기 위한 중앙 집중식 시스템을 제공합니다. 주요 기능은 다음과 같습니다:
-
-- **생명주기 관리** - UI 프레젠터의 로드, 열기, 닫기, 언로드
-- **레이어 구성** - 설정 가능한 레이어를 사용한 깊이 정렬 UI
-- **UI 세트** - 그룹화된 UI 요소에 대한 일괄 작업
-- **비동기 로딩** - 커스터마이징 가능한 에셋 로딩 전략 (Addressables, Resources, Prefab Registry)
-- **피처 조합** - 모듈식 피처로 프레젠터 동작 확장
-
-## 아키텍처 개요
+## 아키텍처
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                      게임 코드                           │
-│                 (GameManager, Systems)                  │
-└─────────────────────┬───────────────────────────────────┘
-                      │
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│              IUiServiceInit : IUiService                │
-│    ┌────────────────────────────────────────────────┐   │
-│    │ IUiService (소비: open/close/load/unload)      │   │
-│    └────────────────────────────────────────────────┘   │
-│    + Init(UiConfigs) + Dispose()                        │
-└─────────────────────┬───────────────────────────────────┘
-                      │
-        ┌─────────────┼─────────────┐
-        ▼             ▼             ▼
-┌───────────┐  ┌────────────┐  ┌─────────────────┐
-│ UiConfigs │  │ UiPresenter│  │ IUiAssetLoader  │
-│   (SO)    │  │  (Views)   │  │ (추상화)        │
-└───────────┘  └─────┬──────┘  └─────────────────┘
-                     │
-                     ▼
-              ┌──────────────┐
-              │   Features   │
-              │ (조합 가능)   │
-              └──────────────┘
+게임 코드
+   │  IUiService (열기/닫기/로드/언로드/조회)
+   ▼
+UiService : IUiServiceInit (Init(UiConfigs), Dispose())
+   ├── UiConfigs (ScriptableObject: UiConfig 목록 + UI 세트)
+   ├── IUiAssetLoader (Addressables / Resources / PrefabRegistry)
+   └── UiPresenter (프리팹 루트 컴포넌트)
+          └── PresenterFeatureBase 컴포넌트들 (전환, UI Toolkit 등)
 ```
 
-### 서비스 인터페이스
-
-UI Service는 **두 가지 인터페이스**를 노출합니다:
-
-| 인터페이스 | 목적 | 핵심 기능 |
-|-----------|------|----------|
-| `IUiService` | **소비** - UI 열기/닫기/쿼리 | 모든 UI 생명주기 작업 |
-| `IUiServiceInit` | **초기화** - `IUiService` 확장 | `Init(UiConfigs)` + `Dispose()` |
-
-> **주의:** `Init()`을 호출해야 할 때는 `IUiServiceInit`을 사용하세요. `Init()` 메서드는 `IUiService`에서는 사용할 수 **없습니다**. 자세한 내용은 [핵심 개념 - 서비스 인터페이스](core-concepts.md#서비스-인터페이스)를 참조하세요.
+- `Init()` 은 `"Ui"` 라는 `DontDestroyOnLoad` 루트 GameObject 를 만들고, 로드된 프레젠터는 모두 이 루트 바로 아래에 인스턴스화됩니다.
+- 루트에는 `UiServiceMonoComponent` 가 붙어 해상도와 기기 방향 변화를 감지해 `UiService.OnResolutionChanged`, `UiService.OnOrientationChanged` 정적 이벤트를 발생시킵니다.
 
 ## 패키지 구조
 
 ```
-Runtime/
-├── IUiService.cs          # 공개 API 인터페이스
-├── UiService.cs           # 핵심 구현
-├── UiPresenter.cs         # 기본 프레젠터 클래스
-├── UiConfigs.cs           # 설정 ScriptableObject
-├── Loaders/
-│   ├── IUiAssetLoader.cs      # 에셋 로딩 인터페이스
-│   ├── AddressablesUiAssetLoader.cs # Addressables 구현
-│   ├── PrefabRegistryUiAssetLoader.cs # 직접 프리팹 참조
-│   └── ResourcesUiAssetLoader.cs # Resources.Load 구현
-├── UiInstanceId.cs        # 멀티 인스턴스 지원
-├── Features/              # 조합 가능한 피처
-│   ├── TimeDelayFeature.cs
-│   ├── AnimationDelayFeature.cs
-│   └── UiToolkitPresenterFeature.cs
-└── Views/                 # 헬퍼 컴포넌트
-    ├── SafeAreaHelperView.cs
-    ├── NonDrawingView.cs
-    └── AdjustScreenSizeFitterView.cs
+Runtime/                              (어셈블리 Geuneda.UiService)
+├── IUiService.cs                     IUiService, IUiServiceInit, UiInstance
+├── UiService.cs                      서비스 구현
+├── UiPresenter.cs                    UiPresenter, UiPresenter<T>, IUiPresenterData
+├── UiConfigs.cs                      UiConfig, UiConfigs(abstract)
+├── AddressablesUiConfigs.cs          Addressables 용 설정 에셋
+├── ResourcesUiConfigs.cs             Resources 용 설정 에셋
+├── PrefabRegistryUiConfigs.cs        프리팹 직접 참조용 설정 에셋
+├── UiSetConfig.cs                    UiSetConfig, UiSetEntry, UiSetConfigSerializable
+├── UiInstanceId.cs                   다중 인스턴스 식별자
+├── UiServiceMonoComponent.cs         해상도/방향 감지
+├── LoadSynchronouslyAttribute.cs     동기 로드 표시 어트리뷰트
+├── Loaders/                          IUiAssetLoader 와 구현 3종
+├── Features/                         PresenterFeatureBase, ITransitionFeature, 기본 피처
+└── Views/                            헬퍼 뷰 (네임스페이스 Geuneda.UiService.Views)
 
-Editor/
-├── UiConfigsEditor.cs     # 향상된 인스펙터
-└── UiPresenterManagerWindow.cs  # 실시간 디버깅 및 관리
+Editor/                               (어셈블리 Geuneda.UiService.Editor, 네임스페이스 GeunedaEditor.UiService)
+├── UiConfigsEditorBase.cs            설정 인스펙터 공통 기반 (레이어 시각화, 세트 편집)
+├── AddressablesUiConfigsEditor.cs    Addressables 그룹과 동기화
+├── ResourcesUiConfigsEditor.cs       Resources 폴더와 동기화
+├── PrefabRegistryUiConfigsEditor.cs  프리팹 레지스트리 편집
+├── DefaultUiConfigsEditor.cs         DefaultUiSetId 와 기본 인스펙터 3종
+├── UiConfigsMenuItems.cs             Tools > UI Service 메뉴
+├── UiPresenterManagerWindow.cs       플레이 모드 프레젠터 관리 창
+├── UiPresenterEditor.cs              프레젠터 인스펙터 (열기/닫기 버튼)
+└── NonDrawingViewEditor.cs           NonDrawingView 인스펙터
+
+Tests/EditMode, Tests/PlayMode        단위/통합/성능/스모크 테스트
 ```
-
-## 버전 이력
-
-버전 이력과 릴리스 노트는 [CHANGELOG.md](../CHANGELOG.md)를 참조하세요.
-
-## 기여하기
-
-기여 가이드라인은 메인 [README.md](../README.md)를 참조하세요.

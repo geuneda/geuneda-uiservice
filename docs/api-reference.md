@@ -1,470 +1,314 @@
 # API 레퍼런스
 
-UI Service의 전체 API 문서입니다.
+런타임 네임스페이스는 `Geuneda.UiService`, 헬퍼 뷰는 `Geuneda.UiService.Views` 입니다. 비동기 메서드는 모두 UniTask(`Cysharp.Threading.Tasks`)를 반환합니다. 헬퍼 뷰는 [고급 주제](advanced.md#헬퍼-뷰)에 있습니다.
 
-## 목차
-
-- [IUiService 인터페이스](#iuiservice-인터페이스)
-- [로딩 및 언로딩](#로딩-및-언로딩)
-- [열기 및 닫기](#열기-및-닫기)
-- [UI 세트 작업](#ui-세트-작업)
-- [쿼리 메서드](#쿼리-메서드)
-- [비동기 작업](#비동기-작업)
-- [런타임 설정](#런타임-설정)
+- [IUiService](#iuiservice)
+- [IUiServiceInit](#iuiserviceinit)
+- [UiService](#uiservice)
+- [UiPresenter](#uipresenter)
+- [피처](#피처)
+- [설정 타입](#설정-타입)
+- [에셋 로더](#에셋-로더)
 
 ---
 
-## IUiService 인터페이스
+## IUiService
 
-모든 UI 작업을 위한 메인 인터페이스입니다.
+### 프로퍼티와 조회
 
-### 프로퍼티
+| 멤버 | 설명 |
+|------|------|
+| `IReadOnlyList<UiInstanceId> VisiblePresenters { get; }` | 표시 중인 인스턴스 목록 (할당 없는 읽기 전용 래퍼) |
+| `IReadOnlyDictionary<int, UiSetConfig> UiSets { get; }` | 등록된 UI 세트 |
+| `List<UiInstance> GetLoadedPresenters()` | 로드된 모든 인스턴스. 호출마다 새 리스트 생성 |
+| `T GetUi<T>() where T : UiPresenter` | 로드된 프레젠터. 없으면 `KeyNotFoundException` |
+| `bool IsVisible<T>() where T : UiPresenter` | 표시 목록에 있는지 여부 |
 
-| 프로퍼티 | 타입 | 설명 |
-|---------|------|------|
-| `VisiblePresenters` | `IReadOnlyList<UiInstanceId>` | 현재 보이는 모든 프레젠터 인스턴스 |
-| `UiSets` | `IReadOnlyDictionary<int, UiSetConfig>` | 등록된 모든 UI 세트 |
+### 설정과 등록
 
-### 메서드 개요
+| 시그니처 | 설명 |
+|----------|------|
+| `void AddUiConfig(UiConfig config)` | 설정 추가. 같은 타입이 이미 있으면 경고 후 무시 |
+| `void AddUiSet(UiSetConfig uiSet)` | 세트 추가. 같은 ID 가 이미 있으면 경고 후 무시 |
+| `void AddUi<T>(T ui, int layer, bool openAfter = false) where T : UiPresenter` | 이미 인스턴스화된 프레젠터를 빈 인스턴스 주소로 추가 |
+| `bool RemoveUi<T>() where T : UiPresenter` | 언로드하지 않고 서비스에서 제거 |
+| `bool RemoveUi<T>(T uiPresenter) where T : UiPresenter` | 해당 인스턴스를 제거 |
+| `bool RemoveUi(Type type)` | 타입으로 제거 |
+| `List<UiPresenter> RemoveUiSet(int setId)` | 세트의 로드된 프레젠터를 제거하고 반환. 세트가 없으면 `KeyNotFoundException` |
 
-| 메서드 | 반환 타입 | 설명 |
-|--------|----------|------|
-| `GetLoadedPresenters()` | `List<UiInstance>` | 현재 메모리에 있는 모든 프레젠터 |
-| `GetUi<T>()` | `T` | 타입으로 로드된 프레젠터 가져오기 |
-| `IsVisible<T>()` | `bool` | 프레젠터가 보이는지 확인 |
-| `LoadUiAsync<T>()` | `UniTask<T>` | 프레젠터를 메모리에 로드 |
-| `OpenUiAsync<T>()` | `UniTask<T>` | 프레젠터 열기 (필요 시 로드) |
-| `CloseUi<T>()` | `void` | 프레젠터 닫기 |
-| `UnloadUi<T>()` | `void` | 메모리에서 프레젠터 언로드 |
+`RemoveUi` 계열은 표시 목록에서도 빼지만 닫기 생명주기를 실행하지 않고 GameObject 도 그대로 둡니다.
+
+### 로드와 언로드
+
+| 시그니처 | 설명 |
+|----------|------|
+| `UniTask<T> LoadUiAsync<T>(bool openAfter = false, CancellationToken cancellationToken = default) where T : UiPresenter` | 설정 주소를 인스턴스 주소로 로드 |
+| `UniTask<UiPresenter> LoadUiAsync(Type type, bool openAfter = false, CancellationToken cancellationToken = default)` | 타입으로 로드 |
+| `IList<UniTask<UiPresenter>> LoadUiSetAsync(int setId)` | 세트에서 아직 로드되지 않은 항목의 로드 태스크 목록. 세트가 없으면 빈 목록 |
+| `void UnloadUi<T>() where T : UiPresenter` | 언로드 |
+| `void UnloadUi<T>(T uiPresenter) where T : UiPresenter` | 해당 인스턴스 언로드 |
+| `void UnloadUi(Type type)` | 타입으로 언로드 |
+| `void UnloadUi(Type type, string instanceAddress)` | 특정 인스턴스 언로드 |
+| `void UnloadUiSet(int setId)` | 세트의 로드된 항목을 언로드 |
+
+- 설정이 없는 타입을 로드하면 `KeyNotFoundException` 이 납니다.
+- 이미 로드된 인스턴스를 다시 로드하면 경고를 남기고 기존 인스턴스를 반환합니다.
+- 로드되지 않은 인스턴스를 언로드하면 `KeyNotFoundException` 이 납니다. 언로드는 닫기 생명주기를 실행하지 않고 표시 목록에서 뺀 뒤 로더의 `UnloadAsset` 을 호출합니다. 훅이 필요하면 `CloseUi(..., destroy: true)` 를 사용하세요.
+
+### 열기와 닫기
+
+| 시그니처 | 설명 |
+|----------|------|
+| `UniTask<T> OpenUiAsync<T>(CancellationToken cancellationToken = default) where T : UiPresenter` | 필요하면 로드한 뒤 열기 |
+| `UniTask<UiPresenter> OpenUiAsync(Type type, CancellationToken cancellationToken = default)` | 타입으로 열기 |
+| `UniTask<T> OpenUiAsync<T, TData>(TData initialData, CancellationToken cancellationToken = default) where T : class, IUiPresenterData where TData : struct` | `Data` 를 설정한 뒤 열기 |
+| `UniTask<UiPresenter> OpenUiAsync<TData>(Type type, TData initialData, CancellationToken cancellationToken = default) where TData : struct` | 타입으로 데이터와 함께 열기 |
+| `UniTask<UiPresenter[]> OpenUiSetAsync(int setId, CancellationToken cancellationToken = default)` | 세트 전체를 `UniTask.WhenAll` 로 병렬 열기. 세트가 없으면 `KeyNotFoundException` |
+| `void CloseUi<T>(bool destroy = false) where T : UiPresenter` | 닫기. `destroy: true` 면 닫기 전환 후 언로드 |
+| `void CloseUi<T>(T uiPresenter, bool destroy = false) where T : UiPresenter` | 해당 인스턴스 닫기 |
+| `void CloseUi(Type type, bool destroy = false)` | 타입으로 닫기 |
+| `void CloseUi(Type type, string instanceAddress, bool destroy = false)` | 특정 인스턴스 닫기 |
+| `void CloseAllUi()` | 표시 중인 모든 UI 닫기 |
+| `void CloseAllUi(int layer)` | 해당 레이어의 표시 중인 UI 닫기 |
+| `void CloseAllUiSet(int setId)` | 세트의 항목 닫기. 세트가 없으면 `KeyNotFoundException` |
+
+- 이미 열린 인스턴스를 열거나 열려 있지 않은 인스턴스를 닫으면 경고만 남깁니다. `CloseAllUiSet` 은 열리지 않은 항목마다 경고를 남깁니다.
+- 열기 메서드는 열기를 시작한 직후 완료됩니다. 전환까지 기다리려면 반환된 프레젠터의 `OpenTransitionTask` 를 기다립니다.
+- 데이터 오버로드에서 프레젠터가 `UiPresenter<TData>` 가 아니면 에러 로그를 남기고 **열지 않은 채** 프레젠터를 반환합니다.
+- `CancellationToken` 은 `AddressablesUiAssetLoader` 의 비동기 인스턴스화 대기에만 전달됩니다. Resources/PrefabRegistry 로더는 동기로 인스턴스화하므로 토큰을 쓰지 않습니다.
+
+```csharp
+// 여러 UI 를 병렬로 열고 결과를 받기
+var (hud, minimap) = await UniTask.WhenAll(
+    _uiService.OpenUiAsync<HudPresenter>(),
+    _uiService.OpenUiAsync<MinimapPresenter>());
+
+// 닫기 전환이 끝날 때까지 기다리기
+var popup = _uiService.GetUi<AnimatedPopup>();
+_uiService.CloseUi(popup);
+await popup.CloseTransitionTask;
+```
+
+UniTask 는 한 번만 `await` 할 수 있습니다. `UniTask.WhenAll` 로 기다린 태스크를 다시 `await` 하거나 `GetAwaiter().GetResult()` 로 읽지 마세요.
 
 ---
 
-## 로딩 및 언로딩
+## IUiServiceInit
 
-### LoadUiAsync
+`public interface IUiServiceInit : IUiService, IDisposable`
 
-UI 프레젠터를 열지 않고 메모리에 로드합니다.
+| 시그니처 | 설명 |
+|----------|------|
+| `void Init(UiConfigs configs)` | 설정과 세트를 등록하고 `"Ui"` 루트 GameObject(`DontDestroyOnLoad`, `UiServiceMonoComponent` 부착)를 생성 |
+| `void Dispose()` | 표시 중인 UI 를 닫고, 로드된 인스턴스를 모두 언로드하고, 컬렉션을 비우고, 루트 GameObject 를 파괴 |
 
-```csharp
-// 메모리에 로드 (숨김 유지)
-var inventory = await _uiService.LoadUiAsync<InventoryPresenter>();
-
-// 로드 후 즉시 열기
-var inventory = await _uiService.LoadUiAsync<InventoryPresenter>(openAfter: true);
-
-// 취소 지원
-var cts = new CancellationTokenSource();
-var inventory = await _uiService.LoadUiAsync<InventoryPresenter>(
-    openAfter: false,
-    cancellationToken: cts.Token
-);
-```
-
-**시그니처:**
-```csharp
-UniTask<T> LoadUiAsync<T>(bool openAfter = false, CancellationToken cancellationToken = default)
-    where T : UiPresenter;
-
-UniTask<UiPresenter> LoadUiAsync(Type type, bool openAfter = false, CancellationToken cancellationToken = default);
-```
-
-### UnloadUi
-
-메모리에서 프레젠터를 언로드합니다 (Addressables 참조 해제).
-
-```csharp
-// 타입으로 언로드
-_uiService.UnloadUi<InventoryPresenter>();
-
-// 인스턴스로 언로드
-_uiService.UnloadUi(inventoryPresenter);
-
-// Type 객체로 언로드
-_uiService.UnloadUi(typeof(InventoryPresenter));
-```
-
-**참고:** 보이는 프레젠터를 언로드하면 먼저 닫힙니다.
+`Init` 예외: `configs` 가 `null` 이면 `ArgumentNullException`, 설정에 빈 주소나 찾을 수 없는 타입이 있으면 `ArgumentException`. 레이어가 0 미만 또는 1000 초과면 경고만 남깁니다.
 
 ---
 
-## 열기 및 닫기
+## UiService
 
-### OpenUiAsync
+`public class UiService : IUiServiceInit`
 
-프레젠터를 열고, 필요하면 먼저 로드합니다.
+### 생성자
 
-```csharp
-// 기본 열기
-var shop = await _uiService.OpenUiAsync<ShopPresenter>();
+| 시그니처 | 설명 |
+|----------|------|
+| `UiService()` | `AddressablesUiAssetLoader` 사용 |
+| `UiService(IUiAssetLoader assetLoader)` | 로더 주입 |
 
-// 초기 데이터와 함께 열기 - 자동으로 OnSetData() 트리거
-var questData = new QuestData { QuestId = 101, Title = "Dragon Slayer" };
-var quest = await _uiService.OpenUiAsync<QuestPresenter, QuestData>(questData);
+### 정적 이벤트
 
-// 언제든지 데이터 업데이트 - 역시 OnSetData() 트리거
-quest.Data = new QuestData { QuestId = 102, Title = "Updated Quest" };
+| 멤버 | 설명 |
+|------|------|
+| `static readonly UnityEvent<DeviceOrientation, DeviceOrientation> OnOrientationChanged` | (이전, 현재) 기기 방향. `Unknown`, `FaceUp`, `FaceDown` 은 무시 |
+| `static readonly UnityEvent<Vector2, Vector2> OnResolutionChanged` | (이전, 현재) `Screen.width/height` |
 
-// 취소 지원
-var cts = new CancellationTokenSource();
-try
-{
-    var ui = await _uiService.OpenUiAsync<LoadingPresenter>(cts.Token);
-}
-catch (OperationCanceledException)
-{
-    Debug.Log("UI loading was cancelled");
-}
-```
+정적 이벤트이므로 `Dispose()` 가 리스너를 지우지 않습니다. 구독한 쪽에서 직접 해제하세요.
 
-**시그니처:**
-```csharp
-UniTask<T> OpenUiAsync<T>(CancellationToken cancellationToken = default)
-    where T : UiPresenter;
+### 인스턴스 주소 오버로드 (UiService 전용)
 
-UniTask<T> OpenUiAsync<T, TData>(TData initialData, CancellationToken cancellationToken = default)
-    where T : class, IUiPresenterData
-    where TData : struct;
-```
+| 시그니처 |
+|----------|
+| `T GetUi<T>(string instanceAddress) where T : UiPresenter` |
+| `bool IsVisible<T>(string instanceAddress) where T : UiPresenter` |
+| `void AddUi<T>(T ui, int layer, string instanceAddress, bool openAfter = false) where T : UiPresenter` |
+| `bool RemoveUi(Type type, string instanceAddress)` |
+| `UniTask<UiPresenter> LoadUiAsync(Type type, string instanceAddress, bool openAfter = false, CancellationToken cancellationToken = default)` |
+| `UniTask<UiPresenter> OpenUiAsync(Type type, string instanceAddress, CancellationToken cancellationToken = default)` |
+| `UniTask<UiPresenter> OpenUiAsync<TData>(Type type, string instanceAddress, TData initialData, CancellationToken cancellationToken = default) where TData : struct` |
 
-### CloseUi
-
-보이는 프레젠터를 닫습니다.
-
-```csharp
-// 닫기 (메모리에 유지, 빠른 재열기)
-_uiService.CloseUi<ShopPresenter>();
-_uiService.CloseUi<ShopPresenter>(destroy: false);
-
-// 닫기 및 메모리에서 언로드
-_uiService.CloseUi<ShopPresenter>(destroy: true);
-
-// 인스턴스로 닫기
-_uiService.CloseUi(shopPresenter);
-_uiService.CloseUi(shopPresenter, destroy: true);
-```
-
-**전환 동작:**
-- 프레젠터에 `ITransitionFeature` 컴포넌트(예: `TimeDelayFeature`, `AnimationDelayFeature`)가 있으면, 닫기는 모든 전환이 완료된 후 GameObject를 숨깁니다.
-- `presenter.CloseTransitionTask`를 사용하여 전환을 포함한 전체 닫기 프로세스를 대기할 수 있습니다.
-
-```csharp
-// 닫기 전환 완료 대기
-_uiService.CloseUi<AnimatedPopup>();
-await presenter.CloseTransitionTask;
-Debug.Log("Popup fully closed with animation");
-```
-
-### CloseAllUi
-
-여러 프레젠터를 한 번에 닫습니다.
-
-```csharp
-// 보이는 모든 UI 닫기
-_uiService.CloseAllUi();
-
-// 특정 레이어의 모든 UI 닫기
-_uiService.CloseAllUi(layer: 2);
-```
+`CloseUi(Type, string, bool)` 과 `UnloadUi(Type, string)` 은 `IUiService` 에도 있습니다. 주소 없는 오버로드의 인스턴스 선택 규칙은 [핵심 개념 - 다중 인스턴스](core-concepts.md#다중-인스턴스)를 보세요.
 
 ---
 
-## UI 세트 작업
+## UiPresenter
 
-### LoadUiSetAsync
+`public abstract class UiPresenter : MonoBehaviour`
 
-세트의 모든 프레젠터를 로드합니다.
+| 멤버 | 설명 |
+|------|------|
+| `bool IsOpen { get; }` | `gameObject.activeSelf` |
+| `UniTask OpenTransitionTask { get; }` | 최근 열기 과정(전환 포함)이 끝나면 완료 |
+| `UniTask CloseTransitionTask { get; }` | 최근 닫기 과정(전환 포함)이 끝나면 완료 |
+| `protected IUiService _uiService` | 이 프레젠터를 관리하는 서비스 |
+| `protected void Close(bool destroy)` | 자신의 인스턴스를 닫음 |
+| `protected virtual void OnInitialized()` | 서비스에 추가될 때 한 번 |
+| `protected virtual void OnOpened()` | 열릴 때 (활성화 직후) |
+| `protected virtual void OnClosed()` | 닫힐 때 (비활성화 전) |
+| `protected virtual void OnOpenTransitionCompleted()` | 열기 전환이 모두 끝난 뒤 |
+| `protected virtual void OnCloseTransitionCompleted()` | 닫기 전환이 끝나고 비활성화된 뒤 |
 
-```csharp
-// 태스크 배열 반환 - 병렬로 로드
-IList<UniTask<UiPresenter>> loadTasks = _uiService.LoadUiSetAsync(setId: 1);
+`public abstract class UiPresenter<T> : UiPresenter, IUiPresenterData where T : struct`
 
-// 모두 완료될 때까지 대기
-var presenters = await UniTask.WhenAll(loadTasks);
+| 멤버 | 설명 |
+|------|------|
+| `T Data { get; set; }` | 대입할 때마다 `OnSetData()` 호출 |
+| `protected virtual void OnSetData()` | 데이터 반영 지점 |
 
-// 또는 완료되는 대로 처리
-foreach (var task in loadTasks)
-{
-    var presenter = await task;
-    Debug.Log($"Loaded: {presenter.name}");
-}
-```
-
-### OpenUiSetAsync
-
-세트의 모든 프레젠터를 열고, 필요하면 로드합니다.
-
-```csharp
-// 모든 UI를 병렬로 열고, 모두 열릴 때까지 대기
-UiPresenter[] presenters = await _uiService.OpenUiSetAsync(setId: 1);
-
-// 취소 지원
-var cts = new CancellationTokenSource();
-var presenters = await _uiService.OpenUiSetAsync(setId: 1, cts.Token);
-```
-
-**시그니처:**
-```csharp
-UniTask<UiPresenter[]> OpenUiSetAsync(int setId, CancellationToken cancellationToken = default);
-```
-
-**참고:** 이 메서드는 적절한 주소 처리를 보장하여 이후 `CloseAllUiSet`과 `UnloadUiSet`이 올바르게 작동합니다.
-
-### CloseAllUiSet
-
-세트의 모든 프레젠터를 닫습니다.
-
-```csharp
-_uiService.CloseAllUiSet(setId: 1);
-```
-
-### UnloadUiSet
-
-메모리에서 세트의 모든 프레젠터를 언로드합니다.
-
-```csharp
-_uiService.UnloadUiSet(setId: 1);
-```
-
-### RemoveUiSet
-
-세트의 모든 프레젠터를 제거하고 반환합니다.
-
-```csharp
-List<UiPresenter> removed = _uiService.RemoveUiSet(setId: 2);
-
-// 필요한 경우 수동으로 정리
-foreach (var presenter in removed)
-{
-    Destroy(presenter.gameObject);
-}
-```
+`public interface IUiPresenterData` 는 `UiPresenter<T>` 가 구현하는 마커 인터페이스입니다.
 
 ---
 
-## 쿼리 메서드
+## 피처
 
-### GetUi
+`public abstract class PresenterFeatureBase : MonoBehaviour`
 
-타입으로 로드된 프레젠터를 가져옵니다.
+| 멤버 | 호출 시점 |
+|------|-----------|
+| `protected UiPresenter Presenter { get; }` | `OnPresenterInitialized` 에서 설정 |
+| `public virtual void OnPresenterInitialized(UiPresenter presenter)` | 프레젠터 `OnInitialized()` 직전. 재정의 시 `base` 호출 필요(그래야 `Presenter` 가 설정됨) |
+| `public virtual void OnPresenterOpening()` | 활성화 전 |
+| `public virtual void OnPresenterOpened()` | `OnOpened()` 후 |
+| `public virtual void OnPresenterClosing()` | `OnClosed()` 전 |
+| `public virtual void OnPresenterClosed()` | `OnClosed()` 후, 닫기 전환 대기 전 |
 
-```csharp
-var hud = _uiService.GetUi<GameHudPresenter>();
+`public interface ITransitionFeature`
 
-if (hud != null)
-{
-    hud.UpdateScore(newScore);
-}
-```
+| 멤버 | 설명 |
+|------|------|
+| `UniTask OpenTransitionTask { get; }` | 진행 중인 열기 전환. 없으면 `UniTask.CompletedTask` |
+| `UniTask CloseTransitionTask { get; }` | 진행 중인 닫기 전환. 없으면 `UniTask.CompletedTask` |
 
-**예외:** 로드되지 않은 경우 `KeyNotFoundException` 발생.
+### TimeDelayFeature : PresenterFeatureBase, ITransitionFeature
 
-### IsVisible
+| 멤버 | 설명 |
+|------|------|
+| `float OpenDelayInSeconds { get; }` | 직렬화 필드 `_openDelayInSeconds`, 기본 0.5 |
+| `float CloseDelayInSeconds { get; }` | 직렬화 필드 `_closeDelayInSeconds`, 기본 0.3 |
+| `OpenTransitionTask`, `CloseTransitionTask` | `ITransitionFeature` 구현 |
+| `protected virtual void OnOpenStarted()`, `OnOpenedCompleted()`, `OnCloseStarted()`, `OnClosedCompleted()` | 딜레이 시작/완료 훅 |
 
-프레젠터가 현재 보이는지 확인합니다.
+### AnimationDelayFeature : PresenterFeatureBase, ITransitionFeature
 
-```csharp
-if (_uiService.IsVisible<MainMenuPresenter>())
-{
-    Debug.Log("Main menu is showing");
-}
+`[RequireComponent(typeof(Animation))]`
 
-// 중복을 피하기 위해 열기 전에 확인
-if (!_uiService.IsVisible<PauseMenu>())
-{
-    await _uiService.OpenUiAsync<PauseMenu>();
-}
-```
+| 멤버 | 설명 |
+|------|------|
+| `Animation AnimationComponent { get; }` | 직렬화 필드 `_animation` (`OnValidate` 에서 자동 할당) |
+| `AnimationClip IntroAnimationClip { get; }`, `AnimationClip OutroAnimationClip { get; }` | 인트로/아웃트로 클립 |
+| `float OpenDelayInSeconds { get; }`, `float CloseDelayInSeconds { get; }` | 클립 길이, 클립이 없으면 0 |
+| `OpenTransitionTask`, `CloseTransitionTask` | `ITransitionFeature` 구현 |
+| `protected virtual void OnOpenStarted()`, `OnCloseStarted()` | 기본 구현이 해당 클립을 재생 |
+| `protected virtual void OnOpenedCompleted()`, `OnClosedCompleted()` | 완료 훅 |
 
-### GetLoadedPresenters
+### UiToolkitPresenterFeature : PresenterFeatureBase
 
-현재 메모리에 로드된 모든 프레젠터를 가져옵니다.
+`[RequireComponent(typeof(UIDocument))]`
 
-```csharp
-List<UiInstance> loaded = _uiService.GetLoadedPresenters();
+| 멤버 | 설명 |
+|------|------|
+| `UIDocument Document { get; }` | 부착된 `UIDocument` |
+| `VisualElement Root { get; }` | `Document.rootVisualElement` |
+| `void AddVisualTreeAttachedListener(UnityAction<VisualElement> callback)` | 트리가 준비되면 호출. 이미 준비돼 있으면 즉시 호출 |
+| `void RemoveVisualTreeAttachedListener(UnityAction<VisualElement> callback)` | 등록 해제 |
 
-foreach (var instance in loaded)
-{
-    Debug.Log($"Loaded: {instance.Type.Name} [{instance.Address}]");
-}
+### UiToolkitPanelRendererFeature : PresenterFeatureBase
 
-// 특정 타입이 로드되었는지 확인
-bool isLoaded = loaded.Any(p => p.Type == typeof(InventoryPresenter));
-```
+Unity 6000.5 이상(`#if UNITY_6000_5_OR_NEWER`). `[RequireComponent(typeof(PanelRenderer))]`
 
-### VisiblePresenters
-
-현재 보이는 모든 프레젠터를 가져옵니다.
-
-```csharp
-IReadOnlyList<UiInstanceId> visible = _uiService.VisiblePresenters;
-
-Debug.Log($"Visible count: {visible.Count}");
-
-foreach (var id in visible)
-{
-    Debug.Log($"Visible: {id}");
-}
-```
-
----
-
-## 비동기 작업
-
-모든 비동기 작업은 더 나은 성능과 WebGL 호환성을 위해 UniTask를 사용합니다.
-
-### 순차 로딩
-
-```csharp
-// 하나씩 로드
-var menu = await _uiService.OpenUiAsync<MainMenuPresenter>();
-var settings = await _uiService.OpenUiAsync<SettingsPresenter>();
-```
-
-### 병렬 로딩
-
-```csharp
-// 여러 UI를 동시에 로드 (더 빠름)
-var menuTask = _uiService.OpenUiAsync<MainMenuPresenter>();
-var hudTask = _uiService.OpenUiAsync<GameHudPresenter>();
-var chatTask = _uiService.OpenUiAsync<ChatPresenter>();
-
-await UniTask.WhenAll(menuTask, hudTask, chatTask);
-
-// 결과 접근
-var menu = menuTask.GetAwaiter().GetResult();
-```
-
-### 취소
-
-```csharp
-var cts = new CancellationTokenSource();
-
-// 로딩 시작
-var loadTask = _uiService.OpenUiAsync<HeavyPresenter>(cts.Token);
-
-// 타임아웃 후 취소
-cts.CancelAfter(TimeSpan.FromSeconds(5));
-
-try
-{
-    var presenter = await loadTask;
-}
-catch (OperationCanceledException)
-{
-    Debug.Log("Loading was cancelled");
-}
-
-// 또는 수동으로 취소
-cts.Cancel();
-```
-
-### Fire-and-Forget
-
-```csharp
-// await가 필요 없을 때
-_uiService.OpenUiAsync<NotificationPresenter>().Forget();
-```
+| 멤버 | 설명 |
+|------|------|
+| `PanelRenderer Panel { get; }` | 부착된 `PanelRenderer` |
+| `VisualElement Root { get; }` | 최근 리로드 콜백에서 받은 루트. 아직 없으면 `null` |
+| `void AddVisualTreeAttachedListener(UnityAction<VisualElement> callback)` | `PanelRenderer` 리로드마다 호출. 루트가 있으면 즉시 호출 |
+| `void RemoveVisualTreeAttachedListener(UnityAction<VisualElement> callback)` | 등록 해제 |
 
 ---
 
-## 런타임 설정
+## 설정 타입
 
-### AddUiConfig
+### UiConfig (struct)
 
-런타임에 UI 설정을 추가합니다.
+| 필드 | 타입 |
+|------|------|
+| `Address` | `string` |
+| `Layer` | `int` |
+| `UiType` | `Type` |
+| `LoadSynchronously` | `bool` |
 
-```csharp
-// 참고: 실제 UiConfig 생성자는 다를 수 있습니다
-var config = new UiConfig
-{
-    PresenterType = typeof(DynamicPopup),
-    AddressableAddress = "UI/DynamicPopup",
-    Layer = 3,
-    LoadSynchronously = false
-};
+### UiConfigs (abstract ScriptableObject)
 
-_uiService.AddUiConfig(config);
-```
+| 멤버 | 설명 |
+|------|------|
+| `List<UiConfig> Configs { get; set; }` | 직렬화된 설정을 변환해 반환. 호출마다 새 리스트 |
+| `List<UiSetConfig> Sets { get; }` | 직렬화된 세트를 변환해 반환. 타입을 찾지 못한 항목은 제외 |
+| `void SetSetsSize(int size)` | 세트 수를 맞추고, 설정에 없는 타입을 가리키는 항목을 제거 |
+| `struct UiConfigSerializable` | 직렬화 형태 (`Address`, `Layer`, 타입 이름 `UiType`). `UiConfig` 와 암시적 변환 |
 
-### AddUiSet
+파생 타입과 생성 메뉴:
 
-런타임에 UI 세트 설정을 추가합니다.
+| 타입 | `Create` 메뉴 | 추가 멤버 |
+|------|---------------|-----------|
+| `AddressablesUiConfigs` | `ScriptableObjects/Configs/UiConfigs/Addressables` | |
+| `ResourcesUiConfigs` | `ScriptableObjects/Configs/UiConfigs/Resources` | |
+| `PrefabRegistryUiConfigs` | `ScriptableObjects/Configs/UiConfigs/PrefabRegistry` | `IReadOnlyList<PrefabEntry> PrefabEntries`, `struct PrefabEntry { string Address; GameObject Prefab; }` |
 
-```csharp
-var setConfig = new UiSetConfig(setId: 10);
-_uiService.AddUiSet(setConfig);
-```
+### UiSetConfig, UiSetEntry, UiSetConfigSerializable
 
-### AddUi
+| 타입 | 멤버 |
+|------|------|
+| `UiSetConfig` (struct) | `int SetId`, `UiInstanceId[] UiInstanceIds` |
+| `UiSetEntry` (struct) | `string UiTypeName`(AssemblyQualifiedName), `string InstanceAddress`, `UiInstanceId ToUiInstanceId()`, `static UiSetEntry FromUiInstanceId(UiInstanceId)` |
+| `UiSetConfigSerializable` (struct) | `int SetId`, `List<UiSetEntry> UiEntries`, `static UiSetConfig ToUiSetConfig(UiSetConfigSerializable)`, `static UiSetConfigSerializable FromUiSetConfig(UiSetConfig)` |
 
-이미 인스턴스화된 프레젠터를 서비스에 추가합니다.
+### UiInstanceId, UiInstance
 
-```csharp
-// 수동으로 인스턴스화
-var dynamicUi = Instantiate(uiPrefab).GetComponent<UiPresenter>();
+| 타입 | 멤버 |
+|------|------|
+| `UiInstanceId` (readonly struct, `IEquatable<UiInstanceId>`) | `UiInstanceId(Type presenterType, string instanceAddress = null)`, `Type PresenterType`, `string InstanceAddress`, `bool IsDefault`, `static Default(Type)`, `static Named(Type, string)`, `==`, `!=`, `ToString()` |
+| `UiInstance` (readonly struct) | `UiInstance(Type type, string address, UiPresenter presenter)`, `Type Type`, `string Address`, `UiPresenter Presenter` |
 
-// 서비스에 추가
-_uiService.AddUi(dynamicUi, layer: 3, openAfter: true);
-```
+`UiInstanceId` 생성자는 `presenterType` 이 `null` 이면 `ArgumentNullException` 을 던지고, `null`/빈 주소를 `string.Empty` 로 바꿉니다.
 
-### RemoveUi
+### LoadSynchronouslyAttribute
 
-언로드하지 않고 서비스에서 프레젠터를 제거합니다.
-
-```csharp
-// 타입으로 제거
-bool removed = _uiService.RemoveUi<DynamicPopup>();
-
-// 인스턴스로 제거
-bool removed = _uiService.RemoveUi(dynamicPresenter);
-
-// Type 객체로 제거
-bool removed = _uiService.RemoveUi(typeof(DynamicPopup));
-```
+프레젠터 클래스에 붙이는 표시용 어트리뷰트입니다. 설정 인스펙터가 동기화할 때 `UiConfig.LoadSynchronously` 를 채우지만 에셋에는 저장되지 않으므로 런타임 로딩에는 영향이 없습니다. 자세한 내용은 [핵심 개념 - UI 설정](core-concepts.md#ui-설정).
 
 ---
 
-## IUiServiceInit 인터페이스
-
-초기화와 해제를 위한 확장 인터페이스입니다.
-
-### Init
-
-설정으로 서비스를 초기화합니다.
-
-```csharp
-IUiServiceInit uiService = new UiService();
-uiService.Init(uiConfigs);
-
-// 또는 커스텀 로더 사용
-var loader = new AddressablesUiAssetLoader();
-IUiServiceInit uiService = new UiService(loader);
-uiService.Init(uiConfigs);
-
-// 다른 내장 로더 사용
-var prefabLoader = new PrefabRegistryUiAssetLoader();
-var resourcesLoader = new ResourcesUiAssetLoader();
-```
-
-### IUiAssetLoader 인터페이스
-
-이 인터페이스를 사용하여 커스텀 에셋 로딩 전략을 구현할 수 있습니다.
+## 에셋 로더
 
 ```csharp
 public interface IUiAssetLoader
 {
-    UniTask<GameObject> InstantiatePrefab(UiConfig config, Transform parent, CancellationToken ct = default);
+    UniTask<GameObject> InstantiatePrefab(UiConfig config, Transform parent, CancellationToken cancellationToken = default);
     void UnloadAsset(GameObject asset);
 }
 ```
 
-### Dispose
+| 구현 | 인스턴스화 | 해제 |
+|------|-----------|------|
+| `AddressablesUiAssetLoader` | `Addressables.InstantiateAsync(config.Address, ...)`. `LoadSynchronously` 면 `WaitForCompletion()`. 실패 시 `OperationException` 을 던짐 | `Addressables.ReleaseInstance` |
+| `ResourcesUiAssetLoader` | `Resources.Load<GameObject>(config.Address)` 결과를 캐시해 `Instantiate`. 없으면 `KeyNotFoundException` | `Object.DestroyImmediate` |
+| `PrefabRegistryUiAssetLoader` | 등록된 프리팹을 `Instantiate`. 미등록 주소면 `KeyNotFoundException` | `Object.DestroyImmediate` |
 
-모든 리소스를 정리합니다.
+`PrefabRegistryUiAssetLoader` 생성자와 메서드:
 
-```csharp
-// 모든 UI를 닫고, 에셋을 언로드하고, 루트 GameObject를 파괴합니다
-uiService.Dispose();
-```
+| 시그니처 | 설명 |
+|----------|------|
+| `PrefabRegistryUiAssetLoader()` | 빈 레지스트리 |
+| `PrefabRegistryUiAssetLoader(PrefabRegistryUiConfigs configs)` | `configs.PrefabEntries` 를 등록 (`null` 이면 무시) |
+| `void RegisterPrefab(string address, GameObject prefab)` | 주소에 프리팹 등록 (덮어쓰기) |
 
-**참고:** 서비스 사용이 끝나면 항상 `Dispose()`를 호출하세요 (예: `OnDestroy`에서).
+커스텀 로더 예제는 [고급 주제](advanced.md#커스텀-에셋-로더)에 있습니다.

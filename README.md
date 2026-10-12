@@ -1,223 +1,118 @@
 # Geuneda UI Service
 
-[![Unity Version](https://img.shields.io/badge/Unity-6000.0%2B-blue.svg)](https://unity3d.com/get-unity/download)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-1.2.0-green.svg)](CHANGELOG.md)
+Unity UI 프레젠터의 로드, 열기, 닫기, 언로드를 한 서비스에서 관리하는 패키지입니다. 레이어 정렬, UI 세트, 다중 인스턴스, 피처 조합, UI Toolkit, 교체 가능한 에셋 로더(Addressables, Resources, 프리팹 직접 참조)를 지원합니다.
 
-> **바로가기**: [설치](#설치-방법) | [빠른 시작](#빠른-시작) | [문서](docs/README.md) | [예제](#예제) | [문제 해결](docs/troubleshooting.md)
+## 설치
 
-## 왜 이 패키지를 사용해야 하나요?
-
-Unity 게임에서 UI를 관리하다 보면 직접 참조의 난맥, 분산된 열기/닫기 로직, 수동 생명주기 관리 등의 문제에 부딪힙니다. 이 **UI Service**는 이러한 문제를 해결합니다:
-
-| 문제점 | 해결책 |
-|--------|--------|
-| **분산된 UI 로직** | 중앙 집중식 서비스로 UI 생명주기 관리 (로드 -> 열기 -> 닫기 -> 언로드) |
-| **메모리 관리 복잡성** | Addressables 통합으로 자동 에셋 로드/언로드 |
-| **경직된 UI 계층 구조** | 유연한 깊이 정렬이 가능한 레이어 기반 구성 |
-| **중복 보일러플레이트** | 상속의 복잡성 없이 동작을 확장하는 피처 조합 시스템 |
-| **복잡한 비동기 로딩** | 취소 지원이 포함된 UniTask 기반 비동기 작업 |
-| **UI 상태 파악 불가** | 실시간 분석, 계층 구조 디버깅, 설정을 위한 에디터 윈도우 |
-| **어려운 테스팅** | 주입 가능한 인터페이스(`IUiService`, `IUiAssetLoader`)와 내장 로더로 쉬운 모킹 |
-
-**프로덕션 검증 완료:** WebGL, 모바일, 데스크톱을 지원하는 실제 게임에서 사용 중. 핫 패스에서 프레임당 할당 제로.
-
-### 주요 기능
-
-- **UI Model-View-Presenter 패턴** - 생명주기 관리가 포함된 깔끔한 UI 로직 분리
-- **UI Toolkit 지원** - uGUI와 UI Toolkit 모두 호환
-- **피처 조합** - 프레젠터 동작을 확장하는 모듈식 피처 시스템
-- **비동기 로딩** - UniTask 지원으로 UI 에셋을 비동기적으로 로드
-- **UI 그룹 구성** - 깊이 레이어별로 UI 요소를 구성하고 일괄 작업 수행
-- **메모리 관리** - Unity의 Addressables 시스템으로 효율적인 UI 에셋 로드/언로드
-- **분석 및 성능 추적** - 의존성 주입을 활용한 선택적 분석 시스템
-- **에디터 도구** - 디버깅 및 모니터링을 위한 강력한 에디터 윈도우
-- **반응형 디자인** - 기기 세이프 영역 내장 지원 (예: iPhone 다이나믹 아일랜드)
-
----
-
-## 시스템 요구 사항
-
-- **[Unity](https://unity.com/download)** (v6.0+) - 패키지 실행 환경
-- **[Unity Addressables](https://docs.unity3d.com/Packages/com.unity.addressables@latest)** (v2.6.0+) - 비동기 에셋 로딩
-- **[UniTask](https://github.com/Cysharp/UniTask)** (v2.5.10+) - 효율적인 비동기 작업
-
-Unity Package Manager를 통해 설치하면 종속성이 자동으로 해결됩니다.
-
-### 호환성 매트릭스
-
-| Unity 버전 | 상태 | 비고 |
-|------------|------|------|
-| 6000.3.x (Unity 6) | 완전 테스트 | 주요 개발 대상 |
-| 6000.0.x (Unity 6) | 완전 테스트 | 완전 지원 |
-| 2022.3 LTS | 미테스트 | 약간의 조정이 필요할 수 있음 |
-
-| 플랫폼 | 상태 | 비고 |
-|---------|------|------|
-| Standalone (Windows/Mac/Linux) | 지원 | 모든 기능 지원 |
-| WebGL | 지원 | UniTask 필요 (Task.Delay 사용 불가) |
-| Mobile (iOS/Android) | 지원 | 모든 기능 지원 |
-| Console | 미테스트 | Addressables 설정으로 작동할 것으로 예상 |
-
-## 설치 방법
-
-### Unity Package Manager (권장)
-
-1. Unity Package Manager 열기 (`Window` -> `Package Manager`)
-2. `+` 버튼 클릭 후 `Add package from git URL` 선택
-3. 다음 URL 입력:
-   ```
-   https://github.com/geuneda/geuneda-uiservice.git
-   ```
-
-### manifest.json으로 설치
-
-프로젝트의 `Packages/manifest.json`에 다음을 추가:
+UniTask 는 Unity 레지스트리에 없어서 의존성으로 자동 설치되지 않습니다. `Packages/manifest.json` 에 UniTask 와 이 패키지를 함께 추가합니다.
 
 ```json
 {
   "dependencies": {
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.geuneda.uiservice": "https://github.com/geuneda/geuneda-uiservice.git"
   }
 }
 ```
 
----
-
-## 문서
-
-| 문서 | 설명 |
-|------|------|
-| [시작하기](docs/getting-started.md) | 설치, 설정, 첫 프레젠터 만들기 |
-| [핵심 개념](docs/core-concepts.md) | 프레젠터, 레이어, 세트, 피처 |
-| [API 레퍼런스](docs/api-reference.md) | 전체 API 문서 |
-| [고급 주제](docs/advanced.md) | 분석, 성능, 헬퍼 뷰 |
-| [문제 해결](docs/troubleshooting.md) | 자주 발생하는 문제와 해결법 |
-
-## 패키지 구조
-
-```
-Runtime/
-├── Loaders/
-│   ├── IUiAssetLoader.cs          # 에셋 로딩 인터페이스
-│   ├── AddressablesUiAssetLoader.cs # Addressables 구현
-│   ├── PrefabRegistryUiAssetLoader.cs # 프리팹 직접 참조
-│   └── ResourcesUiAssetLoader.cs # Resources.Load 구현
-├── IUiService.cs          # 공개 API 인터페이스
-├── UiService.cs           # 핵심 구현
-├── UiPresenter.cs         # 기본 프레젠터 클래스
-├── UiConfigs.cs           # 설정용 ScriptableObject
-├── Features/              # 조합 가능한 피처
-│   ├── TimeDelayFeature.cs
-│   ├── AnimationDelayFeature.cs
-│   └── UiToolkitPresenterFeature.cs
-└── Views/                 # 헬퍼 컴포넌트
-
-Editor/
-├── UiConfigsEditor.cs     # 향상된 인스펙터
-├── UiAnalyticsWindow.cs   # 성능 모니터링
-└── UiServiceHierarchyWindow.cs  # 실시간 디버깅
-```
-
-### 주요 파일
-
-| 컴포넌트 | 역할 |
-|----------|------|
-| **IUiService** | 모든 UI 작업을 위한 공개 API |
-| **UiService** | 생명주기, 레이어, 상태를 관리하는 핵심 구현 |
-| **UiPresenter** | 생명주기 훅이 포함된 모든 UI 뷰의 기본 클래스 |
-| **UiConfigs** | UI 설정과 세트를 저장하는 ScriptableObject |
-| **PrefabRegistryConfig** | 주소 키를 UI 프리팹에 매핑하여 직접 참조 |
-| **IUiAssetLoader** | 커스텀 에셋 로딩 전략을 위한 인터페이스 |
-| **AddressablesUiAssetLoader** | 비동기 로딩을 위한 Addressables 통합 처리 |
-| **PrefabRegistryUiAssetLoader** | 프리팹 직접 참조를 위한 간단한 로더 |
-| **ResourcesUiAssetLoader** | Unity Resources 폴더에서 UI 로드 |
-| **PresenterFeatureBase** | 조합 가능한 프레젠터 동작의 기본 클래스 |
-| **UiInstanceId** | 같은 프레젠터 타입의 다중 인스턴스 지원 |
-
----
+Package Manager 의 `+` > `Add package from git URL` 에 위 URL 을 넣어도 됩니다. 특정 버전에 고정하려면 URL 끝에 `#<태그>` 를 붙입니다(레포에 실제로 있는 태그만 쓸 수 있습니다). Addressables 는 Unity 레지스트리에서 자동으로 설치됩니다.
 
 ## 빠른 시작
 
-### 1. UI 설정 생성
+1. 프레젠터 스크립트를 만듭니다.
 
-1. Project View에서 우클릭
-2. `Create` -> `ScriptableObjects` -> `Configs` -> `UiConfigs` 이동
-3. 생성된 에셋에서 UI 프레젠터 설정
+   ```csharp
+   using Geuneda.UiService;
+   using UnityEngine;
+   using UnityEngine.UI;
 
-### 2. UI Service 초기화
+   public class MainMenuPresenter : UiPresenter
+   {
+       [SerializeField] private Button _playButton;
 
-```csharp
-using UnityEngine;
-using Geuneda.UiService;
+       protected override void OnInitialized()
+       {
+           _playButton.onClick.AddListener(() => Close(destroy: false));
+       }
 
-public class GameInitializer : MonoBehaviour
-{
-    [SerializeField] private UiConfigs _uiConfigs;
-    private IUiServiceInit _uiService;
+       protected override void OnOpened()
+       {
+           Debug.Log("메인 메뉴 열림");
+       }
+   }
+   ```
 
-    void Start()
-    {
-        _uiService = new UiService();
-        _uiService.Init(_uiConfigs);
-    }
-}
-```
+2. 루트 GameObject 에 `Canvas` 와 `MainMenuPresenter` 를 붙인 프리팹을 만들고 Addressable 로 표시합니다.
+3. `Create > ScriptableObjects > Configs > UiConfigs > Addressables` 로 `AddressablesUiConfigs` 에셋을 만듭니다(또는 `Tools > UI Service > Select UiConfigs`). 인스펙터를 열면 Addressable 그룹에서 `UiPresenter` 가 붙은 프리팹을 찾아 설정 목록을 자동으로 채웁니다.
+4. 서비스를 초기화하고 UI 를 엽니다.
 
-### 3. 첫 번째 UI Presenter 만들기
+   ```csharp
+   using Cysharp.Threading.Tasks;
+   using Geuneda.UiService;
+   using UnityEngine;
 
-```csharp
-using UnityEngine;
-using Geuneda.UiService;
+   public class GameBootstrap : MonoBehaviour
+   {
+       [SerializeField] private UiConfigs _uiConfigs;
+       private IUiServiceInit _uiService;
 
-public class MainMenuPresenter : UiPresenter
-{
-    [SerializeField] private Button _playButton;
+       private void Start()
+       {
+           _uiService = new UiService();      // 기본 로더: AddressablesUiAssetLoader
+           _uiService.Init(_uiConfigs);
+           OpenMainMenuAsync().Forget();
+       }
 
-    protected override void OnInitialized()
-    {
-        _playButton.onClick.AddListener(OnPlayClicked);
-    }
+       private async UniTaskVoid OpenMainMenuAsync()
+       {
+           await _uiService.OpenUiAsync<MainMenuPresenter>();
+       }
 
-    protected override void OnOpened()
-    {
-        Debug.Log("메인 메뉴가 열렸습니다!");
-    }
+       private void OnDestroy()
+       {
+           _uiService?.Dispose();
+       }
+   }
+   ```
 
-    protected override void OnClosed()
-    {
-        Debug.Log("메인 메뉴가 닫혔습니다!");
-    }
+자세한 단계는 [시작하기](docs/getting-started.md)를 참고하세요.
 
-    private void OnPlayClicked()
-    {
-        Close(destroy: false);
-    }
-}
-```
+## 핵심 개념
 
-### 4. UI 열기 및 관리
+| 개념 | 요약 |
+|------|------|
+| `IUiService` / `IUiServiceInit` | UI 를 다루는 공개 API 와, 여기에 `Init(UiConfigs)` 와 `Dispose()` 를 더한 소유자용 인터페이스 |
+| `UiPresenter`, `UiPresenter<T>` | 모든 UI 의 기본 클래스. `OnInitialized`, `OnOpened`, `OnClosed` 등 생명주기 훅과 struct 데이터 바인딩 제공 |
+| 레이어 | `UiConfig.Layer` 값이 프리팹 루트의 `Canvas.sortingOrder` 또는 `UIDocument.sortingOrder` 로 설정됨 |
+| UI 세트 | 여러 프레젠터를 묶어 `OpenUiSetAsync`, `CloseAllUiSet`, `UnloadUiSet` 으로 일괄 처리 |
+| 다중 인스턴스 | `UiInstanceId`(타입 + 인스턴스 주소)로 같은 프레젠터 타입을 여러 개 띄움 |
+| 피처 | `PresenterFeatureBase` 컴포넌트를 프리팹에 붙여 동작을 확장. `TimeDelayFeature`, `AnimationDelayFeature`, `UiToolkitPresenterFeature`, `UiToolkitPanelRendererFeature`(Unity 6.5+) 기본 제공 |
+| 에셋 로더 | `IUiAssetLoader` 구현을 `UiService` 생성자에 주입. `AddressablesUiAssetLoader`(기본), `ResourcesUiAssetLoader`, `PrefabRegistryUiAssetLoader` 기본 제공 |
+| 헬퍼 뷰 | `Geuneda.UiService.Views` 의 `SafeAreaHelperView`, `NonDrawingView`, `AdjustScreenSizeFitterView`, `InteractableTextView` |
+| 에디터 도구 | `Tools > UI Service` 메뉴의 `Select UiConfigs`, `Layer Visualizer`, `Presenter Manager` |
 
-```csharp
-// UI 열기
-var mainMenu = await _uiService.OpenUiAsync<MainMenuPresenter>();
+## 문서
 
-// 표시 여부 확인
-if (_uiService.IsVisible<MainMenuPresenter>())
-{
-    Debug.Log("메인 메뉴가 표시 중입니다");
-}
+| 문서 | 내용 |
+|------|------|
+| [시작하기](docs/getting-started.md) | 설치, 설정 에셋, 프리팹 준비, 첫 프레젠터 |
+| [핵심 개념](docs/core-concepts.md) | 생명주기, 피처, 레이어, 세트, 다중 인스턴스, 설정, 에디터 도구 |
+| [API 레퍼런스](docs/api-reference.md) | 공개 API 시그니처와 동작 |
+| [고급 주제](docs/advanced.md) | 헬퍼 뷰, 커스텀 로더, 로딩 전략 |
+| [문제 해결](docs/troubleshooting.md) | 자주 겪는 문제와 해결 방법 |
+| [문서 색인](docs/README.md) | 아키텍처 개요와 패키지 구조 |
 
-// UI 닫기
-_uiService.CloseUi<MainMenuPresenter>();
-```
+변경 이력은 [CHANGELOG.md](CHANGELOG.md)에 있습니다.
 
-전체 설정 가이드는 [시작하기](docs/getting-started.md)를 참조하세요.
+## 요구 사항과 의존성
 
----
+- Unity 6000.0 이상 (`UiToolkitPanelRendererFeature` 는 Unity 6000.5 이상에서만 컴파일됩니다)
+- `com.unity.addressables` 2.6.0
+- `com.cysharp.unitask` 2.5.10
+- 헬퍼 뷰는 uGUI(`UnityEngine.UI`)와 TextMeshPro(`TMPro`)를 사용합니다. Unity 6 에서는 `com.unity.ugui` 에 TextMeshPro 가 포함되어 있습니다. 이 의존성은 `package.json` 에 선언되어 있지 않으므로 프로젝트에 `com.unity.ugui` 가 있어야 합니다.
 
-## 라이센스
+## 라이선스
 
-이 프로젝트는 MIT License에 따라 라이센스됩니다. 자세한 내용은 [LICENSE.md](LICENSE.md) 파일을 참조하세요.
+MIT License. 자세한 내용은 [LICENSE.md](LICENSE.md)를 참고하세요.
 
 원본 저작권: Miguel Tomas (GameLovers)

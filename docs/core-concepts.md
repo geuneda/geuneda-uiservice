@@ -1,270 +1,95 @@
 # 핵심 개념
 
-이 문서에서는 UI Service의 기본 개념인 프레젠터, 레이어, 세트, 피처, 설정에 대해 다룹니다.
-
-## 목차
-
-- [에디터 윈도우](#에디터-윈도우)
 - [서비스 인터페이스](#서비스-인터페이스)
-- [UI 프레젠터](#ui-프레젠터)
+- [프레젠터와 생명주기](#프레젠터와-생명주기)
 - [프레젠터 피처](#프레젠터-피처)
 - [UI 레이어](#ui-레이어)
 - [UI 세트](#ui-세트)
-- [멀티 인스턴스 지원](#멀티-인스턴스-지원)
+- [다중 인스턴스](#다중-인스턴스)
 - [UI 설정](#ui-설정)
-
----
-
-## 에디터 윈도우
-
-패키지에는 개발 및 디버깅을 위한 통합 도구가 포함되어 있습니다.
-
-### Presenter Manager 윈도우
-
-**메뉴:** `Tools → UI Service → Presenter Manager`
-
-플레이 모드에서 활성 및 로드된 UI 프레젠터를 실시간으로 관리합니다:
-- 모든 로드된 프레젠터와 현재 상태(열림/닫힘) 확인
-- 인스턴스별 빠른 열기/닫기/언로드 작업
-- 일괄 작업: 모두 닫기, 모두 언로드
-- 상태 표시기: 🟢 열림, 🔴 닫힘
-
-### UiConfigs 인스펙터
-
-**메뉴:** `Tools → UI Service → Select Ui Configs`
-
-`UiConfigs` 에셋을 선택하면 향상된 인스펙터를 볼 수 있습니다:
-- 시각적 레이어 계층 구조
-- 색상 코딩된 레이어
-- 드래그 앤 드롭 재정렬
-- 통계 패널
-- UI 세트 관리
+- [에디터 도구](#에디터-도구)
 
 ---
 
 ## 서비스 인터페이스
 
-UI Service는 서로 다른 사용 사례를 위해 **두 가지 인터페이스**를 노출합니다:
+| 타입 | 용도 |
+|------|------|
+| `IUiService` | UI 를 소비하는 쪽. 로드/열기/닫기/언로드/조회 |
+| `IUiServiceInit : IUiService, IDisposable` | 서비스를 소유하는 쪽. `Init(UiConfigs)` 와 `Dispose()` 추가 |
+| `UiService : IUiServiceInit` | 구현. 인스턴스 주소를 받는 추가 오버로드 제공 |
 
-| 인터페이스 | 목적 | 주요 메서드 |
-|-----------|------|-----------|
-| `IUiService` | 서비스 **소비** | `OpenUiAsync`, `CloseUi`, `LoadUiAsync`, `UnloadUi`, `IsVisible`, `GetUi` |
-| `IUiServiceInit` | 서비스 **초기화** | `IUiService` 상속 + `Init(UiConfigs)`, `Dispose()` |
-
-### 각 인터페이스를 언제 사용할까
-
-**`IUiServiceInit`을 사용할 때:**
-- `UiService` 인스턴스를 직접 생성하고 소유할 때
-- `Init(UiConfigs)`을 호출하여 초기화할 때
-- `Dispose()`를 호출하여 정리할 때
-
-**`IUiService`를 사용할 때:**
-- 의존성 주입을 통해 서비스를 받을 때
-- UI를 열기/닫기/쿼리만 할 때
-- 서비스 생명주기를 관리하지 않을 때
-
-### 올바른 초기화 패턴
+서비스를 만든 곳은 `IUiServiceInit` 으로 들고 `Init()`/`Dispose()` 를 호출하고, 나머지 코드에는 `IUiService` 만 넘기는 구성을 권장합니다.
 
 ```csharp
-using UnityEngine;
-using GameLovers.UiService;
+using Geuneda.UiService;
 
-public class GameInitializer : MonoBehaviour
-{
-    [SerializeField] private UiConfigs _uiConfigs;
-
-    // IUiServiceInit 사용 - Init()과 Dispose()가 필요합니다
-    private IUiServiceInit _uiService;
-
-    void Start()
-    {
-        _uiService = new UiService();
-        _uiService.Init(_uiConfigs);  // IUiServiceInit에서 사용 가능
-    }
-
-    void OnDestroy()
-    {
-        _uiService?.Dispose();  // IUiServiceInit에서 사용 가능
-    }
-}
-```
-
-### 흔한 실수
-
-```csharp
-// IUiService에는 Init()이 없습니다
-private IUiService _uiService;
-
-void Start()
-{
-    _uiService = new UiService();
-    _uiService.Init(_uiConfigs);  // CS1061: 'IUiService'에 'Init'이 포함되어 있지 않습니다
-}
-```
-
-### 의존성 주입 패턴
-
-```csharp
-// 서비스 로케이터 또는 DI 컨테이너에서 IUiServiceInit으로 등록
-public class ServiceLocator
+public class UiInstaller
 {
     private IUiServiceInit _uiService;
 
-    public void Initialize(UiConfigs configs)
+    public IUiService Service => _uiService;
+
+    public void Install(UiConfigs configs)
     {
         _uiService = new UiService();
         _uiService.Init(configs);
     }
 
-    // 소비자는 IUiService를 받습니다 (Init/Dispose 접근 불가)
-    public IUiService GetUiService() => _uiService;
-
-    public void Shutdown()
+    public void Uninstall()
     {
         _uiService?.Dispose();
     }
 }
-
-// 소비자 클래스는 IUiService만 필요합니다
-public class ShopController
-{
-    private readonly IUiService _uiService;
-
-    public ShopController(IUiService uiService)
-    {
-        _uiService = uiService;
-    }
-
-    public async void OpenShop()
-    {
-        await _uiService.OpenUiAsync<ShopPresenter>();
-    }
-}
 ```
+
+`IUiService` 로 선언한 변수에는 `Init()` 이 없습니다. 인스턴스 주소를 받는 오버로드 중 `CloseUi(Type, string, bool)` 과 `UnloadUi(Type, string)` 만 `IUiService` 에 있고, 나머지(`GetUi<T>(string)`, `IsVisible<T>(string)`, `LoadUiAsync(Type, string, ...)`, `OpenUiAsync(Type, string, ...)`, `AddUi<T>(T, int, string, bool)`, `RemoveUi(Type, string)`)는 `UiService` 에만 있습니다.
 
 ---
 
-## UI 프레젠터
+## 프레젠터와 생명주기
 
-`UiPresenter`는 시스템 내 모든 UI 요소의 기본 클래스입니다. 생명주기 관리와 서비스 통합을 제공합니다.
+`UiPresenter` 는 `MonoBehaviour` 이며 프리팹 루트에 붙입니다. 데이터가 필요하면 `UiPresenter<T>`(`T : struct`)를 상속하고, `Data` 에 값을 대입할 때마다 `OnSetData()` 가 호출됩니다.
 
-### 생명주기 훅
+### 생명주기 순서
 
-| 메서드 | 호출 시점 | 용도 |
-|--------|----------|------|
-| `OnInitialized()` | 처음 로드될 때 한 번 | 설정, 이벤트 구독 |
-| `OnOpened()` | UI가 표시될 때마다 | 애니메이션, 데이터 새로고침 |
-| `OnClosed()` | UI가 숨겨질 때 | 정리, 상태 저장 |
-| `OnOpenTransitionCompleted()` | 모든 전환 피처가 열기를 완료한 후 | 전환 후 로직, 상호작용 활성화 |
-| `OnCloseTransitionCompleted()` | 모든 전환 피처가 닫기를 완료한 후 | 전환 후 정리 |
+서비스에 추가될 때(`LoadUiAsync`, `OpenUiAsync` 의 로드 단계, `AddUi`):
 
-> **참고**: `OnOpenTransitionCompleted()`와 `OnCloseTransitionCompleted()`는 전환 피처가 없는 프레젠터에서도 **항상 호출**됩니다. 모든 프레젠터에 일관된 생명주기를 제공합니다.
+1. 인스턴스화 후 `SetActive(false)` (`AddUi` 는 인스턴스화와 비활성화를 하지 않음)
+2. 레이어를 `Canvas`/`UIDocument` sortingOrder 에 반영
+3. 루트의 `PresenterFeatureBase` 컴포넌트를 모아 각 피처의 `OnPresenterInitialized(presenter)`
+4. `OnInitialized()`
 
-### 전환 태스크
+열기:
 
-프레젠터는 외부 대기를 위한 공개 `UniTask` 프로퍼티를 노출합니다:
+1. 피처 `OnPresenterOpening()`
+2. `gameObject.SetActive(true)`
+3. `OnOpened()`
+4. 피처 `OnPresenterOpened()`
+5. 모든 `ITransitionFeature.OpenTransitionTask` 대기
+6. `OnOpenTransitionCompleted()` (전환 피처가 없어도 호출)
 
-```csharp
-// 프레젠터가 완전히 열릴 때까지 대기 (전환 포함)
-await presenter.OpenTransitionTask;
+닫기:
 
-// 프레젠터가 완전히 닫힐 때까지 대기 (전환 포함)
-await presenter.CloseTransitionTask;
-```
+1. 피처 `OnPresenterClosing()`
+2. `OnClosed()`
+3. 피처 `OnPresenterClosed()`
+4. 모든 `ITransitionFeature.CloseTransitionTask` 대기
+5. `gameObject.SetActive(false)`
+6. `OnCloseTransitionCompleted()` (전환 피처가 없어도 호출)
+7. `destroy: true` 였다면 `UnloadUi(type, instanceAddress)`
 
-### 기본 프레젠터
+주의할 점:
 
-```csharp
-public class BasicPopup : UiPresenter
-{
-    protected override void OnInitialized()
-    {
-        // 프레젠터가 처음 로드될 때 호출됩니다
-        // UI 요소 설정, 이벤트 구독
-    }
-
-    protected override void OnOpened()
-    {
-        // UI가 표시될 때마다 호출됩니다
-        // 애니메이션 시작, 데이터 새로고침
-    }
-
-    protected override void OnClosed()
-    {
-        // UI가 숨겨질 때 호출됩니다
-        // 애니메이션 중지, 상태 저장
-    }
-}
-```
-
-### 데이터 기반 프레젠터
-
-초기화 데이터가 필요한 UI에는 `UiPresenter<T>`를 사용합니다:
-
-```csharp
-public struct QuestData
-{
-    public int QuestId;
-    public string Title;
-    public string Description;
-}
-
-public class QuestPresenter : UiPresenter<QuestData>
-{
-    [SerializeField] private Text _titleText;
-    [SerializeField] private Text _descriptionText;
-
-    protected override void OnSetData()
-    {
-        // Data가 할당될 때마다 자동으로 호출됩니다
-        _titleText.text = Data.Title;
-        _descriptionText.text = Data.Description;
-    }
-}
-
-// 사용법 - 열기 시 초기 데이터
-var questData = new QuestData { QuestId = 1, Title = "Dragon Slayer", Description = "..." };
-await _uiService.OpenUiAsync<QuestPresenter, QuestData>(questData);
-```
-
-### 동적 데이터 업데이트
-
-`UiPresenter<T>`의 `Data` 프로퍼티는 할당 시 자동으로 `OnSetData()`를 트리거하는 **공개 setter**를 가지고 있습니다. 이를 통해 닫기와 다시 열기 없이 언제든지 UI 데이터를 업데이트할 수 있습니다:
-
-```csharp
-// 프레젠터를 가져와서 데이터를 직접 업데이트
-var questPresenter = _uiService.GetUi<QuestPresenter>();
-
-// OnSetData()가 자동으로 호출됩니다
-questPresenter.Data = new QuestData
-{
-    QuestId = 2,
-    Title = "Updated Quest",
-    Description = "New description"
-};
-```
-
-> **참고**: `Data` 설정은 `OpenUiAsync`를 통한 초기 열기 시든 이후 데이터 업데이트 시든 항상 `OnSetData()`를 호출합니다. 데이터 기반 프레젠터에 일관된 생명주기를 제공합니다.
-
-### 내부에서 닫기
-
-프레젠터는 스스로를 닫을 수 있습니다:
+- `OpenUiAsync` 와 `CloseUi` 는 전환을 기다리지 않습니다. 전환 완료를 기다리려면 `presenter.OpenTransitionTask` / `presenter.CloseTransitionTask` 를 `await` 합니다.
+- `IsVisible<T>()` 는 서비스의 표시 목록 기준이고, `presenter.IsOpen` 은 `gameObject.activeSelf` 기준입니다. 닫기 전환 중에는 `IsVisible` 이 이미 `false` 이고 `IsOpen` 은 아직 `true` 입니다.
+- 프레젠터 내부에서는 `Close(bool destroy)` 로 자기 자신을 닫습니다. 자신의 인스턴스 주소를 사용하므로 다중 인스턴스에서도 해당 인스턴스만 닫힙니다.
 
 ```csharp
 public class ConfirmPopup : UiPresenter
 {
-    public void OnConfirmClicked()
-    {
-        // 닫기 (메모리에 유지)
-        Close(destroy: false);
-    }
-
-    public void OnCancelClicked()
-    {
-        // 닫기 및 메모리에서 언로드
-        // 멀티 인스턴스 프레젠터에서도 올바르게 작동합니다
-        Close(destroy: true);
-    }
+    public void OnConfirmClicked() => Close(destroy: false);  // 숨기기
+    public void OnCancelClicked() => Close(destroy: true);    // 닫은 뒤 언로드
 }
 ```
 
@@ -272,180 +97,80 @@ public class ConfirmPopup : UiPresenter
 
 ## 프레젠터 피처
 
-UI Service는 상속 복잡성 없이 프레젠터 동작을 확장하기 위해 **피처 기반 조합 시스템**을 사용합니다.
+피처는 프레젠터 프리팹의 **같은 GameObject** 에 붙인 `PresenterFeatureBase` 컴포넌트입니다(`GetComponents` 로 수집하므로 자식 오브젝트의 피처는 무시됩니다). `ITransitionFeature` 를 구현한 피처는 프레젠터가 전환 태스크를 기다립니다.
 
-### 전환 피처
+### 기본 제공 피처
 
-`ITransitionFeature`를 구현하는 피처는 열기/닫기 전환 딜레이를 제공합니다. 프레젠터는 다음 작업 전에 자동으로 모든 전환 피처를 대기합니다:
-- `OnOpenTransitionCompleted()` 호출 (열기 후)
-- GameObject 숨기기 및 `OnCloseTransitionCompleted()` 호출 (닫기 후)
+| 피처 | 동작 | 설정 |
+|------|------|------|
+| `TimeDelayFeature` | 열린 뒤 `_openDelayInSeconds`(기본 0.5), 닫기 시작 시 `_closeDelayInSeconds`(기본 0.3)만큼 전환 대기 | 인스펙터의 두 딜레이 값. 파생 클래스에서 `OnOpenStarted`, `OnOpenedCompleted`, `OnCloseStarted`, `OnClosedCompleted` 재정의 가능 |
+| `AnimationDelayFeature` | 열린 뒤 인트로 클립, 닫기 시작 시 아웃트로 클립을 `Animation` 컴포넌트로 재생하고 클립 길이만큼 대기 | `Animation` 컴포넌트 필요(`RequireComponent`), 인트로/아웃트로 클립. 클립이 없으면 해당 전환은 즉시 완료 |
+| `UiToolkitPresenterFeature` | `UIDocument` 의 비주얼 트리가 준비되면 콜백 호출 | `UIDocument` 필요(`RequireComponent`) |
+| `UiToolkitPanelRendererFeature` | Unity 6000.5 이상 전용. `PanelRenderer` 의 UI 리로드 콜백으로 루트를 받아 같은 API 로 전달 | `PanelRenderer` 필요. `#if UNITY_6000_5_OR_NEWER` 안에서만 컴파일 |
 
-이를 통해 가시성이 단일 지점(`UiPresenter`)에서 제어되고 전환이 적절히 조율됩니다.
+`AnimationDelayFeature` 는 레거시 `Animation` 컴포넌트를 사용합니다. `Animator` 는 지원하지 않습니다.
 
-### 내장 피처
+### UI Toolkit
 
-#### TimeDelayFeature
-
-UI 열기와 닫기에 시간 기반 딜레이를 추가합니다. `ITransitionFeature`를 구현합니다:
-
-```csharp
-[RequireComponent(typeof(TimeDelayFeature))]
-public class DelayedPopup : UiPresenter
-{
-    [SerializeField] private TimeDelayFeature _delayFeature;
-
-    protected override void OnOpened()
-    {
-        base.OnOpened();
-        Debug.Log($"Opening with {_delayFeature.OpenDelayInSeconds}s delay...");
-    }
-
-    protected override void OnOpenTransitionCompleted()
-    {
-        Debug.Log("Opening delay completed - UI is ready!");
-    }
-
-    protected override void OnCloseTransitionCompleted()
-    {
-        Debug.Log("Closing delay completed!");
-    }
-}
-```
-
-**인스펙터 설정:**
-- `Open Delay In Seconds` - 열기 후 대기 시간 (기본값: 0.5초)
-- `Close Delay In Seconds` - 닫기 전 대기 시간 (기본값: 0.3초)
-
-#### AnimationDelayFeature
-
-UI 생명주기를 애니메이션 클립과 동기화합니다. `ITransitionFeature`를 구현합니다:
+`UIDocument` 는 GameObject 가 비활성화됐다가 다시 활성화되면 비주얼 요소를 새로 만듭니다. 그래서 `OnInitialized()` 에서 `rootVisualElement` 를 직접 쿼리하지 말고 `AddVisualTreeAttachedListener` 로 콜백을 등록합니다. 콜백은 트리가 이미 준비돼 있으면 즉시, 그리고 열 때마다 호출되며 한 번 여는 동안 여러 번 호출될 수 있습니다. 콜백은 여러 번 불려도 안전하게 작성합니다.
 
 ```csharp
-[RequireComponent(typeof(AnimationDelayFeature))]
-public class AnimatedPopup : UiPresenter
-{
-    [SerializeField] private AnimationDelayFeature _animationFeature;
+using Geuneda.UiService;
+using UnityEngine;
+using UnityEngine.UIElements;
 
-    protected override void OnOpenTransitionCompleted()
-    {
-        Debug.Log("Intro animation completed - UI is ready!");
-    }
-
-    protected override void OnCloseTransitionCompleted()
-    {
-        Debug.Log("Outro animation completed!");
-    }
-}
-```
-
-**인스펙터 설정:**
-- `Animation Component` - 자동 감지 또는 수동 할당
-- `Intro Animation Clip` - 열기 시 재생
-- `Outro Animation Clip` - 닫기 시 재생
-
-#### UiToolkitPresenterFeature
-
-안전한 비주얼 트리 처리와 함께 UI Toolkit (UI Elements) 통합을 제공합니다.
-
-> **주의:** UI Toolkit은 프레젠터 GameObject가 비활성화/재활성화될 때 **비주얼 요소를 재생성**합니다. `AddVisualTreeAttachedListener`를 통해 등록된 콜백은 이를 처리하기 위해 **매번 열기 시** 호출됩니다.
-
-> **Unity 6.5+ (PanelRenderer):** Unity 6.5(6000.5)부터 `UIDocument`를 대체하는 `PanelRenderer`를 쓰려면 동일 API 의 `UiToolkitPanelRendererFeature`를 대신 부착하세요. `Document`(UIDocument) 대신 `Panel`(PanelRenderer)을 노출하는 점만 다르고, `AddVisualTreeAttachedListener` 사용법은 동일합니다. PanelRenderer 는 `rootVisualElement`가 없어 `RegisterUIReloadCallback`으로 루트를 받습니다. `#if UNITY_6000_5_OR_NEWER`로 가드되어 6.5 미만에서는 컴파일되지 않습니다.
-
-**프로퍼티:**
-- `Document` - 연결된 `UIDocument`
-- `Root` - 루트 `VisualElement` (패널 연결 전에는 null일 수 있음)
-
-**메서드:**
-- `AddVisualTreeAttachedListener(callback)` - 비주얼 트리가 준비되면 호출되는 콜백을 등록합니다. 요소 재생성을 처리하기 위해 매번 열기 시 호출됩니다.
-- `RemoveVisualTreeAttachedListener(callback)` - 이전에 등록된 콜백을 제거합니다.
-
-**권장 패턴:**
-
-요소가 매번 열기 시 재생성될 수 있으므로, 새 요소를 쿼리하고 등록하기 전에 항상 이전 요소에서 등록을 해제하세요:
-
-```csharp
 [RequireComponent(typeof(UiToolkitPresenterFeature))]
-public class UIToolkitMenu : UiPresenter
+public class SettingsPresenter : UiPresenter
 {
     [SerializeField] private UiToolkitPresenterFeature _toolkitFeature;
 
-    private Button _playButton;
+    private Button _closeButton;
 
     protected override void OnInitialized()
     {
-        _toolkitFeature.AddVisualTreeAttachedListener(SetupUI);
+        _toolkitFeature.AddVisualTreeAttachedListener(SetupUi);
     }
 
-    private void SetupUI(VisualElement root)
+    private void SetupUi(VisualElement root)
     {
-        // 1. 이전 요소에서 등록 해제 (닫기/재열기 후 오래된 것일 수 있음)
-        _playButton?.UnregisterCallback<ClickEvent>(OnPlayClicked);
+        // 이전 요소의 등록을 먼저 해제하고 새 요소에 다시 등록합니다
+        if (_closeButton != null)
+        {
+            _closeButton.clicked -= OnCloseClicked;
+        }
 
-        // 2. 새 요소 쿼리
-        _playButton = root.Q<Button>("play-button");
+        _closeButton = root.Q<Button>("close-button");
 
-        // 3. 현재 요소에 등록
-        _playButton?.RegisterCallback<ClickEvent>(OnPlayClicked);
+        if (_closeButton != null)
+        {
+            _closeButton.clicked += OnCloseClicked;
+        }
     }
 
-    private void OnPlayClicked(ClickEvent evt)
-    {
-        // 클릭 처리
-    }
-
-    private void OnDestroy()
-    {
-        _playButton?.UnregisterCallback<ClickEvent>(OnPlayClicked);
-    }
+    private void OnCloseClicked() => Close(destroy: false);
 }
 ```
 
-### 여러 피처 조합
+`UiToolkitPanelRendererFeature` 는 `Document` 대신 `Panel`(`PanelRenderer`)을 노출하는 점만 다르고 `Root`, `AddVisualTreeAttachedListener`, `RemoveVisualTreeAttachedListener` 사용법은 같습니다. 서비스의 레이어 정렬은 `Canvas` 와 `UIDocument` 에만 적용되고 `PanelRenderer` 에는 적용되지 않습니다.
 
-피처는 자유롭게 조합할 수 있습니다:
-
-```csharp
-[RequireComponent(typeof(TimeDelayFeature))]
-[RequireComponent(typeof(UiToolkitPresenterFeature))]
-public class DelayedUiToolkitPresenter : UiPresenter
-{
-    [SerializeField] private UiToolkitPresenterFeature _toolkitFeature;
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        // 전환 완료까지 UI 비활성화
-        _toolkitFeature.AddVisualTreeAttachedListener(root => root.SetEnabled(false));
-    }
-
-    protected override void OnOpenTransitionCompleted()
-    {
-        // 딜레이 완료 후 UI 활성화
-        _toolkitFeature.Root?.SetEnabled(true);
-    }
-}
-```
-
-### 커스텀 피처 생성
-
-기본 생명주기 훅에는 `PresenterFeatureBase`를 확장합니다. 전환 피처의 경우 `ITransitionFeature`도 구현합니다:
+### 커스텀 피처
 
 ```csharp
 using Cysharp.Threading.Tasks;
+using Geuneda.UiService;
 using UnityEngine;
 
 [RequireComponent(typeof(CanvasGroup))]
 public class FadeFeature : PresenterFeatureBase, ITransitionFeature
 {
     [SerializeField] private CanvasGroup _canvasGroup;
-    [SerializeField] private float _fadeDuration = 0.3f;
+    [SerializeField] private float _duration = 0.3f;
 
-    private UniTaskCompletionSource _openTransitionCompletion;
-    private UniTaskCompletionSource _closeTransitionCompletion;
+    private UniTaskCompletionSource _openCompletion;
+    private UniTaskCompletionSource _closeCompletion;
 
-    // ITransitionFeature 구현
-    public UniTask OpenTransitionTask => _openTransitionCompletion?.Task ?? UniTask.CompletedTask;
-    public UniTask CloseTransitionTask => _closeTransitionCompletion?.Task ?? UniTask.CompletedTask;
+    public UniTask OpenTransitionTask => _openCompletion?.Task ?? UniTask.CompletedTask;
+    public UniTask CloseTransitionTask => _closeCompletion?.Task ?? UniTask.CompletedTask;
 
     public override void OnPresenterOpening()
     {
@@ -454,227 +179,187 @@ public class FadeFeature : PresenterFeatureBase, ITransitionFeature
 
     public override void OnPresenterOpened()
     {
-        FadeInAsync().Forget();
+        // 프레젠터가 태스크를 읽기 전에 CompletionSource 를 만들어 둡니다
+        _openCompletion = new UniTaskCompletionSource();
+        FadeAsync(0f, 1f, _openCompletion).Forget();
     }
 
     public override void OnPresenterClosing()
     {
-        FadeOutAsync().Forget();
+        _closeCompletion = new UniTaskCompletionSource();
+        FadeAsync(1f, 0f, _closeCompletion).Forget();
     }
 
-    private async UniTask FadeInAsync()
+    private async UniTaskVoid FadeAsync(float from, float to, UniTaskCompletionSource completion)
     {
-        _openTransitionCompletion = new UniTaskCompletionSource();
-
-        float elapsed = 0f;
-        while (elapsed < _fadeDuration)
+        var elapsed = 0f;
+        while (elapsed < _duration)
         {
-            _canvasGroup.alpha = elapsed / _fadeDuration;
+            _canvasGroup.alpha = Mathf.Lerp(from, to, elapsed / _duration);
             elapsed += Time.deltaTime;
             await UniTask.Yield();
         }
-        _canvasGroup.alpha = 1f;
 
-        _openTransitionCompletion.TrySetResult();
-    }
-
-    private async UniTask FadeOutAsync()
-    {
-        _closeTransitionCompletion = new UniTaskCompletionSource();
-
-        float elapsed = 0f;
-        while (elapsed < _fadeDuration)
-        {
-            _canvasGroup.alpha = 1f - (elapsed / _fadeDuration);
-            elapsed += Time.deltaTime;
-            await UniTask.Yield();
-        }
-        _canvasGroup.alpha = 0f;
-
-        _closeTransitionCompletion.TrySetResult();
+        _canvasGroup.alpha = to;
+        completion.TrySetResult();
     }
 }
 ```
 
-**사용 가능한 생명주기 훅:**
-- `OnPresenterInitialized(UiPresenter presenter)`
-- `OnPresenterOpening()`
-- `OnPresenterOpened()`
-- `OnPresenterClosing()`
-- `OnPresenterClosed()`
-
-**전환 피처 생성:**
-- 프레젠터가 대기해야 하는 피처에 `ITransitionFeature`를 구현합니다
-- `OpenTransitionTask`와 `CloseTransitionTask`를 `UniTask` 프로퍼티로 노출합니다
-- 전환이 완료되면 `UniTaskCompletionSource`를 사용하여 신호를 보냅니다
-- 프레젠터는 생명주기를 완료하기 전에 모든 `ITransitionFeature` 태스크를 대기합니다
+프레젠터는 `OnPresenterOpened()` 직후, `OnPresenterClosed()` 직후에 전환 태스크를 읽습니다. 그 시점까지 `UniTaskCompletionSource` 를 만들어 두지 않으면 이전 태스크나 완료된 태스크를 읽게 됩니다.
 
 ---
 
 ## UI 레이어
 
-UI 요소는 레이어로 구성되며, 높은 레이어 번호가 위에(카메라에 더 가깝게) 표시됩니다.
-
-### 레이어 구성
-
-```csharp
-// 권장 레이어 구조:
-// 레이어 0: 배경 UI (스카이박스, 패럴랙스)
-// 레이어 1: 게임 HUD (체력바, 미니맵)
-// 레이어 2: 메뉴 (메인 메뉴, 설정)
-// 레이어 3: 팝업 (확인, 보상)
-// 레이어 4: 시스템 메시지 (오류, 로딩)
-// 레이어 5: 디버그 오버레이
-```
-
-### 레이어 작업
-
-```csharp
-// 특정 레이어의 모든 UI 닫기
-_uiService.CloseAllUi(layer: 2);
-
-// 레이어는 UiConfigs에서 프레젠터별로 설정됩니다
-```
-
-### 레이어 작동 방식
-
-- 각 프레젠터는 `UiConfigs`에서 레이어를 할당받습니다
-- `Canvas.sortingOrder` (uGUI) 또는 `UIDocument.sortingOrder` (UI Toolkit)가 자동으로 설정됩니다
-- 높은 레이어가 낮은 레이어 위에 렌더링됩니다
+- 각 `UiConfig.Layer` 값이 프리팹 루트의 `Canvas.sortingOrder` 또는 `UIDocument.sortingOrder` 로 설정됩니다. 값이 클수록 위에 그려집니다.
+- 레이어별 컨테이너 GameObject 는 없습니다. 모든 프레젠터는 `"Ui"` 루트 바로 아래에 생성됩니다.
+- `CloseAllUi(int layer)` 로 한 레이어의 표시 중인 UI 를 모두 닫습니다.
+- `Init()` 은 0 미만 또는 1000 초과 레이어에 경고를 남기지만 막지는 않습니다.
 
 ---
 
 ## UI 세트
 
-관련 UI 요소를 일괄 작업을 위해 그룹화합니다.
-
-### 세트 정의
-
-세트는 `UiConfigs` 에셋에서 정의됩니다. 각 프레젠터는 선택적으로 세트 ID를 통해 세트에 속할 수 있습니다.
-
-```
-세트 0: 핵심 UI (항상 로드됨)
-세트 1: 메인 메뉴 (로고, 메뉴 버튼, 배경)
-세트 2: 게임플레이 (HUD, 미니맵, 채팅)
-세트 3: 상점 (상점 윈도우, 인벤토리, 재화)
-```
-
-### 세트 작업
+UI 세트는 함께 다루는 프레젠터 인스턴스 묶음입니다(`UiSetConfig`: `SetId` + `UiInstanceId[]`).
 
 ```csharp
-// 세트의 모든 UI 로드 (태스크 배열 반환)
-var loadTasks = _uiService.LoadUiSetAsync(setId: 1);
-await UniTask.WhenAll(loadTasks);
+UiPresenter[] opened = await _uiService.OpenUiSetAsync(setId: 2);   // 병렬로 로드 후 열기
+_uiService.CloseAllUiSet(setId: 2);
+_uiService.UnloadUiSet(setId: 2);
 
-// 세트의 모든 UI 닫기
-_uiService.CloseAllUiSet(setId: 1);
+// 열지 않고 미리 로드 (이미 로드된 항목은 건너뜀)
+await UniTask.WhenAll(_uiService.LoadUiSetAsync(setId: 2));
 
-// 메모리에서 세트 언로드
-_uiService.UnloadUiSet(setId: 1);
+// 언로드하지 않고 서비스에서만 제거한 뒤 프레젠터 목록을 돌려받음
+List<UiPresenter> removed = _uiService.RemoveUiSet(setId: 2);
+```
 
-// 세트를 제거하고 제거된 프레젠터 받기
-var removed = _uiService.RemoveUiSet(setId: 2);
-foreach (var presenter in removed)
+### 에디터에서 세트 편집
+
+`UiConfigs` 인스펙터에는 enum 값마다 세트 목록이 하나씩 표시되고, 목록 순서가 세트 ID(0부터)입니다. 기본 enum 은 `GeunedaEditor.UiService.DefaultUiSetId` 입니다.
+
+| ID | 이름 |
+|----|------|
+| 0 | `InitialLoading` |
+| 1 | `MainMenu` |
+| 2 | `Gameplay` |
+| 3 | `Settings` |
+| 4 | `Overlays` |
+| 5 | `Popups` |
+
+세트 항목은 드롭다운에서 설정의 주소를 고르며, 프레젠터 타입 이름(`AssemblyQualifiedName`)과 인스턴스 주소(= 고른 주소)가 저장됩니다. 인스턴스 주소가 설정 주소와 같으므로 세트로 연 UI 와 `OpenUiAsync<T>()` 로 연 UI 는 같은 인스턴스입니다.
+
+세트 이름을 바꾸려면 Editor 폴더에 자체 enum 과 커스텀 에디터를 만듭니다. enum 값은 0부터 연속으로 둡니다.
+
+```csharp
+using Geuneda.UiService;
+using GeunedaEditor.UiService;
+using UnityEditor;
+
+public enum GameUiSetId
 {
-    Destroy(presenter.gameObject);
+    Hud = 0,
+    Shop = 1,
+}
+
+[CustomEditor(typeof(AddressablesUiConfigs))]
+public class GameUiConfigsEditor : AddressablesUiConfigsEditor<GameUiSetId>
+{
 }
 ```
 
-### 권장 세트 구성
+Resources 와 PrefabRegistry 는 각각 `ResourcesUiConfigsEditor<TSet>`, `PrefabRegistryUiConfigsEditor<TSet>` 를 상속합니다. 패키지에도 같은 타입을 대상으로 하는 기본 에디터(`DefaultAddressablesUiConfigsEditor` 등)가 있으므로, 적용 후 인스펙터에 새 세트 이름이 보이는지 확인하세요.
 
-| 세트 ID 범위 | 용도 |
-|-------------|------|
-| 0 | 핵심/영구 UI (항상 로드됨) |
-| 1-10 | 씬별 UI |
-| 11-20 | 기능별 UI (상점, 인벤토리) |
+### 런타임에 세트 추가
+
+```csharp
+_uiService.AddUiSet(new UiSetConfig
+{
+    SetId = 10,
+    UiInstanceIds = new[]
+    {
+        new UiInstanceId(typeof(ShopPresenter), "UI/Shop"),            // 설정 주소와 같게 두면 기본 인스턴스와 공유
+        new UiInstanceId(typeof(InventoryPresenter), "UI/Inventory"),
+    }
+});
+```
 
 ---
 
-## 멀티 인스턴스 지원
+## 다중 인스턴스
 
-기본적으로 각 UI 프레젠터 타입은 싱글톤입니다. `UiInstanceId` 시스템은 동일 타입의 여러 인스턴스를 가능하게 합니다.
+`UiInstanceId` 는 프레젠터 타입과 인스턴스 주소의 조합입니다. `null` 과 빈 문자열은 모두 `string.Empty` 로 정규화됩니다.
 
-### 사용 사례
-
-- 여러 개의 툴팁 윈도우
-- 쌓인 알림 팝업
-- 여러 플레이어 정보 패널 (멀티플레이어)
-- 풀링된 UI 요소
-
-### UiInstanceId
+- 설정(`UiConfig`)은 **타입당 하나**입니다. 같은 타입의 모든 인스턴스는 같은 프리팹 주소와 레이어를 사용하고, 인스턴스 주소로만 구분됩니다.
+- 주소 없이 `LoadUiAsync`/`OpenUiAsync` 를 호출하면 인스턴스 주소로 **설정의 주소**(`UiConfig.Address`)가 사용됩니다. 주소 없이 `AddUi` 로 추가하면 빈 문자열이 사용됩니다. 따라서 `UiInstanceId.IsDefault`(빈 주소 여부)는 설정으로 로드한 기본 인스턴스에서 `false` 입니다.
+- 주소 없이 호출하는 `GetUi<T>()`, `IsVisible<T>()`, `CloseUi<T>()`, `UnloadUi<T>()`, `RemoveUi<T>()` 는 로드된 인스턴스가 하나면 그것을, 여러 개면 경고를 남기고 첫 번째를 대상으로 합니다.
 
 ```csharp
-// 기본/싱글톤 인스턴스
-var defaultId = UiInstanceId.Default(typeof(TooltipPresenter));
+// 주소 오버로드 대부분은 UiService 에만 있으므로 구체 타입으로 보관합니다
+var uiService = new UiService();
+uiService.Init(_uiConfigs);
 
-// 이름이 지정된 인스턴스
-var itemTooltipId = UiInstanceId.Named(typeof(TooltipPresenter), "item");
-var skillTooltipId = UiInstanceId.Named(typeof(TooltipPresenter), "skill");
+await uiService.OpenUiAsync(typeof(TooltipPresenter), "item");
+await uiService.OpenUiAsync(typeof(TooltipPresenter), "skill");
 
-// 기본 인스턴스인지 확인
-if (instanceId.IsDefault)
-{
-    Debug.Log("This is the singleton instance");
-}
+var itemTooltip = uiService.GetUi<TooltipPresenter>("item");
+bool skillVisible = uiService.IsVisible<TooltipPresenter>("skill");
+
+uiService.CloseUi(typeof(TooltipPresenter), "item");               // IUiService 에도 있음
+uiService.UnloadUi(typeof(TooltipPresenter), "skill");             // IUiService 에도 있음
 ```
 
-### 인스턴스 작업
-
-```csharp
-// 로드된 모든 프레젠터 가져오기
-List<UiInstance> loaded = _uiService.GetLoadedPresenters();
-
-foreach (var instance in loaded)
-{
-    Debug.Log($"Type: {instance.Type.Name}");
-    Debug.Log($"Address: {instance.Address}"); // 기본값이면 비어 있음
-    Debug.Log($"Presenter: {instance.Presenter.name}");
-}
-
-// 보이는 프레젠터 확인
-IReadOnlyList<UiInstanceId> visible = _uiService.VisiblePresenters;
-```
-
-### UiInstance vs UiInstanceId
-
-| 구조체 | 용도 | 포함 내용 |
-|--------|------|----------|
-| `UiInstanceId` | 참조를 위한 식별자 | `PresenterType`, `InstanceAddress` |
-| `UiInstance` | 로드된 인스턴스의 전체 데이터 | `Type`, `Address`, `Presenter` |
+| 구조체 | 내용 |
+|--------|------|
+| `UiInstanceId` | `PresenterType`, `InstanceAddress`, `IsDefault`, `Default(Type)`, `Named(Type, string)` |
+| `UiInstance` | 로드된 인스턴스 정보. `Type`, `Address`, `Presenter` (`GetLoadedPresenters()` 의 항목) |
 
 ---
 
 ## UI 설정
 
-`UiConfigs` ScriptableObject는 모든 UI 설정을 저장합니다.
+`UiConfig` 필드:
 
-### UiConfigs 생성
+| 필드 | 설명 |
+|------|------|
+| `Address` | 로더가 프리팹을 찾는 키 (로더별 의미는 [시작하기](getting-started.md#1-로더와-설정-에셋-고르기)) |
+| `Layer` | 정렬 레이어 |
+| `UiType` | 프레젠터 타입 |
+| `LoadSynchronously` | `AddressablesUiAssetLoader` 가 `WaitForCompletion()` 으로 동기 로드할지 여부 |
 
-1. Project 뷰에서 마우스 오른쪽 클릭
-2. `Create` → `ScriptableObjects` → `Configs` → `UiConfigs`로 이동
-
-### 설정 프로퍼티
-
-| 프로퍼티 | 설명 |
-|---------|------|
-| **Type** | 프레젠터 클래스 타입 |
-| **Addressable Address** | UI 프리팹의 Addressable 키 |
-| **Layer** | 깊이 레이어 (높을수록 카메라에 가까움) |
-| **Load Synchronously** | 로드 중 메인 스레드 차단 (주의하여 사용) |
-| **UI Set ID** | 일괄 작업을 위한 선택적 그룹핑 |
+`UiConfigs` 에셋에는 `Address`, `Layer`, 타입 이름(`AssemblyQualifiedName`)만 저장됩니다. `LoadSynchronously` 는 저장되지 않아 에셋에서 읽은 설정은 항상 `false` 입니다. `[LoadSynchronously]` 어트리뷰트는 설정 인스펙터의 표시(`[SYNC]`)와 통계에만 반영됩니다. 동기 로드가 필요하면 `AddUiConfig` 로 `LoadSynchronously = true` 인 설정을 직접 등록합니다.
 
 ### 런타임 설정
 
 ```csharp
-// 런타임에 설정 추가
-var config = new UiConfig(typeof(DynamicPopup), "UI/DynamicPopup", layer: 3);
-_uiService.AddUiConfig(config);
+_uiService.AddUiConfig(new UiConfig
+{
+    Address = "UI/DynamicPopup",
+    Layer = 3,
+    UiType = typeof(DynamicPopupPresenter),
+    LoadSynchronously = false,
+});
 
-// 런타임에 UI 세트 추가
-var setConfig = new UiSetConfig(setId: 5, new[] { typeof(ShopUI), typeof(InventoryUI) });
-_uiService.AddUiSet(setConfig);
-
-// 인스턴스화된 UI 추가
-var dynamicUi = Instantiate(uiPrefab);
-_uiService.AddUi(dynamicUi, layer: 3, openAfter: true);
+// 이미 인스턴스화된 프레젠터를 서비스에 추가
+var popup = Instantiate(_popupPrefab).GetComponent<DynamicPopupPresenter>();
+_uiService.AddUi(popup, layer: 3, openAfter: true);
 ```
+
+- 같은 타입의 설정을 다시 추가하면 경고만 남고 무시됩니다.
+- `AddUi` 로 추가한 프레젠터도 `UnloadUi`, `CloseAllUi(int layer)`, `Close(destroy: true)` 를 쓰려면 같은 타입의 `UiConfig` 가 등록되어 있어야 합니다. 서비스가 이 메서드들에서 타입의 설정을 조회하기 때문입니다.
+- `AddUi` 의 인스턴스 주소는 빈 문자열이고 `OpenUiAsync<T>()` 는 설정 주소를 사용하므로, `AddUi` 로 넣은 프레젠터를 나중에 열려면 `openAfter: true` 를 쓰거나 `UiService.OpenUiAsync(typeof(T), string.Empty)` 로 엽니다.
+
+---
+
+## 에디터 도구
+
+| 메뉴 / 위치 | 기능 |
+|-------------|------|
+| `Tools > UI Service > Select UiConfigs` | 프로젝트의 첫 `UiConfigs` 에셋을 선택. 없으면 `Assets/AddressablesUiConfigs.asset` 생성 |
+| `Tools > UI Service > Layer Visualizer` | 위 에셋을 선택하고 레이어 시각화 섹션을 펼침 |
+| `Tools > UI Service > Presenter Manager` | 플레이 모드에서 로드된 프레젠터와 열림/닫힘 상태 표시, 인스턴스별 열기/닫기/언로드, 모두 닫기, 모두 언로드 |
+| `UiConfigs` 인스펙터 | 레이어별 시각화(검색, 통계), 설정 목록과 레이어 편집, UI 세트 편집 |
+| `UiPresenter` 인스펙터 | 플레이 모드에서 `UI 열기`, `UI 닫기`, `닫기 및 제거` 버튼 |
+
+`UiPresenter` 인스펙터의 버튼은 서비스를 거치지 않고 프레젠터를 직접 열고 닫으므로 `VisiblePresenters` 에 반영되지 않습니다. 서비스 상태까지 맞춰야 하면 Presenter Manager 를 사용하세요.
