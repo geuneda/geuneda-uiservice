@@ -56,7 +56,7 @@ public class UiInstaller
 서비스에 추가될 때(`LoadUiAsync`, `OpenUiAsync` 의 로드 단계, `AddUi`):
 
 1. 인스턴스화 후 `SetActive(false)` (`AddUi` 는 인스턴스화와 비활성화를 하지 않음)
-2. 레이어를 `Canvas`/`UIDocument` sortingOrder 에 반영
+2. 레이어를 `Canvas`/`UIDocument`/`PanelRenderer` sortingOrder 에 반영
 3. 루트의 `PresenterFeatureBase` 컴포넌트를 모아 각 피처의 `OnPresenterInitialized(presenter)`
 4. `OnInitialized()`
 
@@ -151,7 +151,7 @@ public class SettingsPresenter : UiPresenter
 }
 ```
 
-`UiToolkitPanelRendererFeature` 는 `Document` 대신 `Panel`(`PanelRenderer`)을 노출하는 점만 다르고 `Root`, `AddVisualTreeAttachedListener`, `RemoveVisualTreeAttachedListener` 사용법은 같습니다. 서비스의 레이어 정렬은 `Canvas` 와 `UIDocument` 에만 적용되고 `PanelRenderer` 에는 적용되지 않습니다.
+`UiToolkitPanelRendererFeature` 는 `Document` 대신 `Panel`(`PanelRenderer`)을 노출하는 점만 다르고 `Root`, `AddVisualTreeAttachedListener`, `RemoveVisualTreeAttachedListener` 사용법은 같습니다. 서비스의 레이어 정렬은 `PanelRenderer.sortingOrder` 에도 적용됩니다(v1.3.2).
 
 ### 커스텀 피처
 
@@ -212,7 +212,7 @@ public class FadeFeature : PresenterFeatureBase, ITransitionFeature
 
 ## UI 레이어
 
-- 각 `UiConfig.Layer` 값이 프리팹 루트의 `Canvas.sortingOrder` 또는 `UIDocument.sortingOrder` 로 설정됩니다. 값이 클수록 위에 그려집니다.
+- 각 `UiConfig.Layer` 값이 프리팹 루트의 `Canvas.sortingOrder`, `UIDocument.sortingOrder`, `PanelRenderer.sortingOrder`(Unity 6.5+) 로 설정됩니다. 값이 클수록 위에 그려집니다.
 - 레이어별 컨테이너 GameObject 는 없습니다. 모든 프레젠터는 `"Ui"` 루트 바로 아래에 생성됩니다.
 - `CloseAllUi(int layer)` 로 한 레이어의 표시 중인 UI 를 모두 닫습니다.
 - `Init()` 은 0 미만 또는 1000 초과 레이어에 경고를 남기지만 막지는 않습니다.

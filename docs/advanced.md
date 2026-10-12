@@ -175,7 +175,7 @@ public class LevelLoader
 |------|------|
 | 설정은 타입당 하나 | 같은 프레젠터 타입을 다른 프리팹으로 나눠 등록할 수 없음. 다중 인스턴스는 같은 프리팹을 인스턴스 주소로 구분 |
 | `AddUi` 와 언로드 | `AddressablesUiAssetLoader` 를 쓸 때 Addressables 로 인스턴스화하지 않고 `AddUi` 로 넣은 프레젠터는 `Addressables.ReleaseInstance` 가 처리하지 못하므로 로더가 `Object.Destroy` 로 파괴함(v1.3.1). GameObject 를 남기려면 `RemoveUi` 를 씀 |
-| `PanelRenderer` 레이어 | 레이어 정렬은 `Canvas`, `UIDocument` 에만 적용 |
+| `PanelRenderer` 레이어 | Unity 6.5+ 에서 `PanelRenderer.sortingOrder`(int, `Renderer` 상속)에도 적용(v1.3.2) |
 | 정적 이벤트 | `OnResolutionChanged`, `OnOrientationChanged` 는 `Dispose()` 후에도 리스너가 남음 |
 | 프레젠터 인스펙터 버튼 | 서비스를 거치지 않아 `VisiblePresenters` 와 어긋날 수 있음 |
 | 레이어 범위 | 0 미만, 1000 초과는 경고만 남김 |

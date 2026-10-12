@@ -39,15 +39,16 @@ namespace GeunedaEditor.UiService
 				if (uiPresenter == null)
 					continue;
 
-				var sortingOrder = GetSortingOrder(uiPresenter);
+				var hasSortingOrder = TryGetSortingOrder(uiPresenter, out var sortingOrder);
 				var existingConfigIndex = existingConfigs.FindIndex(c => c.Address == asset.address);
 				var presenterType = uiPresenter.GetType();
 				
 				var config = new UiConfig
 				{
 					Address = asset.address,
-					Layer = existingConfigIndex >= 0 && sortingOrder < 0 ? existingConfigs[existingConfigIndex].Layer : 
-					        sortingOrder < 0 ? 0 : sortingOrder,
+					// 정렬 컴포넌트가 있으면 그 값(음수 포함)을, 없으면 기존 설정 레이어나 0 을 쓴다
+					Layer = hasSortingOrder ? sortingOrder :
+					        existingConfigIndex >= 0 ? existingConfigs[existingConfigIndex].Layer : 0,
 					UiType = presenterType,
 					LoadSynchronously = Attribute.IsDefined(presenterType, typeof(LoadSynchronouslyAttribute))
 				};
@@ -116,13 +117,6 @@ namespace GeunedaEditor.UiService
 			layerField.BindProperty(layerProperty);
 			layerField.userData = addressProperty.stringValue;
 			layerField.RegisterValueChangedCallback(OnLayerChanged);
-		}
-
-		private int GetSortingOrder(UiPresenter presenter)
-		{
-			if (presenter.TryGetComponent<Canvas>(out var canvas)) return canvas.sortingOrder;
-			if (presenter.TryGetComponent<UnityEngine.UIElements.UIDocument>(out var document)) return (int)document.sortingOrder;
-			return -1;
 		}
 
 		private static List<AddressableAssetEntry> GetAssetList()

@@ -86,6 +86,21 @@ namespace Geuneda.UiService.Tests
         }
 
         [Test]
+        public void UiConfigSerializable_FromConfigWithNullType_KeepsNullType()
+        {
+            // 준비 - 타입을 찾지 못한 설정(예: 클래스 이름 변경 후 남은 항목)도 다시 저장할 수 있어야 한다
+            var config = new UiConfig { Address = "address", Layer = 1, UiType = null };
+
+            // 실행
+            UiConfigs.UiConfigSerializable serializable = config;
+
+            // 검증
+            Assert.IsNull(serializable.UiType);
+            Assert.AreEqual("address", serializable.Address);
+            Assert.AreEqual(1, serializable.Layer);
+        }
+
+        [Test]
         public void UiConfigSerializable_DataWithoutLoadSynchronously_ReadsAsFalse()
         {
             // 준비 - LoadSynchronously 필드가 추가되기 전에 저장된 데이터

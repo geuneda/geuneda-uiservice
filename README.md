@@ -83,7 +83,7 @@ Package Manager 의 `+` > `Add package from git URL` 에 위 URL 을 넣어도 �
 |------|------|
 | `IUiService` / `IUiServiceInit` | UI 를 다루는 공개 API 와, 여기에 `Init(UiConfigs)` 와 `Dispose()` 를 더한 소유자용 인터페이스 |
 | `UiPresenter`, `UiPresenter<T>` | 모든 UI 의 기본 클래스. `OnInitialized`, `OnOpened`, `OnClosed` 등 생명주기 훅과 struct 데이터 바인딩 제공 |
-| 레이어 | `UiConfig.Layer` 값이 프리팹 루트의 `Canvas.sortingOrder` 또는 `UIDocument.sortingOrder` 로 설정됨 |
+| 레이어 | `UiConfig.Layer` 값이 프리팹 루트의 `Canvas`, `UIDocument`, `PanelRenderer`(Unity 6.5+) `sortingOrder` 로 설정됨 |
 | UI 세트 | 여러 프레젠터를 묶어 `OpenUiSetAsync`, `CloseAllUiSet`, `UnloadUiSet` 으로 일괄 처리 |
 | 다중 인스턴스 | `UiInstanceId`(타입 + 인스턴스 주소)로 같은 프레젠터 타입을 여러 개 띄움 |
 | 피처 | `PresenterFeatureBase` 컴포넌트를 프리팹에 붙여 동작을 확장. `TimeDelayFeature`, `AnimationDelayFeature`, `UiToolkitPresenterFeature`, `UiToolkitPanelRendererFeature`(Unity 6.5+) 기본 제공 |

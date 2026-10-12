@@ -31,7 +31,7 @@ namespace GeunedaEditor.UiService
 			"UI 프레젠터 설정\n\n" +
 			"게임 내 모든 UI 프레젠터 프리팹과 정렬 레이어 값을 나열합니다. " +
 			"Layer 필드는 렌더링 순서를 제어하며, 값이 클수록 카메라에 가깝게 표시됩니다. " +
-			"Canvas 또는 UIDocument 컴포넌트가 있는 프레젠터의 경우, 이 값이 UI 정렬 순서에 직접 매핑됩니다.";
+			"Canvas, UIDocument, PanelRenderer(Unity 6.5+) 컴포넌트가 있는 프레젠터의 경우, 이 값이 UI 정렬 순서에 직접 매핑됩니다.";
 
 		protected virtual string SetExplanation =>
 			"UI 세트 설정\n\n" +
@@ -143,6 +143,33 @@ namespace GeunedaEditor.UiService
 			}
 		}
 
+		/// <summary>
+		/// 프레젠터 루트의 <see cref="Canvas"/>, <see cref="UIDocument"/>, PanelRenderer(Unity 6.5+) 정렬 순서를 읽습니다.
+		/// 정렬 컴포넌트가 없으면 false 를 반환합니다. 음수도 유효한 정렬 순서로 읽습니다.
+		/// </summary>
+		protected static bool TryGetSortingOrder(UiPresenter presenter, out int sortingOrder)
+		{
+			if (presenter.TryGetComponent<Canvas>(out var canvas))
+			{
+				sortingOrder = canvas.sortingOrder;
+				return true;
+			}
+			if (presenter.TryGetComponent<UIDocument>(out var document))
+			{
+				sortingOrder = (int)document.sortingOrder;
+				return true;
+			}
+#if UNITY_6000_5_OR_NEWER
+			if (presenter.TryGetComponent<PanelRenderer>(out var panelRenderer))
+			{
+				sortingOrder = panelRenderer.sortingOrder;
+				return true;
+			}
+#endif
+			sortingOrder = 0;
+			return false;
+		}
+
 		protected virtual void SyncLayerToPrefab(string address, int newLayer)
 		{
 			var pathLookup = GetAssetPathLookup();
@@ -163,6 +190,13 @@ namespace GeunedaEditor.UiService
 				document.sortingOrder = newLayer;
 				changed = true;
 			}
+#if UNITY_6000_5_OR_NEWER
+			else if (prefab.TryGetComponent<UnityEngine.UIElements.PanelRenderer>(out var panelRenderer))
+			{
+				panelRenderer.sortingOrder = newLayer;
+				changed = true;
+			}
+#endif
 
 			if (changed)
 			{

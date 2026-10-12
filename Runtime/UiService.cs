@@ -718,6 +718,13 @@ namespace Geuneda.UiService
 			{
 				document.sortingOrder = layer;
 			}
+#if UNITY_6000_5_OR_NEWER
+			else if (gameObject.TryGetComponent<UnityEngine.UIElements.PanelRenderer>(out var panelRenderer))
+			{
+				// PanelRenderer 는 Renderer 를 상속하므로 int sortingOrder 를 쓴다
+				panelRenderer.sortingOrder = layer;
+			}
+#endif
 		}
 
 		private void OpenUi(UiInstanceId instanceId)

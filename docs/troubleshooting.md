@@ -88,7 +88,7 @@ catch (OperationCanceledException)
 
 ## 레이어 순서가 적용되지 않음
 
-- 서비스는 프리팹 **루트**의 `Canvas` 또는 `UIDocument` sortingOrder 만 설정합니다. 자식 Canvas 나 `PanelRenderer` 에는 적용되지 않습니다.
+- 서비스는 프리팹 **루트**의 `Canvas`, `UIDocument`, `PanelRenderer`(Unity 6.5+) sortingOrder 만 설정합니다. 자식 Canvas 에는 적용되지 않습니다.
 - uGUI 에서 sortingOrder 는 같은 Sorting Layer 안에서만 비교되므로 Canvas 의 Sorting Layer 도 확인합니다.
 
 ---

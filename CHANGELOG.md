@@ -4,6 +4,17 @@
 형식은 [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)를 기반으로 하며
 이 프로젝트는 [Semantic Versioning](http://semver.org/spec/v2.0.0.html)을 준수합니다.
 
+## [1.3.2] - 2026-10-12
+
+**수정**:
+- `UiType` 이 null 인 `UiConfig` 를 `UiConfigSerializable` 로 변환(설정 저장)할 때 `NullReferenceException` 이 나던 문제를 수정했습니다. 타입이 없으면 null 로 저장하고, 이런 설정은 `Init` 에서 `ArgumentException` 으로 알려 줍니다.
+
+**신규**:
+- Unity 6.5+ 에서 레이어 정렬이 프리팹 루트의 `PanelRenderer.sortingOrder` 에도 적용됩니다(`#if UNITY_6000_5_OR_NEWER`). 설정 에디터의 레이어 읽기/쓰기도 `PanelRenderer` 를 지원합니다.
+
+**변경**:
+- 설정 에디터가 정렬 컴포넌트가 없는 경우와 음수 정렬값을 구분하지 못해, 음수 `sortingOrder` 를 가진 프리팹의 레이어를 0 이나 이전 값으로 저장하던 문제를 수정했습니다. 세 설정 에디터의 판독 로직을 `UiConfigsEditorBase.TryGetSortingOrder` 로 모았습니다.
+
 ## [1.3.1] - 2026-10-12
 
 **수정**:

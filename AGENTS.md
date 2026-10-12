@@ -47,7 +47,7 @@
   - 에디터 세트 항목은 `InstanceAddress` 를 설정 주소로 채우므로 세트와 기본 인스턴스가 같은 인스턴스를 가리킵니다.
   - 주소 없는 Get/IsVisible/Close/Unload/Remove 는 내부 `ResolveInstanceAddress(type)` 을 씁니다. 인스턴스가 여러 개면 경고 후 첫 번째를 고릅니다.
 - `UiPresenter.Close(destroy)` 는 자신의 `InstanceAddress` 로 `CloseUi` 를 호출하고, 닫기 전환이 끝난 뒤 `UnloadUi(GetType(), InstanceAddress)` 를 호출합니다.
-- 레이어: `AddUi` 시 프레젠터 루트의 `Canvas.sortingOrder` 또는 `UIDocument.sortingOrder` 를 설정합니다. `PanelRenderer` 는 처리하지 않습니다.
+- 레이어: `AddUi` 시 프레젠터 루트의 `Canvas.sortingOrder`, `UIDocument.sortingOrder`, `PanelRenderer.sortingOrder`(`#if UNITY_6000_5_OR_NEWER`, 1.3.2) 를 설정합니다. 설정 에디터는 `UiConfigsEditorBase.TryGetSortingOrder` 로 같은 세 컴포넌트에서 읽으며, 정렬 컴포넌트가 없을 때만 기존 레이어나 0 을 씁니다(음수 정렬값도 그대로 읽음).
 - `LoadSynchronously`: `UiConfigSerializable` 에 저장됩니다(1.3.1). 필드 추가 전에 저장된 에셋은 `false` 로 읽히며, 설정 인스펙터를 열어 동기화하면 `LoadSynchronouslyAttribute` 값이 저장됩니다. `LoadSynchronouslyAttribute` 는 에디터 동기화 때만 읽힙니다.
 - `CloseAllUi(int)` 는 설정이 있으면 `UiConfig.Layer` 를, 없으면 `AddUi` 에 넘긴 레이어(내부 `_uiLayers`)를 씁니다. `UnloadUi` 는 설정을 조회하지 않으므로 설정 없이 `AddUi` 로만 넣은 타입도 언로드할 수 있습니다.
 - `LoadUiSetAsync` 는 세트가 없으면 빈 목록을 반환합니다. `UnloadUiSet`, `CloseAllUiSet` 은 인덱서를 써서 예외가 납니다.

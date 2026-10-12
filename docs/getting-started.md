@@ -75,7 +75,7 @@ public class MainMenuPresenter : UiPresenter
 - `ResourcesUiConfigs`: 경로에 `/Resources/` 가 들어간 모든 프리팹 중 루트에 `UiPresenter` 가 있는 것을 찾습니다.
 - `PrefabRegistryUiConfigs`: 드롭 영역이나 목록에 프리팹을 넣으면 프리팹 이름이 주소가 됩니다.
 
-각 항목의 레이어 값은 프리팹의 `Canvas`/`UIDocument` sortingOrder 에서 가져오며, 인스펙터에서 레이어를 바꾸면 프리팹의 sortingOrder 에도 기록됩니다. UI 세트 편집은 [핵심 개념 - UI 세트](core-concepts.md#ui-세트)를 보세요.
+각 항목의 레이어 값은 프리팹의 `Canvas`/`UIDocument`/`PanelRenderer`(Unity 6.5+) sortingOrder 에서 가져오며, 인스펙터에서 레이어를 바꾸면 프리팹의 sortingOrder 에도 기록됩니다. UI 세트 편집은 [핵심 개념 - UI 세트](core-concepts.md#ui-세트)를 보세요.
 
 ## 5. 서비스 초기화
 

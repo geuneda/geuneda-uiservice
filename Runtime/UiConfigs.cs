@@ -108,7 +108,8 @@ namespace Geuneda.UiService
 				{
 					Address = serializable.Address,
 					Layer = serializable.Layer,
-					UiType = Type.GetType(serializable.UiType),
+					// 타입 이름이 없으면 null 로 읽는다(Init 에서 ArgumentException 으로 검증된다)
+					UiType = string.IsNullOrEmpty(serializable.UiType) ? null : Type.GetType(serializable.UiType),
 					LoadSynchronously = serializable.LoadSynchronously
 				};
 			}
@@ -119,7 +120,8 @@ namespace Geuneda.UiService
 				{
 					Address = config.Address,
 					Layer = config.Layer,
-					UiType = config.UiType.AssemblyQualifiedName,
+					// 타입이 없는 설정도 저장할 수 있게 null 을 그대로 둔다(Init 에서 명확한 오류로 검증된다)
+					UiType = config.UiType?.AssemblyQualifiedName,
 					LoadSynchronously = config.LoadSynchronously
 				};
 			}

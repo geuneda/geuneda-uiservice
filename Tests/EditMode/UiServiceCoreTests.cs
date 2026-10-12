@@ -92,5 +92,24 @@ namespace Geuneda.UiService.Tests
             // 실행 및 검증
             Assert.Throws<ArgumentException>(() => _service.Init(configs));
         }
+
+        [Test]
+        public void Init_ConfigWithNullTypeSavedThroughConfigs_ThrowsArgumentException()
+        {
+            // 준비 - 타입이 없는 설정을 Configs 로 저장한 뒤 다시 읽는 왕복 경로
+            var configs = ScriptableObject.CreateInstance<PrefabRegistryUiConfigs>();
+            _createdObjects.Add(configs);
+            configs.Configs = new List<UiConfig> { new UiConfig { Address = "address", Layer = 0, UiType = null } };
+
+            // 검증 - 다시 읽어도 예외 없이 null 타입으로 돌아온다
+            Assert.IsNull(configs.Configs[0].UiType);
+            Assert.AreEqual("address", configs.Configs[0].Address);
+
+            _service = new UiService(_mockLoader);
+
+            // 실행 및 검증 - Init 의 설정 검증이 주소를 담은 ArgumentException 으로 알린다
+            var exception = Assert.Throws<ArgumentException>(() => _service.Init(configs));
+            StringAssert.Contains("address", exception.Message);
+        }
     }
 }
