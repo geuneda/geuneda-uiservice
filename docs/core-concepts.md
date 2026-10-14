@@ -93,6 +93,10 @@ public class ConfirmPopup : UiPresenter
 }
 ```
 
+서비스는 열기·닫기를 '준비'(표시 목록 변경, 세대 증가, 전환 태스크 생성)와 '알림과 실행'(표시 상태 이벤트, 위 순서의 훅과 전환)으로 나눕니다. 준비는 즉시 하고, 알림과 실행은 하나씩 차례로 처리하므로 훅 안에서 연 UI 의 훅은 지금 훅이 끝난 뒤에 불립니다. `PresenterOpened`/`PresenterClosed` 는 `OnOpened`/`OnClosed` 보다 먼저 발생합니다. 전환 중에 반대 동작이 끼어들면 늦게 끝난 쪽은 결과를 내지 않습니다. 닫기 전환 중에 다시 열면 그 닫기는 숨기거나 언로드하지 않고 `OnCloseTransitionCompleted` 도 부르지 않습니다. 열기 전환 중에 닫으면 `OnOpenTransitionCompleted` 를 부르지 않습니다. `OpenTransitionTask`, `CloseTransitionTask` 는 어느 경우든 완료됩니다.
+
+뒤로가기 참여(`HandlesBack`, `OnBackPressed`)와 모달 dim(`IsModal`, `OnDimClicked`) 훅은 [뒤로가기, 팝업 큐, 모달 dim, 입력 차단](navigation.md)에 있습니다.
+
 ---
 
 ## 프레젠터 피처
@@ -206,7 +210,7 @@ public class FadeFeature : PresenterFeatureBase, ITransitionFeature
 }
 ```
 
-프레젠터는 `OnPresenterOpened()` 직후, `OnPresenterClosed()` 직후에 전환 태스크를 읽습니다. 그 시점까지 `UniTaskCompletionSource` 를 만들어 두지 않으면 이전 태스크나 완료된 태스크를 읽게 됩니다.
+프레젠터는 `OnPresenterOpened()` 직후(열기), `OnPresenterClosing()` 직후(닫기, `OnClosed()` 전)에 전환 태스크를 읽어 이번 단계의 것으로 고정합니다(2.0.0 부터, 이전에는 `OnPresenterClosed()` 직후). 전환을 시작하지 않을 때는 이전 태스크를 그대로 두지 말고 완료된 태스크를 돌려줍니다. 단계 시작 때와 같은 태스크(이전 단계에서 넘겨받은 것)는 이번 단계의 전환으로 보지 않고 상태도 읽지 않으므로, 전환을 시작하지 않을 때 이전 `async UniTask` 를 그대로 돌려줘도 됩니다.
 
 ---
 

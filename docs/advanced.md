@@ -179,3 +179,8 @@ public class LevelLoader
 | 정적 이벤트 | `OnResolutionChanged`, `OnOrientationChanged` 는 `Dispose()` 후에도 리스너가 남음 |
 | 프레젠터 인스펙터 버튼 | 서비스를 거치지 않아 `VisiblePresenters` 와 어긋날 수 있음 |
 | 레이어 범위 | 0 미만, 1000 초과는 경고만 남김 |
+| 차단막 정렬값 | 입력 차단막은 정렬값 32767 을 씀. 이보다 높은 `sortingOrder`/`PanelSettings.sortingOrder` 를 가진 UI 는 막지 못함 |
+| `PanelRenderer` dim | 루트가 `PanelRenderer` 인 모달에는 dim 을 깔지 않고 경고만 남김 |
+| `UiPopupQueue` 와 서비스 수명 | 서비스를 Dispose 하는 동안에는 `PresenterClosed` 가 오지 않으므로, 큐를 먼저 Dispose 함 |
+| 같은 레이어의 uGUI | 같은 `sortingOrder` 캔버스끼리의 앞뒤를 서비스가 정할 수 없음. 겹치는 팝업은 레이어를 나눔. UI Toolkit 은 서비스가 연 순서대로 정렬값을 매김 |
+| 여러 팝업 큐 | 큐끼리는 표시된 팝업만 보고 기다리므로, 동시에 로드 중인 팩토리는 겹칠 수 있음. 순서가 중요하면 한 큐에 넣음 |

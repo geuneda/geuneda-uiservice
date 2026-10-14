@@ -6,6 +6,7 @@
 - [IUiServiceInit](#iuiserviceinit)
 - [UiService](#uiservice)
 - [UiPresenter](#uipresenter)
+- [팝업 큐](#팝업-큐)
 - [피처](#피처)
 - [설정 타입](#설정-타입)
 - [에셋 로더](#에셋-로더)
@@ -36,7 +37,7 @@
 | `bool RemoveUi(Type type)` | 타입으로 제거 |
 | `List<UiPresenter> RemoveUiSet(int setId)` | 세트의 로드된 프레젠터를 제거하고 반환. 세트가 없으면 `KeyNotFoundException` |
 
-`RemoveUi` 계열은 표시 목록에서도 빼지만 닫기 생명주기를 실행하지 않고 GameObject 도 그대로 둡니다.
+`RemoveUi` 계열은 표시 목록에서도 빼지만 닫기 생명주기를 실행하지 않고 GameObject 도 그대로 둡니다. 진행 중이던 열기·닫기 전환 태스크는 완료됩니다(`UnloadUi` 도 같음).
 
 ### 로드와 언로드
 
@@ -68,12 +69,16 @@
 | `void CloseUi<T>(T uiPresenter, bool destroy = false) where T : UiPresenter` | 해당 인스턴스 닫기 |
 | `void CloseUi(Type type, bool destroy = false)` | 타입으로 닫기 |
 | `void CloseUi(Type type, string instanceAddress, bool destroy = false)` | 특정 인스턴스 닫기 |
-| `void CloseAllUi()` | 표시 중인 모든 UI 닫기 |
-| `void CloseAllUi(int layer)` | 해당 레이어의 표시 중인 UI 닫기 |
+| `void CloseAllUi()` | 표시 중인 모든 UI 닫기. 닫는 도중 콜백에서 연 UI 는 닫지 않음 |
+| `void CloseAllUi(int layer)` | 해당 레이어의 표시 중인 UI 닫기. 닫는 도중 콜백에서 연 UI 는 닫지 않음 |
 | `void CloseAllUiSet(int setId)` | 세트의 항목 닫기. 세트가 없으면 `KeyNotFoundException` |
 
 - 이미 열린 인스턴스를 열거나 열려 있지 않은 인스턴스를 닫으면 경고만 남깁니다. `CloseAllUiSet` 은 열리지 않은 항목마다 경고를 남깁니다.
 - 열기 메서드는 열기를 시작한 직후 완료됩니다. 전환까지 기다리려면 반환된 프레젠터의 `OpenTransitionTask` 를 기다립니다.
+- 닫기 전환 중에 다시 열면 그 닫기는 숨기거나 언로드하지 않고(`destroy: true` 여도) `OnCloseTransitionCompleted` 도 부르지 않습니다. 열기 전환 중에 닫으면 `OnOpenTransitionCompleted` 를 부르지 않습니다. `TimeDelayFeature`, `AnimationDelayFeature` 도 같은 규칙으로 늦게 끝난 전환의 완료 훅을 건너뛰고, 전환 태스크는 모두 완료됩니다.
+- `destroy: true` 닫기는 언로드를 마친 뒤 `CloseTransitionTask` 를 완료합니다.
+- UIDocument 프레젠터의 `sortingOrder` 는 열고 닫을 때마다 `레이어 + 순번 × 1/1024` 로 다시 매겨집니다([화면 맨 위](navigation.md#화면-맨-위)).
+- `AddressablesUiAssetLoader` 로 로드하다 취소하면, 인스턴스화가 끝나는 대로 그 인스턴스를 해제합니다.
 - 데이터 오버로드에서 프레젠터가 `UiPresenter<TData>` 가 아니면 에러 로그를 남기고 **열지 않은 채** 프레젠터를 반환합니다.
 - `CancellationToken` 은 `AddressablesUiAssetLoader` 의 비동기 인스턴스화 대기에만 전달됩니다. Resources/PrefabRegistry 로더는 동기로 인스턴스화하므로 토큰을 쓰지 않습니다.
 
@@ -91,6 +96,36 @@ await popup.CloseTransitionTask;
 
 UniTask 는 한 번만 `await` 할 수 있습니다. `UniTask.WhenAll` 로 기다린 태스크를 다시 `await` 하거나 `GetAwaiter().GetResult()` 로 읽지 마세요.
 
+### 표시 상태 이벤트와 조회
+
+| 멤버 | 설명 |
+|------|------|
+| `event Action<UiInstanceId> PresenterOpened` | 표시 목록에 들어간 직후, `OnOpened` 보다 먼저 |
+| `event Action<UiInstanceId> PresenterClosed` | 표시 목록에서 빠진 직후, `OnClosed` 보다 먼저. 이때 `CloseTransitionTask` 는 이번 닫기의 태스크. 표시 중인 프레젠터를 `RemoveUi`/`UnloadUi` 해도 발생 |
+| `bool TryGetUi(UiInstanceId instanceId, out UiPresenter presenter)` | 로드된 프레젠터를 인스턴스 ID 로 찾음 |
+
+구독자 예외는 `Debug.LogException` 으로 기록하고 다른 구독자에게 계속 전달합니다. `Dispose()` 중에는 발생하지 않습니다. 구독자나 훅 안에서 연 UI·닫은 UI 의 알림과 훅은 지금 처리 중인 알림이 끝난 뒤에 실행됩니다([표시 상태 이벤트](navigation.md#표시-상태-이벤트)).
+
+### 뒤로가기
+
+| 멤버 | 설명 |
+|------|------|
+| `bool HandleBack()` | 뒤로가기 처리. 막혀 있으면 false. 핸들러 → 화면 맨 위 `HandlesBack` 프레젠터의 `OnBackPressed` → `BackUnhandled` 순서 |
+| `IDisposable AddBackHandler(Func<bool> handler, int priority = 0)` | 프레젠터보다 먼저 받을 핸들러. 큰 우선순위 먼저, 같으면 나중에 추가한 것 먼저. true 면 처리 끝. `handler` 가 null 이면 `ArgumentNullException` |
+| `event Action BackUnhandled` | 처리할 핸들러와 프레젠터가 없을 때. 종료 확인 팝업용 |
+
+### 입력 차단
+
+| 멤버 | 설명 |
+|------|------|
+| `UiInputBlock BlockInput(string reason)` | 모든 UI 입력을 막는 토큰. 포인터는 차단막으로, 선택·포커스 입력은 EventSystem 선택 해제·내비게이션 끄기와 UIDocument 패널 키 이벤트 차단으로 막음(막힌 동안 새 EventSystem·패널 포함, 선택은 복구하지 않음). `reason` 이 null 이면 `ArgumentNullException` |
+| `bool IsInputBlocked { get; }` | 토큰이 하나라도 남아 있는지 |
+| `IReadOnlyList<string> InputBlockReasons { get; }` | 남은 토큰의 사유 |
+
+`public readonly struct UiInputBlock : IDisposable` 은 할당 없는 토큰입니다. 두 번 Dispose 하면 경고만 남깁니다. `IUiService` 를 직접 구현할 때는 `new UiInputBlock(Action<int> release, int id)` 로 만듭니다.
+
+동작과 예제는 [뒤로가기, 팝업 큐, 모달 dim, 입력 차단](navigation.md)을 보세요.
+
 ---
 
 ## IUiServiceInit
@@ -100,7 +135,7 @@ UniTask 는 한 번만 `await` 할 수 있습니다. `UniTask.WhenAll` 로 기�
 | 시그니처 | 설명 |
 |----------|------|
 | `void Init(UiConfigs configs)` | 설정과 세트를 등록하고 `"Ui"` 루트 GameObject(`DontDestroyOnLoad`, `UiServiceMonoComponent` 부착)를 생성 |
-| `void Dispose()` | 표시 중인 UI 를 닫고, 로드된 인스턴스를 모두 언로드하고, 컬렉션을 비우고, 루트 GameObject 를 파괴 |
+| `void Dispose()` | 표시 중인 UI 를 닫고, 로드된 인스턴스를 모두 언로드하고, 이벤트 구독·뒤로가기 핸들러·차단막·dim 을 정리하고, 컬렉션을 비우고, 루트 GameObject 를 파괴 |
 
 `Init` 예외: `configs` 가 `null` 이면 `ArgumentNullException`, 설정에 빈 주소나 찾을 수 없는 타입이 있으면 `ArgumentException`. 레이어가 0 미만 또는 1000 초과면 경고만 남깁니다.
 
@@ -116,6 +151,13 @@ UniTask 는 한 번만 `await` 할 수 있습니다. `UniTask.WhenAll` 로 기�
 |----------|------|
 | `UiService()` | `AddressablesUiAssetLoader` 사용 |
 | `UiService(IUiAssetLoader assetLoader)` | 로더 주입 |
+
+### 프로퍼티
+
+| 멤버 | 설명 |
+|------|------|
+| `Color DimColor { get; set; }` | 모달 dim 색. 기본 `(0, 0, 0, 0.6)` |
+| `bool ReadsBackInput { get; set; }` | true 면 Escape(Android 뒤로가기 포함)를 읽어 `HandleBack()` 호출. 기본 false. Init 전후 언제든 변경 가능 |
 
 ### 정적 이벤트
 
@@ -158,6 +200,10 @@ UniTask 는 한 번만 `await` 할 수 있습니다. `UniTask.WhenAll` 로 기�
 | `protected virtual void OnClosed()` | 닫힐 때 (비활성화 전) |
 | `protected virtual void OnOpenTransitionCompleted()` | 열기 전환이 모두 끝난 뒤 |
 | `protected virtual void OnCloseTransitionCompleted()` | 닫기 전환이 끝나고 비활성화된 뒤 |
+| `protected virtual bool HandlesBack { get; }` | 뒤로가기 대상인지. 기본 false |
+| `protected virtual void OnBackPressed()` | 뒤로가기를 받았을 때. 기본 `Close(false)`. 닫을 수 없는 팝업은 재정의 |
+| `protected virtual bool IsModal { get; }` | true 면 맨 위 모달일 때 공용 dim 이 바로 뒤에 깔림. 기본 false |
+| `protected virtual void OnDimClicked()` | 뒤의 dim 을 눌렀을 때. 기본 동작 없음 |
 
 `public abstract class UiPresenter<T> : UiPresenter, IUiPresenterData where T : struct`
 
@@ -167,6 +213,31 @@ UniTask 는 한 번만 `await` 할 수 있습니다. `UniTask.WhenAll` 로 기�
 | `protected virtual void OnSetData()` | 데이터 반영 지점 |
 
 `public interface IUiPresenterData` 는 `UiPresenter<T>` 가 구현하는 마커 인터페이스입니다.
+
+---
+
+## 팝업 큐
+
+`public interface IUiPopupQueue : IDisposable`, `public sealed class UiPopupQueue : IUiPopupQueue`
+
+| 멤버 | 설명 |
+|------|------|
+| `UiPopupQueue(IUiService uiService)` | 서비스의 `PresenterClosed` 를 구독. `uiService` 가 null 이면 `ArgumentNullException` |
+| `bool Enqueue(string key, int priority, Func<CancellationToken, UniTask<UiPresenter>> factory)` | 예약. 큰 우선순위 먼저, 같으면 넣은 순서. 같은 키가 대기·표시 중이면 false. 팩토리가 null 을 돌려주면 건너뛰고, 예외는 기록 후 다음으로 |
+| `bool Remove(string key)` | 대기 중인 항목 빼기 (표시 중인 항목은 빼지 않음) |
+| `void Clear()` | 대기 중인 항목 모두 빼기 |
+| `UiPopupQueueHold Hold(string reason)` | 멈춤 토큰. 모두 풀리면 진행 |
+| `int Count { get; }` | 대기 중인 항목 수 |
+| `bool IsShowing { get; }` | 꺼낸 팝업을 여는 중, 표시 중, 닫기 전환 대기 중 |
+| `bool IsHeld { get; }`, `IReadOnlyList<string> HoldReasons { get; }` | 멈춤 상태와 사유 |
+| `event Action Drained` | 큐가 띄운 팝업이 끝났고 대기 항목도 없을 때 |
+| `void Dispose()` | 구독 해제, 대기 항목 버림, 여는 중인 팩토리의 토큰 취소. 띄운 팝업은 닫지 않음 |
+
+- 팝업이 닫히고 닫기 전환까지 끝나야 다음 팝업을 띄웁니다. 닫기 전환 중에 다시 열리면 계속 현재 항목으로 추적합니다.
+- `Hold` 가 남아 있거나, 큐 밖에서 연 `HandlesBack` 프레젠터가 표시 중이면 기다립니다. 여러 큐가 동시에 로드 중인 팩토리끼리는 서로 기다리지 않습니다.
+- Dispose 뒤 `Enqueue`, `Hold` 는 `ObjectDisposedException` 을 던집니다.
+
+`public readonly struct UiPopupQueueHold : IDisposable` 은 `UiInputBlock` 과 같은 규칙의 토큰입니다.
 
 ---
 

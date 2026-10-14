@@ -20,6 +20,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		public int UnloadCallCount { get; private set; }
 		public bool ShouldFail { get; set; }
 		public int SimulatedDelayMs { get; set; }
+		public bool ThrowOnUnload { get; set; }
 
 		public void RegisterPrefab(string address, GameObject prefab)
 		{
@@ -68,6 +69,12 @@ namespace Geuneda.UiService.Tests.PlayMode
 		public void UnloadAsset(GameObject gameObject)
 		{
 			UnloadCallCount++;
+
+			if (ThrowOnUnload)
+			{
+				throw new InvalidOperationException("unload boom");
+			}
+
 			if (gameObject != null)
 			{
 				_instantiatedObjects.Remove(gameObject);

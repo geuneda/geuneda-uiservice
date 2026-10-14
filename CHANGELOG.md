@@ -4,6 +4,33 @@
 형식은 [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)를 기반으로 하며
 이 프로젝트는 [Semantic Versioning](http://semver.org/spec/v2.0.0.html)을 준수합니다.
 
+## [2.0.0] - 2026-10-14
+
+**호환성 주의**:
+- `IUiService` 에 멤버를 추가했습니다(`PresenterOpened`, `PresenterClosed`, `TryGetUi`, `HandleBack`, `AddBackHandler`, `BackUnhandled`, `IsInputBlocked`, `InputBlockReasons`, `BlockInput`). `IUiService` 를 직접 구현한 클래스는 새 멤버를 구현해야 합니다. 기존 프로젝트는 `#v1.3.2` 로 고정합니다.
+- `OpenUi` 가 프레젠터를 표시 목록에 먼저 넣고 엽니다. `OnOpened` 안에서 다른 UI 를 열면 표시 목록 순서가 연 순서와 같아지고, `OnOpened` 안에서 `IsVisible` 이 true 입니다.
+- 프레젠터가 닫기 전환 태스크를 `OnPresenterClosing()` 직후(`OnClosed()` 전)에 읽습니다(이전에는 `OnPresenterClosed()` 직후). `OnPresenterClosed()` 에서 닫기 전환을 시작하는 커스텀 피처는 `OnPresenterClosing()` 으로 옮겨야 프레젠터가 기다립니다.
+- `CloseAllUi()`, `CloseAllUi(int)` 가 UI 마다 표시 목록에서 빼고 닫습니다. 닫는 도중 콜백에서 연(닫았다 다시 연) UI 는 닫지 않습니다.
+- 서비스가 UIDocument 프레젠터의 `sortingOrder` 를 열고 닫을 때마다 `레이어 + 순위 × 1/1024` 로 다시 매깁니다(마지막으로 연 순서, 닫기 전환 중인 문서 포함). 같은 레이어 안에서도 나중에 연 문서가 위에 그려집니다.
+- 표시 상태가 바뀌는 도중(구독자, 훅)에 연 UI·닫은 UI 의 훅은 지금 처리 중인 알림·훅이 끝난 뒤에 실행됩니다. `IsVisible` 은 바로 바뀝니다.
+- `RemoveUi`/`UnloadUi` 가 진행 중이던 열기·닫기 전환 태스크를 완료합니다.
+- `destroy: true` 닫기는 언로드를 마친 뒤 `CloseTransitionTask` 를 완료합니다. 완료를 기다리던 코드가 같은 인스턴스를 다시 열어도 언로드되지 않습니다.
+
+**신규**:
+- 뒤로가기: `UiPresenter.HandlesBack`/`OnBackPressed` 재정의, `IUiService.HandleBack()`(입력 차단 → 핸들러 → 화면 맨 위 대상 → `BackUnhandled`), `AddBackHandler(handler, priority)`. 화면 맨 위는 레이어가 높을수록, 같으면 나중에 연 프레젠터입니다.
+- `UiService.ReadsBackInput`: Escape(Android 뒤로가기 포함)를 직접 읽어 `HandleBack()` 을 부릅니다. Input System 패키지가 있으면 `<Keyboard>/escape` 액션을, 없으면 레거시 Input Manager 를 씁니다(선택 의존성, `versionDefines`).
+- 모달 dim: `UiPresenter.IsModal`/`OnDimClicked`, `UiService.DimColor`. 표시 중인 모달 중 맨 위 하나 뒤에 공용 dim 을 깝니다. uGUI 는 프레젠터 캔버스의 첫 자식, UI Toolkit 은 같은 패널에 모달 문서보다 반 단계(1/2048) 낮은 정렬값의 dim 문서입니다.
+- 입력 차단: `IUiService.BlockInput(reason)` 이 할당 없는 토큰 `UiInputBlock` 을 돌려줍니다. 막힌 동안 정렬값 32767 의 uGUI 차단 캔버스와(UI Toolkit 프레젠터가 있으면) UI Toolkit 차단 패널을 켜고 뒤로가기를 무시합니다. 선택·포커스로 들어오는 키보드·게임패드 입력도 막습니다(EventSystem 선택 해제와 내비게이션 끄기, UIDocument 패널의 키·내비게이션 이벤트 차단). 막힌 동안 새로 생긴 EventSystem 과 새로 붙은 패널에도 적용하고, 풀 때 내비게이션은 되돌리지만 선택은 복구하지 않습니다. 같은 토큰을 두 번 풀면 경고합니다.
+- 팝업 큐: `IUiPopupQueue`/`UiPopupQueue`. 우선순위(큰 값 먼저, 같으면 넣은 순서), 키 중복 방지, 띄울 때 만드는 팩토리(null 이면 건너뜀, 예외는 기록 후 계속), 닫기 전환까지 기다린 뒤 다음 팝업, `Hold(reason)` 토큰, 큐 밖에서 연 `HandlesBack` 프레젠터가 닫힐 때까지 대기, `Drained` 이벤트.
+- 표시 상태 이벤트 `PresenterOpened`/`PresenterClosed` 와 `TryGetUi(UiInstanceId, out UiPresenter)`. 열기·닫기 훅보다 먼저 발생합니다. 알림과 훅 실행은 하나씩 차례로 처리해, 구독자나 훅 안에서 연 UI·닫은 UI 의 알림과 훅은 지금 처리 중인 것이 끝난 뒤에 실행됩니다(모든 구독자가 같은 순서를 받음). 구독자 예외는 기록만 하고 다른 구독자에게 계속 전달합니다.
+
+**수정**:
+- 닫기 전환 중에 다시 열면 전환이 끝날 때 프레젠터가 숨겨지고(`destroy: true` 면 언로드되고) 표시 목록과 어긋나던 문제를 수정했습니다. 늦게 끝난 닫기는 숨김·언로드·`OnCloseTransitionCompleted` 를 건너뜁니다. 열기 전환 중에 닫으면 `OnOpenTransitionCompleted` 를 부르지 않습니다. 전환 중 다시 열고 닫을 때 이전 과정이 새 전환 태스크를 먼저 완료하던 문제도 함께 고쳤습니다.
+- `CloseAllUi()` 도중 닫기 콜백에서 UI 를 열면 컬렉션 변경 예외가 나던 문제를 수정했습니다.
+- 열기·닫기 훅(`OnOpened`, `OnClosed`, 피처 콜백, `TimeDelayFeature`/`AnimationDelayFeature` 의 시작·완료 훅)이 예외를 던지면 `OpenTransitionTask`/`CloseTransitionTask` 가 끝나지 않던 문제를 수정했습니다. 태스크는 같은 예외로 실패하고 예외는 한 번만 기록됩니다(관찰되지 않은 실패로 GC 때 다시 기록되지 않음). 닫기가 실패하면 숨김과 요청된 언로드를 마칩니다. 피처 닫기 시작 훅의 실패는 `OnClosed` 전에 단계를 실패시키고, 여러 피처의 실패는 각각 한 번씩 기록됩니다. `destroy: true` 닫기의 언로드가 실패하면 닫기 태스크도 그 예외로 실패합니다. `UnloadUi` 의 로더가 던져도 진행 중이던 전환 태스크는 완료됩니다.
+- `TimeDelayFeature`, `AnimationDelayFeature` 가 지연 중에 다시 열고 닫으면 이전 전환이 새 전환 태스크를 먼저 완료하고 자신의 태스크는 끝내 완료하지 않던 문제를 수정했습니다(프레젠터의 닫기가 영원히 끝나지 않음). 각 전환이 자신의 태스크를 완료하고, 지연 중에 반대 알림(지연·클립이 없는 전환 포함)이 오면 늦게 끝난 전환은 완료 훅을 건너뜁니다.
+- `AddressablesUiAssetLoader` 로 로드를 취소하면 인스턴스화가 계속돼 추적되지 않는 GameObject 가 남던 문제를 수정했습니다. 취소되면 인스턴스화가 끝나는 대로 해제합니다(에디터에서 수정 전 누수와 수정 후 해제를 확인).
+
 ## [1.3.2] - 2026-10-12
 
 **수정**:

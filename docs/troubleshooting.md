@@ -10,6 +10,10 @@
 - [같은 UI 가 두 개 로드됨](#같은-ui-가-두-개-로드됨)
 - [취소가 동작하지 않음](#취소가-동작하지-않음)
 - [레이어 순서가 적용되지 않음](#레이어-순서가-적용되지-않음)
+- [뒤로가기가 동작하지 않음](#뒤로가기가-동작하지-않음)
+- [팝업 큐가 다음 팝업을 띄우지 않음](#팝업-큐가-다음-팝업을-띄우지-않음)
+- [입력이 계속 막혀 있음](#입력이-계속-막혀-있음)
+- [dim 이 보이지 않음](#dim-이-보이지-않음)
 - [점검 목록](#점검-목록)
 
 ---
@@ -90,6 +94,32 @@ catch (OperationCanceledException)
 
 - 서비스는 프리팹 **루트**의 `Canvas`, `UIDocument`, `PanelRenderer`(Unity 6.5+) sortingOrder 만 설정합니다. 자식 Canvas 에는 적용되지 않습니다.
 - uGUI 에서 sortingOrder 는 같은 Sorting Layer 안에서만 비교되므로 Canvas 의 Sorting Layer 도 확인합니다.
+
+## 뒤로가기가 동작하지 않음
+
+- 키 입력을 서비스가 읽게 하려면 `UiService.ReadsBackInput = true` 로 둡니다. 게임이 직접 입력을 받는다면 그 코드에서 `HandleBack()` 을 부릅니다.
+- 프레젠터가 `HandlesBack` 을 true 로 재정의했는지 확인합니다. 기본값은 false 입니다.
+- 입력 차단 토큰이 남아 있으면(`IsInputBlocked`) 뒤로가기를 무시합니다.
+- 우선순위가 높은 `AddBackHandler` 핸들러가 true 를 돌려주고 있지 않은지 확인합니다.
+- Input System 만 켠 프로젝트에서는 `com.unity.inputsystem` 패키지가 있어야 Escape 를 읽습니다.
+
+## 팝업 큐가 다음 팝업을 띄우지 않음
+
+- `HoldReasons` 에 남은 멈춤 토큰이 있는지 확인합니다.
+- 큐 밖에서 연 `HandlesBack` 프레젠터(다른 큐의 팝업 포함)가 표시 중이면 닫힐 때까지 기다립니다. `VisiblePresenters` 를 확인합니다.
+- 큐가 띄운 팝업은 닫기 전환이 끝나야 다음으로 넘어갑니다. `CloseUi` 를 불렀는지, 전환 피처의 태스크가 끝나는지 확인합니다.
+- 같은 `key` 가 이미 대기 중이거나 표시 중이면 `Enqueue` 가 false 를 돌려주고 넣지 않습니다.
+
+## 입력이 계속 막혀 있음
+
+- `InputBlockReasons` 에 남은 사유를 확인합니다. `BlockInput` 토큰을 `using` 이나 `try/finally` 로 풀어야 예외가 나도 풀립니다.
+- 같은 토큰을 두 번 풀면 경고가 남지만 다른 토큰은 그대로 남습니다.
+
+## dim 이 보이지 않음
+
+- `IsModal` 을 true 로 재정의했는지 확인합니다. dim 은 표시 중인 모달 중 화면 맨 위 하나에만 깔립니다.
+- 프리팹 루트에 `Canvas` 나 `PanelSettings` 가 지정된 `UIDocument` 가 있어야 합니다. 없으면 경고를 남기고 깔지 않습니다.
+- uGUI dim 클릭(`OnDimClicked`)은 씬에 `EventSystem` 이 있어야 받습니다.
 
 ---
 

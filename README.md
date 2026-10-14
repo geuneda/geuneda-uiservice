@@ -1,6 +1,6 @@
 # Geuneda UI Service
 
-Unity UI 프레젠터의 로드, 열기, 닫기, 언로드를 한 서비스에서 관리하는 패키지입니다. 레이어 정렬, UI 세트, 다중 인스턴스, 피처 조합, UI Toolkit, 교체 가능한 에셋 로더(Addressables, Resources, 프리팹 직접 참조)를 지원합니다.
+Unity UI 프레젠터의 로드, 열기, 닫기, 언로드를 한 서비스에서 관리하는 패키지입니다. 레이어 정렬, UI 세트, 다중 인스턴스, 피처 조합, UI Toolkit, 교체 가능한 에셋 로더(Addressables, Resources, 프리팹 직접 참조)를 지원합니다. 뒤로가기, 우선순위 팝업 큐, 모달 dim, 입력 차단도 제공합니다.
 
 ## 설치
 
@@ -90,6 +90,9 @@ Package Manager 의 `+` > `Add package from git URL` 에 위 URL 을 넣어도 �
 | 에셋 로더 | `IUiAssetLoader` 구현을 `UiService` 생성자에 주입. `AddressablesUiAssetLoader`(기본), `ResourcesUiAssetLoader`, `PrefabRegistryUiAssetLoader` 기본 제공 |
 | 헬퍼 뷰 | `Geuneda.UiService.Views` 의 `SafeAreaHelperView`, `NonDrawingView`, `AdjustScreenSizeFitterView`, `InteractableTextView` |
 | 에디터 도구 | `Tools > UI Service` 메뉴의 `Select UiConfigs`, `Layer Visualizer`, `Presenter Manager` |
+| 뒤로가기 | `HandleBack()` 이 핸들러 → 화면 맨 위 `HandlesBack` 프레젠터 → `BackUnhandled` 순서로 처리. `ReadsBackInput` 으로 Escape/Android 뒤로가기를 직접 읽음 |
+| 팝업 큐 | `UiPopupQueue` 가 팝업을 우선순위 순서로 하나씩 띄움. 키 중복 방지, `Hold` 토큰, 큐 밖 팝업이 닫힐 때까지 대기 |
+| 모달 dim, 입력 차단 | `IsModal` 프레젠터 중 맨 위 하나 뒤에 공용 dim. `BlockInput(reason)` 토큰으로 모든 UI 입력 차단 |
 
 ## 문서
 
@@ -99,6 +102,7 @@ Package Manager 의 `+` > `Add package from git URL` 에 위 URL 을 넣어도 �
 | [핵심 개념](docs/core-concepts.md) | 생명주기, 피처, 레이어, 세트, 다중 인스턴스, 설정, 에디터 도구 |
 | [API 레퍼런스](docs/api-reference.md) | 공개 API 시그니처와 동작 |
 | [고급 주제](docs/advanced.md) | 헬퍼 뷰, 커스텀 로더, 로딩 전략 |
+| [뒤로가기, 팝업 큐, 모달 dim, 입력 차단](docs/navigation.md) | 화면 맨 위 규칙, 뒤로가기 처리 순서, 큐 진행 조건, dim·차단막 배치 |
 | [문제 해결](docs/troubleshooting.md) | 자주 겪는 문제와 해결 방법 |
 | [문서 색인](docs/README.md) | 아키텍처 개요와 패키지 구조 |
 
@@ -110,6 +114,7 @@ Package Manager 의 `+` > `Add package from git URL` 에 위 URL 을 넣어도 �
 - `com.unity.addressables` 2.6.0
 - `com.cysharp.unitask` 2.5.10
 - `com.unity.ugui` 2.0.0. 헬퍼 뷰가 uGUI(`UnityEngine.UI`)와 TextMeshPro(`TMPro`)를 사용하며, Unity 6 에서는 TextMeshPro 가 `com.unity.ugui` 에 포함되어 있습니다.
+- 선택: `com.unity.inputsystem`. 있으면 `ReadsBackInput` 이 Input System 으로 Escape 를 읽습니다(`versionDefines` 로 감지). 없으면 레거시 Input Manager 를 씁니다.
 
 ## 라이선스
 

@@ -23,7 +23,16 @@ namespace Geuneda.UiService
 			}
 			else
 			{
-				await operation.ToUniTask(cancellationToken: cancellationToken);
+				try
+				{
+					await operation.ToUniTask(cancellationToken: cancellationToken);
+				}
+				catch (System.OperationCanceledException)
+				{
+					// 기다림만 취소되고 인스턴스화는 계속되므로, 끝나면 바로 해제해 추적되지 않는 GameObject 가 남지 않게 합니다
+					operation.Completed += ReleaseCanceledInstance;
+					throw;
+				}
 			}
 
 			if (operation.Status != AsyncOperationStatus.Succeeded)
@@ -32,6 +41,18 @@ namespace Geuneda.UiService
 			}
 
 			return operation.Result;
+		}
+
+		private static void ReleaseCanceledInstance(AsyncOperationHandle<GameObject> operation)
+		{
+			if (operation.Status == AsyncOperationStatus.Succeeded)
+			{
+				Addressables.ReleaseInstance(operation.Result);
+			}
+			else
+			{
+				Addressables.Release(operation);
+			}
 		}
 
 		/// <inheritdoc />

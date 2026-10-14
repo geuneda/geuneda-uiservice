@@ -16,6 +16,8 @@ namespace Geuneda.UiService
 
 		private UniTaskCompletionSource _openTransitionCompletion;
 		private UniTaskCompletionSource _closeTransitionCompletion;
+		// 열기·닫기 알림마다 올라갑니다. 지연 중에 반대 알림이 왔으면 이전 전환의 완료 훅을 건너뜁니다
+		private int _transitionVersion;
 
 		/// <summary>
 		/// 프레젠터를 열기 전 지연 시간(초)을 가져옵니다
@@ -36,18 +38,32 @@ namespace Geuneda.UiService
 		/// <inheritdoc />
 		public override void OnPresenterOpened()
 		{
+			// 전환이 없더라도 세대를 올려, 지연 중이던 반대 전환의 완료 훅이 뒤늦게 불리지 않게 합니다
+			var version = ++_transitionVersion;
+
 			if (_openDelayInSeconds > 0)
 			{
-				OpenWithDelayAsync().Forget();
+				OpenWithDelayAsync(version).Forget();
+			}
+			else
+			{
+				// 이번에는 전환이 없으므로 이전 전환(실패했을 수 있음)의 태스크를 이번 열기에 넘기지 않습니다
+				_openTransitionCompletion = null;
 			}
 		}
 
 		/// <inheritdoc />
 		public override void OnPresenterClosing()
 		{
+			var version = ++_transitionVersion;
+
 			if (_closeDelayInSeconds > 0 && Presenter && Presenter.gameObject)
 			{
-				CloseWithDelayAsync().Forget();
+				CloseWithDelayAsync(version).Forget();
+			}
+			else
+			{
+				_closeTransitionCompletion = null;
 			}
 		}
 
@@ -75,37 +91,57 @@ namespace Geuneda.UiService
 		/// </summary>
 		protected virtual void OnClosedCompleted() { }
 
-		private async UniTask OpenWithDelayAsync()
+		private async UniTask OpenWithDelayAsync(int version)
 		{
-			_openTransitionCompletion = new UniTaskCompletionSource();
-			
-			OnOpenStarted();
+			// 지연 중에 다시 열고 닫으면 필드가 새 소스로 바뀌므로 이번 전환의 소스를 따로 잡아 둡니다
+			var completion = new UniTaskCompletionSource();
+			_openTransitionCompletion = completion;
 
-			await UniTask.Delay(TimeSpan.FromSeconds(_openDelayInSeconds));
-
-			if (this && gameObject)
+			try
 			{
-				OnOpenedCompleted();
+				OnOpenStarted();
+
+				await UniTask.Delay(TimeSpan.FromSeconds(_openDelayInSeconds));
+
+				if (this && gameObject && version == _transitionVersion)
+				{
+					OnOpenedCompleted();
+				}
+
+				completion.TrySetResult();
 			}
-			
-			_openTransitionCompletion?.TrySetResult();
+			catch (Exception exception)
+			{
+				// 프레젠터가 이 태스크를 기다리므로 예외를 넘겨 그쪽에서 정리하고 한 번 기록하게 합니다
+				completion.TrySetException(exception);
+			}
 		}
 
-		private async UniTask CloseWithDelayAsync()
+		private async UniTask CloseWithDelayAsync(int version)
 		{
-			_closeTransitionCompletion = new UniTaskCompletionSource();
-			
-			OnCloseStarted();
+			// 지연 중에 다시 열고 닫으면 필드가 새 소스로 바뀌므로 이번 전환의 소스를 따로 잡아 둡니다
+			var completion = new UniTaskCompletionSource();
+			_closeTransitionCompletion = completion;
 
-			await UniTask.Delay(TimeSpan.FromSeconds(_closeDelayInSeconds));
-
-			if (this && gameObject)
+			try
 			{
-				// 참고: 가시성(SetActive)은 이제 모든 전환이 완료된 후 UiPresenter가 처리합니다
-				OnClosedCompleted();
+				OnCloseStarted();
+
+				await UniTask.Delay(TimeSpan.FromSeconds(_closeDelayInSeconds));
+
+				if (this && gameObject && version == _transitionVersion)
+				{
+					// 참고: 가시성(SetActive)은 이제 모든 전환이 완료된 후 UiPresenter가 처리합니다
+					OnClosedCompleted();
+				}
+
+				completion.TrySetResult();
 			}
-			
-			_closeTransitionCompletion?.TrySetResult();
+			catch (Exception exception)
+			{
+				// 프레젠터가 이 태스크를 기다리므로 예외를 넘겨 그쪽에서 정리하고 한 번 기록하게 합니다
+				completion.TrySetException(exception);
+			}
 		}
 	}
 }

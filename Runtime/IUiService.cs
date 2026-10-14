@@ -279,6 +279,7 @@ namespace Geuneda.UiService
 
 		/// <summary>
 		/// 모든 표시 중인 UI 프레젠터를 닫습니다.
+		/// 닫는 도중 콜백에서 연 UI 는 닫지 않습니다.
 		/// </summary>
 		void CloseAllUi();
 
@@ -293,6 +294,70 @@ namespace Geuneda.UiService
 		/// </summary>
 		/// <param name="setId">닫을 UI 세트 구성의 ID.</param>
 		void CloseAllUiSet(int setId);
+
+		/// <summary>
+		/// 프레젠터가 표시 목록에 들어간 직후 발생합니다. 열기 전환은 아직 진행 중일 수 있습니다.
+		/// 구독자 예외는 기록만 하고 다른 구독자에게 계속 전달합니다. <see cref="IDisposable.Dispose"/> 중에는 발생하지 않습니다.
+		/// </summary>
+		event Action<UiInstanceId> PresenterOpened;
+
+		/// <summary>
+		/// 프레젠터가 표시 목록에서 빠진 직후 발생합니다. 닫기 전환은 아직 진행 중일 수 있습니다.
+		/// 닫기 외에 표시 중인 프레젠터를 RemoveUi/UnloadUi 로 뺄 때도 발생합니다.
+		/// 구독자 예외는 기록만 하고 다른 구독자에게 계속 전달합니다. <see cref="IDisposable.Dispose"/> 중에는 발생하지 않습니다.
+		/// </summary>
+		event Action<UiInstanceId> PresenterClosed;
+
+		/// <summary>
+		/// 로드된 프레젠터를 인스턴스 ID 로 찾습니다.
+		/// </summary>
+		/// <param name="instanceId">찾을 프레젠터의 인스턴스 ID.</param>
+		/// <param name="presenter">찾은 프레젠터. 없으면 null.</param>
+		/// <returns>로드되어 있으면 true.</returns>
+		bool TryGetUi(UiInstanceId instanceId, out UiPresenter presenter);
+
+		/// <summary>
+		/// 뒤로가기(Android 뒤로가기, Escape)를 처리합니다.
+		/// 입력이 막혀 있으면 아무것도 하지 않습니다. 아니면 <see cref="AddBackHandler"/> 핸들러를 우선순위가 높은 것부터
+		/// (같으면 나중에 추가한 것부터) 부르고, 모두 false 면 화면 맨 위 뒤로가기 대상(<see cref="UiPresenter.HandlesBack"/>)의
+		/// <see cref="UiPresenter.OnBackPressed"/> 를 부릅니다. 대상도 없으면 <see cref="BackUnhandled"/> 를 발생시킵니다.
+		/// </summary>
+		/// <returns>핸들러나 프레젠터가 처리했으면 true. 막혀 있거나 처리할 대상이 없으면 false.</returns>
+		bool HandleBack();
+
+		/// <summary>
+		/// 프레젠터보다 먼저 뒤로가기를 받을 핸들러를 추가합니다. 핸들러가 true 를 돌려주면 처리가 끝납니다.
+		/// 네이티브 웹뷰처럼 서비스가 관리하지 않는 화면에 씁니다.
+		/// </summary>
+		/// <param name="handler">처리했으면 true 를 돌려주는 핸들러.</param>
+		/// <param name="priority">클수록 먼저 불립니다. 같으면 나중에 추가한 핸들러가 먼저입니다.</param>
+		/// <returns>Dispose 하면 핸들러를 제거합니다. 여러 번 Dispose 해도 됩니다.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="handler"/>가 null 인 경우 발생합니다.</exception>
+		IDisposable AddBackHandler(Func<bool> handler, int priority = 0);
+
+		/// <summary>
+		/// 뒤로가기를 처리할 핸들러와 프레젠터가 없을 때 발생합니다. 게임 종료 확인 팝업을 띄우는 데 씁니다.
+		/// </summary>
+		event Action BackUnhandled;
+
+		/// <summary>
+		/// 입력 차단 토큰이 하나라도 남아 있는지 여부입니다.
+		/// </summary>
+		bool IsInputBlocked { get; }
+
+		/// <summary>
+		/// 남아 있는 입력 차단 토큰의 사유 목록입니다. 차단이 풀리지 않는 원인을 찾을 때 씁니다.
+		/// </summary>
+		IReadOnlyList<string> InputBlockReasons { get; }
+
+		/// <summary>
+		/// 모든 UI 의 입력을 막습니다. 돌려받은 토큰을 Dispose 하면 풀리고, 토큰이 모두 풀릴 때까지 막힌 상태가 유지됩니다.
+		/// 막힌 동안에는 <see cref="HandleBack"/> 도 무시합니다.
+		/// </summary>
+		/// <param name="reason">진단용 사유. <see cref="InputBlockReasons"/> 에 나옵니다. 이미 풀린 토큰을 다시 Dispose 하면 경고를 남깁니다.</param>
+		/// <returns>Dispose 하면 이 차단을 푸는 토큰.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="reason"/>이 null 인 경우 발생합니다.</exception>
+		UiInputBlock BlockInput(string reason);
 	}
 
 	/// <inheritdoc cref="IUiService" />

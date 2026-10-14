@@ -12,7 +12,7 @@ using Object = UnityEngine.Object;
 namespace Geuneda.UiService
 {
 	/// <inheritdoc />
-	public class UiService : IUiServiceInit
+	public partial class UiService : IUiServiceInit
 	{
 		public static readonly UnityEvent<DeviceOrientation, DeviceOrientation> OnOrientationChanged = new ();
 		public static readonly UnityEvent<Vector2, Vector2> OnResolutionChanged = new ();
@@ -49,6 +49,8 @@ namespace Geuneda.UiService
 		public UiService(IUiAssetLoader assetLoader)
 		{
 			_assetLoader = assetLoader;
+			_modalDim = new UiModalDim(OnDimClicked);
+			_inputBlocker = new UiInputBlocker(OnInputBlockChanged);
 			
 			// 에디터/디버깅 접근을 위한 정적 참조 설정
 			CurrentService = this;
@@ -101,6 +103,7 @@ namespace Geuneda.UiService
 
 			_uiParent.gameObject.AddComponent<UiServiceMonoComponent>();
 			Object.DontDestroyOnLoad(_uiParent.gameObject);
+			AttachNavigation(_uiParent);
 		}
 
 		/// <inheritdoc />
@@ -208,6 +211,7 @@ namespace Geuneda.UiService
 
 			// Canvas 정렬 순서가 레이어와 일치하는지 확인합니다
 			EnsureCanvasSortingOrder(ui.gameObject, layer);
+			PrepareNavigation(ui);
 
 			ui.Init(this, instanceAddress);
 
@@ -243,33 +247,11 @@ namespace Geuneda.UiService
 		/// <returns>UI가 제거되었으면 true, 그렇지 않으면 false</returns>
 		public bool RemoveUi(Type type, string instanceAddress)
 		{
-			var instanceId = new UiInstanceId(type, instanceAddress);
-			_visibleUiList.Remove(instanceId);
-			
-			if (!_uiPresenters.TryGetValue(type, out var instanceList))
-			{
-				return false;
-			}
+			var removed = RemoveRegistration(type, instanceAddress, out var detached);
 
-			// 인스턴스를 찾아 제거합니다
-			for (int i = 0; i < instanceList.Count; i++)
-			{
-				if (instanceList[i].Address == instanceAddress)
-				{
-					instanceList.RemoveAt(i);
-					_uiLayers.Remove(instanceId);
-
-					// 빈 타입 항목을 정리합니다
-					if (instanceList.Count == 0)
-					{
-						_uiPresenters.Remove(type);
-					}
-					
-					return true;
-				}
-			}
-			
-			return false;
+			// 빠진 등록의 진행 중이던 열기·닫기 태스크를 기다리던 쪽이 멈추지 않게 합니다
+			UiPresenter.CompleteDetached(detached);
+			return removed;
 		}
 
 		/// <inheritdoc />
@@ -410,9 +392,17 @@ namespace Geuneda.UiService
 				throw new KeyNotFoundException($"Cannot unload UI {instanceId}. It is not loaded.");
 			}
 
-			RemoveUi(type, instanceAddress);
+			RemoveRegistration(type, instanceAddress, out var detached);
 
-			_assetLoader.UnloadAsset(ui.gameObject);
+			try
+			{
+				_assetLoader.UnloadAsset(ui.gameObject);
+			}
+			finally
+			{
+				// 로더가 던져도 빠진 등록의 진행 중이던 열기·닫기 태스크를 기다리던 쪽이 멈추지 않게 합니다
+				UiPresenter.CompleteDetached(detached);
+			}
 		}
 
 		/// <inheritdoc />
@@ -535,40 +525,30 @@ namespace Geuneda.UiService
 		{
 			var instanceId = new UiInstanceId(type, instanceAddress);
 			
-			if (!_visibleUiList.Contains(instanceId))
+			if (!TryCloseVisible(instanceId, destroy))
 			{
 				Debug.LogWarning($"Is trying to close the {instanceId} ui but is not open");
-				return;
-			}
-
-			_visibleUiList.Remove(instanceId);
-			
-			if (TryFindPresenter(type, instanceAddress, out var presenter))
-			{
-				presenter.InternalClose(destroy);
 			}
 		}
 
 		/// <inheritdoc />
 		public void CloseAllUi()
 		{
-			foreach (var instanceId in _visibleUiList)
+			// 닫기 콜백이 UI 를 열거나 닫을 수 있으므로 복사본을 돌고, 그사이 연(다시 연) UI 는 닫지 않습니다
+			var snapshot = CopyVisibleList();
+			foreach (var entry in snapshot)
 			{
-				if (TryFindPresenter(instanceId.PresenterType, instanceId.InstanceAddress, out var presenter))
-				{
-					presenter.InternalClose(false);
-				}
+				TryCloseSnapshot(entry);
 			}
-
-			_visibleUiList.Clear();
 		}
 
 		/// <inheritdoc />
 		public void CloseAllUi(int layer)
 		{
-			for (int i = _visibleUiList.Count - 1; i >= 0; i--)
+			var snapshot = CopyVisibleList();
+			for (int i = snapshot.Length - 1; i >= 0; i--)
 			{
-				var instanceId = _visibleUiList[i];
+				var instanceId = snapshot[i].Id;
 
 				// UiConfig가 있으면 설정의 레이어를, 없으면 AddUi로 전달된 레이어를 사용합니다
 				int uiLayer;
@@ -583,11 +563,7 @@ namespace Geuneda.UiService
 
 				if (uiLayer == layer)
 				{
-					if (TryFindPresenter(instanceId.PresenterType, instanceId.InstanceAddress, out var presenter))
-					{
-						presenter.InternalClose(false);
-					}
-					_visibleUiList.Remove(instanceId);
+					TryCloseSnapshot(snapshot[i]);
 				}
 			}
 		}
@@ -641,6 +617,7 @@ namespace Geuneda.UiService
 
 			// 모든 표시 중인 UI를 닫습니다
 			CloseAllUi();
+			RunPendingChangesForDispose();
 
 			// 모든 UI 프레젠터를 언로드합니다
 			var presenterInstances = new List<UiInstanceId>();
@@ -664,6 +641,9 @@ namespace Geuneda.UiService
 					Debug.LogWarning($"Failed to unload UI {instanceId} during disposal: {ex.Message}");
 				}
 			}
+
+			// 이벤트 구독, 뒤로가기 핸들러, 입력 차단막과 dim 을 정리합니다
+			DestroyNavigation();
 
 			// 모든 컬렉션을 정리합니다
 			_uiPresenters.Clear();
@@ -737,8 +717,7 @@ namespace Geuneda.UiService
 
 			if (TryFindPresenter(instanceId.PresenterType, instanceId.InstanceAddress, out var presenter))
 			{
-				presenter.InternalOpen();
-				_visibleUiList.Add(instanceId);
+				OpenVisible(instanceId, presenter);
 			}
 		}
 
