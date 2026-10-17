@@ -77,7 +77,7 @@
 - 열기 메서드는 열기를 시작한 직후 완료됩니다. 전환까지 기다리려면 반환된 프레젠터의 `OpenTransitionTask` 를 기다립니다.
 - 닫기 전환 중에 다시 열면 그 닫기는 숨기거나 언로드하지 않고(`destroy: true` 여도) `OnCloseTransitionCompleted` 도 부르지 않습니다. 열기 전환 중에 닫으면 `OnOpenTransitionCompleted` 를 부르지 않습니다. `TimeDelayFeature`, `AnimationDelayFeature` 도 같은 규칙으로 늦게 끝난 전환의 완료 훅을 건너뛰고, 전환 태스크는 모두 완료됩니다.
 - `destroy: true` 닫기는 언로드를 마친 뒤 `CloseTransitionTask` 를 완료합니다.
-- UIDocument 프레젠터의 `sortingOrder` 는 열고 닫을 때마다 `레이어 + 순번 × 1/1024` 로 다시 매겨집니다([화면 맨 위](navigation.md#화면-맨-위)).
+- 열고 닫을 때마다 UIDocument 프레젠터의 `sortingOrder` 는 `레이어 + 순번 × 1/1024` 로, uGUI 프레젠터의 루트 `Canvas.sortingOrder` 는 `레이어 + 순번`(다음 설정 레이어 값보다 작게, 3.1.0) 으로 다시 매겨집니다([화면 맨 위](navigation.md#화면-맨-위)).
 - `AddressablesUiAssetLoader` 로 로드하다 취소하면, 인스턴스화가 끝나는 대로 그 인스턴스를 해제합니다.
 - 데이터 오버로드에서 프레젠터가 `UiPresenter<TData>` 가 아니면 에러 로그를 남기고 **열지 않은 채** 프레젠터를 반환합니다.
 - `CancellationToken` 은 `AddressablesUiAssetLoader` 의 비동기 인스턴스화 대기에만 전달됩니다. Resources/PrefabRegistry 로더는 동기로 인스턴스화하므로 토큰을 쓰지 않습니다.
@@ -234,7 +234,7 @@ UniTask 는 한 번만 `await` 할 수 있습니다. `UniTask.WhenAll` 로 기�
 | `void Dispose()` | 구독 해제, 대기 항목 버림, 여는 중인 팩토리의 토큰 취소. 띄운 팝업은 닫지 않음 |
 
 - 팝업이 닫히고 닫기 전환까지 끝나야 다음 팝업을 띄웁니다. 닫기 전환 중에 다시 열리면 계속 현재 항목으로 추적합니다.
-- `Hold` 가 남아 있거나, 큐 밖에서 연 `HandlesBack` 프레젠터가 표시 중이면 기다립니다. 여러 큐가 동시에 로드 중인 팩토리끼리는 서로 기다리지 않습니다.
+- `Hold` 가 남아 있거나, 큐 밖에서 연 `HandlesBack` 프레젠터가 표시 중이거나, 같은 서비스의 다른 큐가 팩토리를 돌리는 중이면 기다립니다. 큐 사이는 먼저 시작한 큐가 이기고, 팩토리가 끝나면(실패, 취소, null 포함) 기다리던 큐가 그 큐의 다음 항목보다 먼저 진행합니다(3.1.0, [여러 큐](navigation.md#여러-큐)).
 - Dispose 뒤 `Enqueue`, `Hold` 는 `ObjectDisposedException` 을 던집니다.
 
 `public readonly struct UiPopupQueueHold : IDisposable` 은 `UiInputBlock` 과 같은 규칙의 토큰입니다.

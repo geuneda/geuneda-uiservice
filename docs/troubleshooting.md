@@ -94,6 +94,8 @@ catch (OperationCanceledException)
 
 - 서비스는 프리팹 **루트**의 `Canvas`, `UIDocument`, `PanelRenderer`(Unity 6.5+) sortingOrder 만 설정합니다. 자식 Canvas 에는 적용되지 않습니다.
 - uGUI 에서 sortingOrder 는 같은 Sorting Layer 안에서만 비교되므로 Canvas 의 Sorting Layer 도 확인합니다.
+- 같은 레이어에서 나중에 연 uGUI 가 아래에 그려지면 "다음 레이어까지 정렬값이 ... 개뿐" 경고가 있는지 봅니다. 레이어 사이 간격이 동시에 띄운 수보다 작으면 먼저 연 캔버스들이 같은 정렬값을 씁니다. 레이어를 더 띄워 둡니다.
+- 루트 `Canvas.sortingOrder` 는 열고 닫을 때마다 바뀝니다(`레이어 + 순위`). 정렬값으로 레이어를 판단하지 말고 `UiConfig.Layer` 를 씁니다.
 
 ## 뒤로가기가 동작하지 않음
 

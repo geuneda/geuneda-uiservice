@@ -213,15 +213,26 @@ namespace Geuneda.UiService.Tests.PlayMode
 		}
 
 		[UnityTest]
-		public IEnumerator CanvasModalSharingLayer_WarnsOncePerType()
+		public IEnumerator CanvasModalsOnSameLayer_LaterModalCanvasIsAbove_WithoutWarning()
 		{
+			var firstTask = _service.OpenUiAsync<TestPopupPresenter>();
+			yield return firstTask.ToCoroutine();
+			var first = firstTask.GetAwaiter().GetResult();
+			var secondTask = _service.OpenUiAsync<TestPopupPresenterC>();
+			yield return secondTask.ToCoroutine();
+			var second = secondTask.GetAwaiter().GetResult();
+
+			// dim 은 위에 있는 모달 캔버스의 첫 자식이라 먼저 연 모달을 덮습니다
+			Assert.That(first.GetComponent<Canvas>().sortingOrder, Is.EqualTo(10));
+			Assert.That(second.GetComponent<Canvas>().sortingOrder, Is.EqualTo(11));
+			Assert.That(second.transform.GetChild(0).name, Is.EqualTo("UiDim"));
+
+			// 아래 모달을 다시 열면 그 캔버스가 위로 올라가고 dim 도 따라갑니다
+			_service.CloseUi<TestPopupPresenter>();
 			yield return _service.OpenUiAsync<TestPopupPresenter>().ToCoroutine();
-			LogAssert.Expect(LogType.Warning, new Regex("같은 레이어"));
 
-			yield return _service.OpenUiAsync<TestPopupPresenterC>().ToCoroutine();
-			_service.CloseUi<TestPopupPresenterC>();
-			yield return _service.OpenUiAsync<TestPopupPresenterC>().ToCoroutine();
-
+			Assert.That(first.GetComponent<Canvas>().sortingOrder, Is.GreaterThan(second.GetComponent<Canvas>().sortingOrder));
+			Assert.That(first.transform.GetChild(0).name, Is.EqualTo("UiDim"));
 			LogAssert.NoUnexpectedReceived();
 		}
 

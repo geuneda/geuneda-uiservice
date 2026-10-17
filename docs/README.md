@@ -39,7 +39,7 @@ UiPopupQueue : IUiPopupQueue (게임이 장면마다 만듦)
 Runtime/                              (어셈블리 Geuneda.UiService)
 ├── IUiService.cs                     IUiService, IUiServiceInit, UiInstance
 ├── UiService.cs                      서비스 구현 (로드, 열기, 닫기, 세트)
-├── UiService.Visibility.cs           표시 목록 변경과 알림(디스패처), UI Toolkit 정렬, dim 갱신
+├── UiService.Visibility.cs           표시 목록 변경과 알림(디스패처), UI Toolkit·uGUI 정렬, dim 갱신
 ├── UiService.Navigation.cs           표시 상태 이벤트 선언, 뒤로가기, 입력 차단, 모달 dim 설정
 ├── UiPresenter.cs                    UiPresenter, UiPresenter<T>, IUiPresenterData
 ├── UiConfigs.cs                      UiConfig, UiConfigs(abstract)
@@ -51,7 +51,7 @@ Runtime/                              (어셈블리 Geuneda.UiService)
 ├── UiServiceMonoComponent.cs         해상도/방향 감지
 ├── LoadSynchronouslyAttribute.cs     동기 로드 표시 어트리뷰트
 ├── Navigation/                       UiInputBlock, 차단막, 모달 dim, 뒤로가기 키 리더 (UiInputBlock 외 internal)
-├── Queue/                            IUiPopupQueue, UiPopupQueue, UiPopupQueueHold
+├── Queue/                            IUiPopupQueue, UiPopupQueue, UiPopupQueueHold, 큐 사이 팩토리 조정(internal UiPopupQueueGate)
 ├── Loaders/                          IUiAssetLoader 와 구현 3종
 ├── Features/                         PresenterFeatureBase, ITransitionFeature, 기본 피처
 └── Views/                            헬퍼 뷰 (네임스페이스 Geuneda.UiService.Views)

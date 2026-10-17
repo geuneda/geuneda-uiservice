@@ -12,6 +12,8 @@ namespace Geuneda.UiService
 	/// <inheritdoc />
 	/// <remarks>
 	/// 메인 스레드에서만 씁니다. 장면마다 큐를 만들고, 장면을 떠날 때 Dispose 합니다. 서비스보다 먼저 Dispose 해야 합니다.
+	/// 같은 <see cref="UiService"/> 로 만든 큐끼리는 팩토리를 하나씩 돌립니다. 다른 큐의 팩토리가 로드 중이면 기다리고,
+	/// 그 팩토리가 끝나면(실패, 취소, null 포함) 그때 진행할 수 있는 큐가 기다리기 시작한 순서대로 진행합니다.
 	/// </remarks>
 	public sealed class UiPopupQueue : IUiPopupQueue
 	{
@@ -23,6 +25,8 @@ namespace Geuneda.UiService
 		private readonly List<int> _holdIds = new List<int>();
 		private readonly List<string> _holdReasons = new List<string>();
 		private readonly Action<int> _releaseHold;
+		private readonly Action _advance;
+		private readonly UiPopupQueueGate _gate;
 		private readonly CancellationTokenSource _disposeCancellation = new CancellationTokenSource();
 		private int _lastHoldId;
 		// 꺼낸 항목의 키. 여는 중부터 닫기 전환이 끝날 때까지 남아 있습니다
@@ -42,6 +46,9 @@ namespace Geuneda.UiService
 		{
 			_uiService = uiService ?? throw new ArgumentNullException(nameof(uiService));
 			_releaseHold = ReleaseHold;
+			_advance = Advance;
+			// 같은 UiService 의 큐끼리 팩토리를 하나씩 돌립니다. 다른 IUiService 구현이면 이 큐만 씁니다
+			_gate = uiService is UiService service ? service.PopupQueueGate : new UiPopupQueueGate();
 			HoldReasons = _holdReasons.AsReadOnly();
 			_uiService.PresenterClosed += OnPresenterClosed;
 		}
@@ -157,6 +164,8 @@ namespace Geuneda.UiService
 			finally
 			{
 				_disposeCancellation.Dispose();
+				// 여는 중이던 팩토리를 기다리던 다른 큐가 멈추지 않게 합니다
+				_gate.Exit(_advance);
 			}
 		}
 
@@ -177,7 +186,9 @@ namespace Geuneda.UiService
 				{
 					_advanceAgain = false;
 
-					if (_disposed || _currentKey != null || IsHeld || _pending.Count == 0 || HasOutsideBackTarget())
+					// 다른 큐의 팩토리가 로드 중이면 끝날 때 게이트가 다시 진행시킵니다
+					if (_disposed || _currentKey != null || IsHeld || _pending.Count == 0 || HasOutsideBackTarget() ||
+						!_gate.TryEnter(_advance))
 					{
 						continue;
 					}
@@ -222,6 +233,10 @@ namespace Geuneda.UiService
 				// 팝업 하나가 실패해도 나머지 팝업은 띄웁니다
 				Logger.Error(exception, $"The popup factory threw (key '{entry.Key}')");
 			}
+
+			// 로드가 끝났으므로(실패, 취소, null 포함) 기다리던 다른 큐를 이 큐의 다음 항목보다 먼저 진행시킵니다.
+			// 팝업이 떴으면 그 뒤로는 큐 밖 뒤로가기 대상 규칙으로 기다립니다
+			_gate.Exit(_advance);
 
 			if (_disposed)
 			{

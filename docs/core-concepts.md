@@ -217,6 +217,7 @@ public class FadeFeature : PresenterFeatureBase, ITransitionFeature
 ## UI 레이어
 
 - 각 `UiConfig.Layer` 값이 프리팹 루트의 `Canvas.sortingOrder`, `UIDocument.sortingOrder`, `PanelRenderer.sortingOrder`(Unity 6.5+) 로 설정됩니다. 값이 클수록 위에 그려집니다.
+- 열고 닫을 때마다 같은 레이어 안에서 나중에 연 것이 위에 오도록 `Canvas` 는 `레이어 + 순위`, `UIDocument` 는 `레이어 + 순위/1024` 로 다시 매깁니다. uGUI 는 다음 설정 레이어 값보다 작게만 쓰므로 레이어를 띄워 둡니다(예: 0, 10, 20). 자세한 규칙은 [화면 맨 위](navigation.md#화면-맨-위)를 봅니다.
 - 레이어별 컨테이너 GameObject 는 없습니다. 모든 프레젠터는 `"Ui"` 루트 바로 아래에 생성됩니다.
 - `CloseAllUi(int layer)` 로 한 레이어의 표시 중인 UI 를 모두 닫습니다.
 - `Init()` 은 0 미만 또는 1000 초과 레이어에 경고를 남기지만 막지는 않습니다.

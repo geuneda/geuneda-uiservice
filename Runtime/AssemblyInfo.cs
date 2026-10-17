@@ -14,3 +14,7 @@ using System.Runtime.CompilerServices;
 // 이를 통해 테스트가 InternalOpen(), InternalClose() 및 internal 비동기 프로세스 메서드 등의
 // internal API에 접근하여 프레젠터 생명주기 동작을 테스트할 수 있습니다.
 [assembly: InternalsVisibleTo("Geuneda.UiService.Tests.PlayMode")]
+
+// internal 멤버를 EditMode 테스트 어셈블리에 노출합니다.
+// 팝업 큐 게이트(UiPopupQueueGate)와 uGUI 정렬값 계산처럼 씬 없이 확인할 수 있는 internal 로직을 단위 테스트합니다.
+[assembly: InternalsVisibleTo("Geuneda.UiService.Tests")]

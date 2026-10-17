@@ -35,6 +35,9 @@ namespace Geuneda.UiService
 		/// <inheritdoc />
 		public bool IsInputBlocked => _inputBlocker.IsBlocked;
 
+		// 이 서비스로 만든 팝업 큐들이 팩토리를 하나씩 돌리게 합니다
+		internal UiPopupQueueGate PopupQueueGate { get; } = new UiPopupQueueGate();
+
 		/// <inheritdoc />
 		public IReadOnlyList<string> InputBlockReasons => _inputBlocker.Reasons;
 
