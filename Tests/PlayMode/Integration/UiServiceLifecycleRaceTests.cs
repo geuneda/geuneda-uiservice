@@ -352,7 +352,9 @@ namespace Geuneda.UiService.Tests.PlayMode
 				_service.OpenUiAsync<TestPopupPresenterB>().Forget();
 				_service.OpenUiAsync<TestPopupPresenterC>().Forget();
 			};
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\] Refreshing the UI order or modal dim threw"));
 			LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex("modal boom"));
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\] Refreshing the UI order or modal dim threw"));
 			LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex("modal boom"));
 
 			yield return _service.OpenUiAsync<TestPopupPresenter>().ToCoroutine();
@@ -371,6 +373,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			loadTask = default;
 			popup.OpenedCallback = () => throw new InvalidOperationException("hook boom");
 			CountExceptionLogs("hook boom");
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("hook boom"));
 
 			yield return _service.OpenUiAsync<TestPopupPresenter>().ToCoroutine();
@@ -397,6 +400,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			openTask = default;
 			popup.ClosedCallback = () => throw new InvalidOperationException("close boom");
 			CountExceptionLogs("close boom");
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("close boom"));
 
 			_service.CloseUi<TestPopupPresenter>(destroy: true);
@@ -420,6 +424,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			var popup = openTask.GetAwaiter().GetResult();
 			popup.ClosedCallback = () => throw new InvalidOperationException("close boom");
 			_mockLoader.ThrowOnUnload = true;
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("close boom"));
 			LogAssert.Expect(LogType.Exception, new Regex("unload boom"));
 
@@ -443,6 +448,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			feature = null;
 			yield return _service.OpenUiAsync<TestLayerUiPresenter>().ToCoroutine();
 			CountExceptionLogs("feature close boom");
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("feature close boom"));
 
 			_service.CloseUi<TestLayerUiPresenter>();
@@ -473,6 +479,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			feature.ThrowOnOpenStarted = true;
 			feature = null;
 			CountExceptionLogs("feature open boom");
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("feature open boom"));
 
 			yield return _service.OpenUiAsync<TestLayerUiPresenter>().ToCoroutine();
@@ -523,6 +530,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			feature.SetDelays(0f, 0.05f);
 			feature.ThrowOnCloseStarted = true;
 			yield return _service.OpenUiAsync<TestLayerUiPresenter>().ToCoroutine();
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("feature close start boom"));
 
 			_service.CloseUi<TestLayerUiPresenter>();
@@ -540,6 +548,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			var feature = presenter.GetComponent<TestCountingDelayFeature>();
 			feature.SetDelays(0.05f, 0f);
 			feature.ThrowOnOpenStarted = true;
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("feature open boom"));
 			yield return _service.OpenUiAsync<TestLayerUiPresenter>().ToCoroutine();
 			Assert.That(presenter.OpenTransitionTask.Status, Is.EqualTo(UniTaskStatus.Faulted));
@@ -573,6 +582,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			CountExceptionLogs("boom");
 			// 시작한 피처 전환의 실패를 먼저 관찰해 기록하고, 단계를 실패시킨 콜백 예외를 다음에 기록합니다
 			LogAssert.Expect(LogType.Exception, new Regex("feature close start boom"));
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("callback boom"));
 
 			_service.CloseUi<TestLayerUiPresenter>();
@@ -603,7 +613,9 @@ namespace Geuneda.UiService.Tests.PlayMode
 
 			yield return _service.OpenUiAsync<TestDataUiPresenter>().ToCoroutine();
 			CountExceptionLogs("feature close boom");
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Transition\] Another feature transition also failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("feature close boom"));
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("feature close boom"));
 
 			_service.CloseUi<TestDataUiPresenter>();
@@ -630,6 +642,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			var popup = openTask.GetAwaiter().GetResult();
 			_mockLoader.ThrowOnUnload = true;
 			CountExceptionLogs("unload boom");
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("unload boom"));
 
 			_service.CloseUi<TestPopupPresenter>(destroy: true);
@@ -657,6 +670,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 
 			feature.ThrowBeforeAssign = true;
 			CountExceptionLogs("boom");
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("custom closing boom"));
 
 			_service.CloseUi<TestZeroDelayPresenter>();
@@ -676,6 +690,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			var presenter = openTask.GetAwaiter().GetResult();
 			var feature = presenter.GetComponent<TestCustomTransitionFeature>();
 			feature.FailWith = new InvalidOperationException("custom transition boom");
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("custom transition boom"));
 
 			_service.CloseUi<TestZeroDelayPresenter>();
@@ -684,6 +699,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 
 			feature.ThrowBeforeAssign = true;
 			CountExceptionLogs("boom");
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("custom closing boom"));
 
 			_service.CloseUi<TestZeroDelayPresenter>();
@@ -702,6 +718,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			var presenter = openTask.GetAwaiter().GetResult();
 			presenter.GetComponent<TestCustomTransitionFeature>().UseDeferredThrow = true;
 			CountExceptionLogs("deferred close boom");
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("deferred close boom"));
 
 			_service.CloseUi<TestZeroDelayPresenter>();
@@ -729,6 +746,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			yield return _service.OpenUiAsync(type).ToCoroutine();
 			CountExceptionLogs("boom");
 			LogAssert.Expect(LogType.Exception, new Regex("feature close start boom"));
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("status boom"));
 
 			_service.CloseUi(type);

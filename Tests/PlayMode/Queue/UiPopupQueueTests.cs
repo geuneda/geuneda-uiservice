@@ -111,6 +111,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator FactoryThrowing_IsLoggedAndSkipped()
 		{
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.PopupQueue\] The popup factory threw \(key 'broken'\)"));
 			LogAssert.Expect(LogType.Exception, new Regex("factory failed"));
 			_queue.Enqueue("broken", 5, _ => throw new InvalidOperationException("factory failed"));
 			_queue.Enqueue("show", 0, OpenFactory<TestPopupPresenter>("show"));
@@ -358,6 +359,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			yield return null;
 			var first = _service.GetUi<TestPopupPresenter>();
 			first.ClosedCallback = () => throw new InvalidOperationException("close boom");
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\.Presenter\] \w+ open or close step failed"));
 			LogAssert.Expect(LogType.Exception, new Regex("close boom"));
 
 			_service.CloseUi<TestPopupPresenter>();

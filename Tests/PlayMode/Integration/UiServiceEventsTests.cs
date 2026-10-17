@@ -80,6 +80,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			var received = 0;
 			_service.PresenterOpened += _ => throw new InvalidOperationException("boom");
 			_service.PresenterOpened += _ => received++;
+			LogAssert.Expect(LogType.Error, new Regex(@"\[Geuneda\.UiService\] A visibility handler threw for \S+"));
 			LogAssert.Expect(LogType.Exception, new Regex("boom"));
 
 			yield return _service.OpenUiAsync<TestPopupPresenter>().ToCoroutine();

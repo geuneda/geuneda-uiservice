@@ -4,6 +4,15 @@
 형식은 [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)를 기반으로 하며
 이 프로젝트는 [Semantic Versioning](http://semver.org/spec/v2.0.0.html)을 준수합니다.
 
+## [3.0.0] - 2026-10-17
+
+**호환성 주의**:
+- `com.geuneda.core` 0.4.0 에 의존합니다. git URL 로 설치한 프로젝트는 `Packages/manifest.json` 에 `"com.geuneda.core": "https://github.com/geuneda/geuneda-core.git"` 를 추가해야 합니다. core 를 넣지 않을 기존 프로젝트는 `#v2.0.0` 에 고정하세요.
+- 예외만 남기던 곳은 무엇이 실패했는지 적은 Error 줄을 먼저 남기고 예외를 남깁니다. `LogAssert.Expect(LogType.Exception, ...)` 로 이 로그를 기대하던 테스트는 그 앞에 `LogType.Error` 기대를 추가해야 합니다. 해당 위치: 프레젠터 열기·닫기 단계 실패와 전환 관찰 실패, 다른 피처 전환의 추가 실패, 표시 상태 이벤트 구독자 예외, 정렬·dim 갱신 예외, 팝업 팩토리 예외.
+
+**변경**:
+- 런타임 로그를 core 의 `ModuleLogger` 로 옮겼습니다. 메시지 앞에 모듈 이름이 붙습니다: `[Geuneda.UiService]`(`UiService`), `[Geuneda.UiService.Presenter]`(`UiPresenter`), `[Geuneda.UiService.Transition]`(피처 전환 관찰), `[Geuneda.UiService.ModalDim]`, `[Geuneda.UiService.InputBlocker]`, `[Geuneda.UiService.PopupQueue]`, `[Geuneda.UiService.UiSet]`. 메시지에 직접 붙이던 `[UiService]`, `[UiPopupQueue]` 는 뺐습니다. 에디터 도구의 로그는 그대로입니다.
+
 ## [2.0.0] - 2026-10-14
 
 **호환성 주의**:

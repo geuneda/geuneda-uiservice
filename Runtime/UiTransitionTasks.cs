@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.ExceptionServices;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
+using Geuneda.Core;
 
 // ReSharper disable CheckNamespace
 
@@ -13,6 +13,8 @@ namespace Geuneda.UiService
 	/// </summary>
 	internal static class UiTransitionTasks
 	{
+		private static readonly ModuleLogger Logger = new ModuleLogger("Geuneda.UiService.Transition");
+
 		// 기다리지 않고 끝날 때, 시작한 전환의 실패가 버려지지 않게 관찰을 넘깁니다(실패하면 Forget 이 한 번 기록)
 		public static void ObserveTransitions(UniTask[] tasks)
 		{
@@ -69,7 +71,7 @@ namespace Geuneda.UiService
 						}
 						else
 						{
-							Debug.LogException(exception);
+							Logger.Error(exception, "Another feature transition also failed");
 						}
 					}
 				}
@@ -106,7 +108,7 @@ namespace Geuneda.UiService
 					}
 					else
 					{
-						Debug.LogException(exception);
+						Logger.Error(exception, "Another feature transition also failed");
 					}
 				}
 			}

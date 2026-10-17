@@ -104,7 +104,7 @@ UniTask 는 한 번만 `await` 할 수 있습니다. `UniTask.WhenAll` 로 기�
 | `event Action<UiInstanceId> PresenterClosed` | 표시 목록에서 빠진 직후, `OnClosed` 보다 먼저. 이때 `CloseTransitionTask` 는 이번 닫기의 태스크. 표시 중인 프레젠터를 `RemoveUi`/`UnloadUi` 해도 발생 |
 | `bool TryGetUi(UiInstanceId instanceId, out UiPresenter presenter)` | 로드된 프레젠터를 인스턴스 ID 로 찾음 |
 
-구독자 예외는 `Debug.LogException` 으로 기록하고 다른 구독자에게 계속 전달합니다. `Dispose()` 중에는 발생하지 않습니다. 구독자나 훅 안에서 연 UI·닫은 UI 의 알림과 훅은 지금 처리 중인 알림이 끝난 뒤에 실행됩니다([표시 상태 이벤트](navigation.md#표시-상태-이벤트)).
+구독자 예외는 `Geuneda.UiService` 로거로 기록하고(Error 줄 + 예외) 다른 구독자에게 계속 전달합니다. `Dispose()` 중에는 발생하지 않습니다. 구독자나 훅 안에서 연 UI·닫은 UI 의 알림과 훅은 지금 처리 중인 알림이 끝난 뒤에 실행됩니다([표시 상태 이벤트](navigation.md#표시-상태-이벤트)).
 
 ### 뒤로가기
 

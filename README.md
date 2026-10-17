@@ -4,12 +4,13 @@ Unity UI 프레젠터의 로드, 열기, 닫기, 언로드를 한 서비스에�
 
 ## 설치
 
-UniTask 는 Unity 레지스트리에 없어서 의존성으로 자동 설치되지 않습니다. `Packages/manifest.json` 에 UniTask 와 이 패키지를 함께 추가합니다.
+core 와 UniTask 는 Unity 레지스트리에 없어서 의존성으로 자동 설치되지 않습니다. `Packages/manifest.json` 에 core, UniTask 와 이 패키지를 함께 추가합니다.
 
 ```json
 {
   "dependencies": {
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+    "com.geuneda.core": "https://github.com/geuneda/geuneda-core.git",
     "com.geuneda.uiservice": "https://github.com/geuneda/geuneda-uiservice.git"
   }
 }
@@ -111,6 +112,7 @@ Package Manager 의 `+` > `Add package from git URL` 에 위 URL 을 넣어도 �
 ## 요구 사항과 의존성
 
 - Unity 6000.0 이상 (`UiToolkitPanelRendererFeature` 는 Unity 6000.5 이상에서만 컴파일됩니다)
+- `com.geuneda.core` 0.4.0(로거 `ModuleLogger`)
 - `com.unity.addressables` 2.6.0
 - `com.cysharp.unitask` 2.5.10
 - `com.unity.ugui` 2.0.0. 헬퍼 뷰가 uGUI(`UnityEngine.UI`)와 TextMeshPro(`TMPro`)를 사용하며, Unity 6 에서는 TextMeshPro 가 `com.unity.ugui` 에 포함되어 있습니다.

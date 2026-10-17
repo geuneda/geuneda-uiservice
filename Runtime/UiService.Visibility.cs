@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Geuneda.Core;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -114,7 +115,7 @@ namespace Geuneda.UiService
 			}
 			catch (Exception exception)
 			{
-				Debug.LogException(exception);
+				Logger.Error(exception, "Refreshing the UI order or modal dim threw");
 			}
 		}
 
@@ -328,7 +329,7 @@ namespace Geuneda.UiService
 				if (instanceId != hostId && GetSortingLayer(instanceId) == hostLayer)
 				{
 					_sameLayerWarnedTypes.Add(host.GetType());
-					Debug.LogWarning($"[UiService] 모달 {hostId} 와 같은 레이어({hostLayer})에 {instanceId} 가 떠 있습니다. " +
+					Logger.Warning($"모달 {hostId} 와 같은 레이어({hostLayer})에 {instanceId} 가 떠 있습니다. " +
 						"uGUI 는 같은 sortingOrder 캔버스의 앞뒤를 보장하지 않아 dim 이 일부를 가리지 못하거나 뒤로가기 순서가 화면과 다를 수 있습니다. 겹치는 팝업은 레이어를 나누세요.");
 					return;
 				}
@@ -351,7 +352,7 @@ namespace Geuneda.UiService
 				}
 				catch (Exception exception)
 				{
-					Debug.LogException(exception);
+					Logger.Error(exception, $"A visibility handler threw for {instanceId}");
 				}
 			}
 		}

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Geuneda.Core;
 using UnityEngine;
 
 // ReSharper disable CheckNamespace
@@ -26,6 +27,8 @@ namespace Geuneda.UiService
 	[Serializable]
 	public struct UiSetEntry
 	{
+		private static readonly ModuleLogger Logger = new ModuleLogger("Geuneda.UiService.UiSet");
+
 		/// <summary>
 		/// UI 프레젠터 타입의 AssemblyQualifiedName입니다
 		/// </summary>
@@ -41,7 +44,7 @@ namespace Geuneda.UiService
 			var type = Type.GetType(UiTypeName);
 			if (type == null)
 			{
-				Debug.LogWarning($"Could not find type: {UiTypeName}");
+				Logger.Warning($"Could not find type: {UiTypeName}");
 				return default;
 			}
 			return new UiInstanceId(type, string.IsNullOrEmpty(InstanceAddress) ? null : InstanceAddress);

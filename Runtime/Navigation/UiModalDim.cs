@@ -1,4 +1,5 @@
 using System;
+using Geuneda.Core;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Image = UnityEngine.UI.Image;
@@ -15,6 +16,8 @@ namespace Geuneda.UiService
 	/// </summary>
 	internal sealed class UiModalDim
 	{
+		private static readonly ModuleLogger Logger = new ModuleLogger("Geuneda.UiService.ModalDim");
+
 		/// <summary>
 		/// 같은 레이어 안에서 UI Toolkit 문서에 매기는 정렬값 단계입니다. 2 의 거듭제곱 분수라 레이어 1000 근처에서도 정확합니다.
 		/// </summary>
@@ -110,7 +113,7 @@ namespace Geuneda.UiService
 			}
 			else
 			{
-				Debug.LogWarning($"[UiService] 모달 프레젠터 {host.GetType().Name} 의 루트에 Canvas 나 PanelSettings 가 지정된 UIDocument 가 없어 dim 을 깔지 않습니다.");
+				Logger.Warning($"모달 프레젠터 {host.GetType().Name} 의 루트에 Canvas 나 PanelSettings 가 지정된 UIDocument 가 없어 dim 을 깔지 않습니다.");
 			}
 		}
 

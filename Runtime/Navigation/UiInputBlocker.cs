@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Geuneda.Core;
 using Geuneda.UiService.Views;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,6 +18,8 @@ namespace Geuneda.UiService
 	/// </summary>
 	internal sealed class UiInputBlocker
 	{
+		private static readonly ModuleLogger Logger = new ModuleLogger("Geuneda.UiService.InputBlocker");
+
 		// 레이어 권장 범위(0~1000)보다 훨씬 위라 어떤 프레젠터보다 먼저 입력을 받습니다
 		internal const int SortingOrder = 32767;
 
@@ -154,7 +157,7 @@ namespace Geuneda.UiService
 			var index = _ids.IndexOf(id);
 			if (index < 0)
 			{
-				Debug.LogWarning("[UiService] 이미 풀린 입력 차단 토큰을 다시 풀었습니다. 같은 토큰을 두 번 Dispose 하지 않았는지 확인하세요.");
+				Logger.Warning("이미 풀린 입력 차단 토큰을 다시 풀었습니다. 같은 토큰을 두 번 Dispose 하지 않았는지 확인하세요.");
 				return;
 			}
 

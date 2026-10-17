@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
+using Geuneda.Core;
 using UnityEngine;
 using UnityEngine.Events;
 using Object = UnityEngine.Object;
@@ -14,6 +15,8 @@ namespace Geuneda.UiService
 	/// <inheritdoc />
 	public partial class UiService : IUiServiceInit
 	{
+		private static readonly ModuleLogger Logger = new ModuleLogger("Geuneda.UiService");
+
 		public static readonly UnityEvent<DeviceOrientation, DeviceOrientation> OnOrientationChanged = new ();
 		public static readonly UnityEvent<Vector2, Vector2> OnResolutionChanged = new ();
 
@@ -84,11 +87,11 @@ namespace Geuneda.UiService
 
 				if (uiConfig.Layer < 0)
 				{
-					Debug.LogWarning($"UiConfig for type '{uiConfig.UiType.Name}' has negative layer number ({uiConfig.Layer}). This may cause unexpected behavior.");
+					Logger.Warning($"UiConfig for type '{uiConfig.UiType.Name}' has negative layer number ({uiConfig.Layer}). This may cause unexpected behavior.");
 				}
 				if (uiConfig.Layer > 1000)
 				{
-					Debug.LogWarning($"UiConfig for type '{uiConfig.UiType.Name}' has very high layer number ({uiConfig.Layer}). Consider using lower values for better organization.");
+					Logger.Warning($"UiConfig for type '{uiConfig.UiType.Name}' has very high layer number ({uiConfig.Layer}). Consider using lower values for better organization.");
 				}
 
 				AddUiConfig(uiConfig);
@@ -162,7 +165,7 @@ namespace Geuneda.UiService
 		{
 			if (!_uiConfigs.TryAdd(config.UiType, config))
 			{
-				Debug.LogWarning($"The UiConfig {config.Address} was already added");
+				Logger.Warning($"The UiConfig {config.Address} was already added");
 			}
 		}
 
@@ -171,7 +174,7 @@ namespace Geuneda.UiService
 		{
 			if (!_uiSets.TryAdd(uiSet.SetId, uiSet))
 			{
-				Debug.LogWarning($"The Ui Configuration with the id {uiSet.SetId.ToString()} was already added");
+				Logger.Warning($"The Ui Configuration with the id {uiSet.SetId.ToString()} was already added");
 			}
 		}
 
@@ -196,7 +199,7 @@ namespace Geuneda.UiService
 			// 이미 존재하는지 확인합니다
 			if (TryFindPresenter(type, instanceAddress, out _))
 			{
-				Debug.LogWarning($"The Ui {instanceId} was already added");
+				Logger.Warning($"The Ui {instanceId} was already added");
 				return;
 			}
 			
@@ -315,7 +318,7 @@ namespace Geuneda.UiService
 			
 			if (TryFindPresenter(type, instanceAddress, out var existingUi))
 			{
-				Debug.LogWarning($"The Ui {instanceId} was already loaded");
+				Logger.Warning($"The Ui {instanceId} was already loaded");
 
 				return existingUi;
 			}
@@ -487,7 +490,7 @@ namespace Geuneda.UiService
 			}
 			else
 			{
-				Debug.LogError($"The UiPresenter {type} is not a {nameof(UiPresenter<TData>)} type. " +
+				Logger.Error($"The UiPresenter {type} is not a {nameof(UiPresenter<TData>)} type. " +
 							$"Implement UiPresenter<{typeof(TData).Name}> to allow it to open with initial defined data");
 				return ui;
 			}
@@ -527,7 +530,7 @@ namespace Geuneda.UiService
 			
 			if (!TryCloseVisible(instanceId, destroy))
 			{
-				Debug.LogWarning($"Is trying to close the {instanceId} ui but is not open");
+				Logger.Warning($"Is trying to close the {instanceId} ui but is not open");
 			}
 		}
 
@@ -638,7 +641,7 @@ namespace Geuneda.UiService
 				}
 				catch (Exception ex)
 				{
-					Debug.LogWarning($"Failed to unload UI {instanceId} during disposal: {ex.Message}");
+					Logger.Warning($"Failed to unload UI {instanceId} during disposal: {ex.Message}");
 				}
 			}
 
@@ -711,7 +714,7 @@ namespace Geuneda.UiService
 		{
 			if (_visibleUiList.Contains(instanceId))
 			{
-				Debug.LogWarning($"Is trying to open the {instanceId} ui but is already open");
+				Logger.Warning($"Is trying to open the {instanceId} ui but is already open");
 				return;
 			}
 
@@ -766,7 +769,7 @@ namespace Geuneda.UiService
 			
 			var firstMatch = instances[0];
 			var selectedName = string.IsNullOrEmpty(firstMatch.Address) ? "default" : firstMatch.Address;
-			Debug.LogWarning($"[UiService] Ambiguous call for {type.Name}: found {instances.Count} instances [{string.Join(", ", instanceNames)}]. " +
+			Logger.Warning($"Ambiguous call for {type.Name}: found {instances.Count} instances [{string.Join(", ", instanceNames)}]. " +
 							$"Using '{selectedName}'. Specify instance address explicitly to avoid ambiguity.");
 			
 			return firstMatch.Address;

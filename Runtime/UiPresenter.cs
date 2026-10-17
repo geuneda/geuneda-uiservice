@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using Cysharp.Threading.Tasks;
+using Geuneda.Core;
 using UnityEngine;
 
 // ReSharper disable CheckNamespace
@@ -22,6 +23,8 @@ namespace Geuneda.UiService
 	/// </summary>
 	public abstract class UiPresenter : MonoBehaviour
 	{
+		private static readonly ModuleLogger Logger = new ModuleLogger("Geuneda.UiService.Presenter");
+
 		protected IUiService _uiService;
 		private List<PresenterFeatureBase> _features;
 		private UniTaskCompletionSource _openTransitionCompletion;
@@ -255,7 +258,7 @@ namespace Geuneda.UiService
 				}
 			}
 
-			Debug.LogException(exception);
+			Logger.Error(exception, $"{GetType().Name} open or close step failed");
 		}
 
 
@@ -480,7 +483,7 @@ namespace Geuneda.UiService
 				}
 				catch (Exception observeException)
 				{
-					Debug.LogException(observeException);
+					Logger.Error(observeException, $"{GetType().Name} could not observe its feature transitions");
 				}
 
 				// 표시 목록에서는 이미 빠졌으므로 화면에 남지 않게 숨기고 요청된 언로드를 한 뒤 실패를 알립니다.
@@ -575,7 +578,7 @@ namespace Geuneda.UiService
 					}
 					else
 					{
-						Debug.LogException(exception);
+						Logger.Error(exception, $"{GetType().Name} could not read a feature transition status");
 					}
 
 					continue;
@@ -601,7 +604,7 @@ namespace Geuneda.UiService
 
 			if (statusError != null)
 			{
-				Debug.LogException(statusError);
+				Logger.Error(statusError, $"{GetType().Name} could not read a feature transition status");
 			}
 
 			return tasks;

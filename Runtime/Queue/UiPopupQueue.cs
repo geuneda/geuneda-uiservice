@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Geuneda.Core;
 using UnityEngine;
 
 // ReSharper disable CheckNamespace
@@ -14,6 +15,8 @@ namespace Geuneda.UiService
 	/// </remarks>
 	public sealed class UiPopupQueue : IUiPopupQueue
 	{
+		private static readonly ModuleLogger Logger = new ModuleLogger("Geuneda.UiService.PopupQueue");
+
 		private readonly IUiService _uiService;
 		// 우선순위가 높은 것부터, 같으면 넣은 순서대로 정렬해 둡니다
 		private readonly List<Entry> _pending = new List<Entry>();
@@ -217,7 +220,7 @@ namespace Geuneda.UiService
 			catch (Exception exception)
 			{
 				// 팝업 하나가 실패해도 나머지 팝업은 띄웁니다
-				Debug.LogException(exception);
+				Logger.Error(exception, $"The popup factory threw (key '{entry.Key}')");
 			}
 
 			if (_disposed)
@@ -323,7 +326,7 @@ namespace Geuneda.UiService
 			var index = _holdIds.IndexOf(id);
 			if (index < 0)
 			{
-				Debug.LogWarning("[UiPopupQueue] 이미 풀린 멈춤 토큰을 다시 풀었습니다. 같은 토큰을 두 번 Dispose 하지 않았는지 확인하세요.");
+				Logger.Warning("이미 풀린 멈춤 토큰을 다시 풀었습니다. 같은 토큰을 두 번 Dispose 하지 않았는지 확인하세요.");
 				return;
 			}
 
