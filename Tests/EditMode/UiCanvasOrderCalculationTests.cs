@@ -61,6 +61,31 @@ namespace Geuneda.UiService.Tests
 		}
 
 		[Test]
+		public void GetCanvasOrder_WithStep_AddsStepPerOpenRank()
+		{
+			Assert.That(Orders(10, 59, 3, 10), Is.EqualTo(new[] { 10, 20, 30 }));
+			Assert.That(Orders(10, 30, 3, 10), Is.EqualTo(new[] { 10, 20, 30 }));
+		}
+
+		[Test]
+		public void GetCanvasOrder_WithStep_WithoutEnoughGap_EarlierCanvasesShareStart()
+		{
+			// 10 부터 29 까지는 간격 10 으로 두 값(10, 20)만 쓸 수 있습니다
+			Assert.That(Orders(10, 29, 4, 10), Is.EqualTo(new[] { 10, 10, 10, 20 }));
+			Assert.That(Orders(32750, 32766, 3, 10), Is.EqualTo(new[] { 32750, 32750, 32760 }));
+		}
+
+		[Test]
+		public void CanvasOrderStep_DefaultsToOne_AndRejectsBelowOne()
+		{
+			var service = new UiService(new MockAssetLoader());
+
+			Assert.That(service.CanvasOrderStep, Is.EqualTo(1));
+			Assert.Throws<System.ArgumentOutOfRangeException>(() => service.CanvasOrderStep = 0);
+			Assert.That(service.CanvasOrderStep, Is.EqualTo(1));
+		}
+
+		[Test]
 		public void GetCanvasOrderStart_ClampsToCanvasRangeAndLimit()
 		{
 			Assert.That(UiService.GetCanvasOrderStart(10, 19), Is.EqualTo(10));
@@ -68,12 +93,12 @@ namespace Geuneda.UiService.Tests
 			Assert.That(UiService.GetCanvasOrderStart(-40000, 32766), Is.EqualTo(-32768));
 		}
 
-		private static int[] Orders(int layer, int limit, int count)
+		private static int[] Orders(int layer, int limit, int count, int step = 1)
 		{
 			var orders = new int[count];
 			for (var i = 0; i < count; i++)
 			{
-				orders[i] = UiService.GetCanvasOrder(layer, limit, count, i);
+				orders[i] = UiService.GetCanvasOrder(layer, limit, count, i, step);
 			}
 
 			return orders;

@@ -216,6 +216,46 @@ namespace Geuneda.UiService.Tests.PlayMode
 			Assert.That(child.sortingOrder, Is.EqualTo(5));
 		}
 
+		[UnityTest]
+		public IEnumerator CanvasOrderStep_SpacesSameLayerCanvases_SoChildOffsetStaysBelowLaterPresenter()
+		{
+			_eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+			_service.CanvasOrderStep = 10;
+			var lower = CreateRaycastPrefab<TestPlainPresenter>(false).GetComponent<TestPlainPresenter>();
+			var upper = CreateRaycastPrefab<TestPlainPresenter>(true).GetComponent<TestPlainPresenter>();
+
+			// 설정 레이어(10, 20, 22)보다 높은 레이어라 차단막 아래까지 간격 10 으로 매깁니다
+			_service.AddUi(lower, 100, "lower", openAfter: true);
+			_service.AddUi(upper, 100, "upper", openAfter: true);
+			yield return null;
+
+			Assert.That(lower.GetComponent<Canvas>().sortingOrder, Is.EqualTo(100));
+			Assert.That(upper.GetComponent<Canvas>().sortingOrder, Is.EqualTo(110));
+
+			// 아래 프레젠터의 자식 캔버스를 루트 + 8 에 두어도 나중에 연 프레젠터가 위입니다
+			var child = new GameObject("ChildCanvas", typeof(RectTransform), typeof(Canvas), typeof(GraphicRaycaster), typeof(Image));
+			var childRect = (RectTransform)child.transform;
+			childRect.SetParent(lower.transform, false);
+			childRect.anchorMin = Vector2.zero;
+			childRect.anchorMax = Vector2.one;
+			childRect.offsetMin = Vector2.zero;
+			childRect.offsetMax = Vector2.zero;
+			var childCanvas = child.GetComponent<Canvas>();
+			childCanvas.overrideSorting = true;
+			childCanvas.sortingOrder = lower.GetComponent<Canvas>().sortingOrder + 8;
+			yield return null;
+
+			Assert.That(TopmostHitPresenter(), Is.SameAs(upper));
+
+			// 닫았다 다시 열면 순위가 바뀌고 간격은 그대로입니다
+			_service.CloseUi(typeof(TestPlainPresenter), "lower");
+			_service.OpenUiAsync(typeof(TestPlainPresenter), "lower").Forget();
+			yield return null;
+
+			Assert.That(upper.GetComponent<Canvas>().sortingOrder, Is.EqualTo(100));
+			Assert.That(lower.GetComponent<Canvas>().sortingOrder, Is.EqualTo(110));
+		}
+
 		// GraphicRaycaster 가 있는 오버레이 캔버스 프레젠터. fillScreen 이면 화면을 덮는 Image 를 자식으로 둡니다
 		private static GameObject CreateRaycastPrefab<T>(bool fillScreen) where T : UiPresenter
 		{

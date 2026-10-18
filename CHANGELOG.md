@@ -4,6 +4,11 @@
 형식은 [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)를 기반으로 하며
 이 프로젝트는 [Semantic Versioning](http://semver.org/spec/v2.0.0.html)을 준수합니다.
 
+## [3.2.0] - 2026-10-18
+
+**추가**:
+- `UiService.CanvasOrderStep`(기본 1): 같은 레이어에서 나중에 연 uGUI 프레젠터의 루트 `Canvas.sortingOrder` 에 더하는 간격입니다. 프레젠터 안의 자식 Canvas 를 루트 기준 오프셋(+1, +2 ...)으로 그리는 프로젝트가 10 처럼 크게 잡으면, 아래 프레젠터의 자식이 위 프레젠터를 덮지 않습니다. 값은 `레이어 + 순위 × 간격` 이고 상한(다음 설정 레이어 - 1, 없으면 32766)과 간격이 모자랄 때 먼저 연 캔버스가 시작 값을 같이 쓰는 규칙은 같습니다. 1 보다 작으면 `ArgumentOutOfRangeException`. 다음 열기·닫기부터 적용됩니다. 기본값이 1 이라 기존 동작은 바뀌지 않습니다.
+
 ## [3.1.0] - 2026-10-17
 
 공개 API 는 그대로이고 아래 두 동작이 바뀝니다.

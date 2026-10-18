@@ -35,6 +35,27 @@ namespace Geuneda.UiService
 		private PendingChange _notifying;
 		private bool _notifyingNotRun;
 		private long _openSequence;
+		private int _canvasOrderStep = 1;
+
+		/// <summary>
+		/// 같은 레이어에서 나중에 연 uGUI 프레젠터의 루트 <see cref="Canvas.sortingOrder"/> 에 더하는 간격입니다. 기본값은 1 입니다.
+		/// 프레젠터 안의 자식 Canvas 를 루트 정렬값 기준 오프셋(+1, +2 ...)으로 그리는 프로젝트는 그 오프셋보다 크게 잡아
+		/// 아래 프레젠터의 자식이 위 프레젠터를 덮지 않게 합니다(예: 10). 다음 열기·닫기부터 적용됩니다.
+		/// </summary>
+		/// <exception cref="ArgumentOutOfRangeException">1 보다 작은 값</exception>
+		public int CanvasOrderStep
+		{
+			get => _canvasOrderStep;
+			set
+			{
+				if (value < 1)
+				{
+					throw new ArgumentOutOfRangeException(nameof(value), value, "CanvasOrderStep must be at least 1");
+				}
+
+				_canvasOrderStep = value;
+			}
+		}
 
 		private void OpenVisible(UiInstanceId instanceId, UiPresenter presenter)
 		{
@@ -374,20 +395,20 @@ namespace Geuneda.UiService
 		{
 			var limit = GetCanvasOrderLimit(layer);
 			var start = GetCanvasOrderStart(layer, limit);
-			var slots = limit - start + 1;
+			var slots = GetCanvasOrderSlots(start, limit, _canvasOrderStep);
 
 			if ((start != layer || count > slots) && _canvasGapWarnedLayers.Add(layer))
 			{
 				Logger.Warning(start != layer
 					? $"레이어 {layer} 는 uGUI 정렬값으로 쓸 수 있는 범위({short.MinValue}~{limit}, 입력 차단막 {UiInputBlocker.SortingOrder} 아래) 밖이라 {start} 부터 매깁니다. " +
 					  "범위 밖 레이어의 uGUI 는 다른 레이어와 같은 정렬값을 쓸 수 있습니다. 레이어를 범위 안으로 옮기세요."
-					: $"레이어 {layer} 에 uGUI 프레젠터 {count} 개가 그려지는데 다음 레이어까지 정렬값이 {slots} 개뿐이라 먼저 연 {count - slots + 1} 개가 같은 정렬값({start})을 씁니다. " +
+					: $"레이어 {layer} 에 uGUI 프레젠터 {count} 개가 그려지는데 다음 레이어까지 간격 {_canvasOrderStep} 으로 정렬값이 {slots} 개뿐이라 먼저 연 {count - slots + 1} 개가 같은 정렬값({start})을 씁니다. " +
 					  "같은 정렬값 캔버스끼리는 앞뒤가 정해지지 않아 dim 이 일부를 가리지 못하거나 뒤로가기 순서가 화면과 다를 수 있습니다. 레이어 사이를 더 띄워 두세요.");
 			}
 
 			for (var i = 0; i < count; i++)
 			{
-				_canvasOrder[first + i].Canvas.sortingOrder = GetCanvasOrder(layer, limit, count, i);
+				_canvasOrder[first + i].Canvas.sortingOrder = GetCanvasOrder(layer, limit, count, i, _canvasOrderStep);
 			}
 		}
 
@@ -412,13 +433,19 @@ namespace Geuneda.UiService
 			return Math.Min(Math.Max(layer, short.MinValue), limit);
 		}
 
-		// 한 레이어의 count 개 캔버스 중 연 순번으로 index 번째의 값입니다. 시작 값부터 1 씩 오르고 limit 을 넘지 않으며,
+		// 시작 값부터 limit 까지 step 간격으로 쓸 수 있는 정렬값 수입니다
+		internal static int GetCanvasOrderSlots(int start, int limit, int step)
+		{
+			return (limit - start) / step + 1;
+		}
+
+		// 한 레이어의 count 개 캔버스 중 연 순번으로 index 번째의 값입니다. 시작 값부터 step 씩 오르고 limit 을 넘지 않으며,
 		// 값이 모자라면 먼저 연 캔버스들이 시작 값을 같이 써서 나중에 연 캔버스는 계속 위에 그려집니다
-		internal static int GetCanvasOrder(int layer, int limit, int count, int index)
+		internal static int GetCanvasOrder(int layer, int limit, int count, int index, int step = 1)
 		{
 			var start = GetCanvasOrderStart(layer, limit);
-			var shared = Math.Max(0, count - (limit - start + 1));
-			return start + Math.Max(0, index - shared);
+			var shared = Math.Max(0, count - GetCanvasOrderSlots(start, limit, step));
+			return start + Math.Max(0, index - shared) * step;
 		}
 
 		private void RefreshModalDim()

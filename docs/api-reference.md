@@ -77,7 +77,7 @@
 - 열기 메서드는 열기를 시작한 직후 완료됩니다. 전환까지 기다리려면 반환된 프레젠터의 `OpenTransitionTask` 를 기다립니다.
 - 닫기 전환 중에 다시 열면 그 닫기는 숨기거나 언로드하지 않고(`destroy: true` 여도) `OnCloseTransitionCompleted` 도 부르지 않습니다. 열기 전환 중에 닫으면 `OnOpenTransitionCompleted` 를 부르지 않습니다. `TimeDelayFeature`, `AnimationDelayFeature` 도 같은 규칙으로 늦게 끝난 전환의 완료 훅을 건너뛰고, 전환 태스크는 모두 완료됩니다.
 - `destroy: true` 닫기는 언로드를 마친 뒤 `CloseTransitionTask` 를 완료합니다.
-- 열고 닫을 때마다 UIDocument 프레젠터의 `sortingOrder` 는 `레이어 + 순번 × 1/1024` 로, uGUI 프레젠터의 루트 `Canvas.sortingOrder` 는 `레이어 + 순번`(다음 설정 레이어 값보다 작게, 3.1.0) 으로 다시 매겨집니다([화면 맨 위](navigation.md#화면-맨-위)).
+- 열고 닫을 때마다 UIDocument 프레젠터의 `sortingOrder` 는 `레이어 + 순번 × 1/1024` 로, uGUI 프레젠터의 루트 `Canvas.sortingOrder` 는 `레이어 + 순번 × CanvasOrderStep`(다음 설정 레이어 값보다 작게, 3.1.0, 간격 3.2.0) 으로 다시 매겨집니다([화면 맨 위](navigation.md#화면-맨-위)).
 - `AddressablesUiAssetLoader` 로 로드하다 취소하면, 인스턴스화가 끝나는 대로 그 인스턴스를 해제합니다.
 - 데이터 오버로드에서 프레젠터가 `UiPresenter<TData>` 가 아니면 에러 로그를 남기고 **열지 않은 채** 프레젠터를 반환합니다.
 - `CancellationToken` 은 `AddressablesUiAssetLoader` 의 비동기 인스턴스화 대기에만 전달됩니다. Resources/PrefabRegistry 로더는 동기로 인스턴스화하므로 토큰을 쓰지 않습니다.
@@ -157,6 +157,7 @@ UniTask 는 한 번만 `await` 할 수 있습니다. `UniTask.WhenAll` 로 기�
 | 멤버 | 설명 |
 |------|------|
 | `Color DimColor { get; set; }` | 모달 dim 색. 기본 `(0, 0, 0, 0.6)` |
+| `int CanvasOrderStep { get; set; }` | 같은 레이어 uGUI 루트 Canvas 정렬값 간격. 기본 1, 1 미만은 `ArgumentOutOfRangeException`. 다음 열기·닫기부터 적용(3.2.0) |
 | `bool ReadsBackInput { get; set; }` | true 면 Escape(Android 뒤로가기 포함)를 읽어 `HandleBack()` 호출. 기본 false. Init 전후 언제든 변경 가능 |
 
 ### 정적 이벤트

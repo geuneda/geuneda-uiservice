@@ -182,5 +182,5 @@ public class LevelLoader
 | 차단막 정렬값 | 입력 차단막은 정렬값 32767 을 씀. 이보다 높은 `sortingOrder`/`PanelSettings.sortingOrder` 를 가진 UI 는 막지 못함 |
 | `PanelRenderer` dim | 루트가 `PanelRenderer` 인 모달에는 dim 을 깔지 않고 경고만 남김 |
 | `UiPopupQueue` 와 서비스 수명 | 서비스를 Dispose 하는 동안에는 `PresenterClosed` 가 오지 않으므로, 큐를 먼저 Dispose 함 |
-| 같은 레이어의 uGUI | 서비스가 루트 `Canvas.sortingOrder` 를 `레이어 + 연 순위` 로 매기되 다음 설정 레이어 값보다 작게만 씀(3.1.0). 레이어를 띄워 둠. 간격이 모자라면 먼저 연 캔버스끼리 정렬값을 같이 쓰고(앞뒤 미정) 경고. 자식 Canvas 는 그대로 |
+| 같은 레이어의 uGUI | 서비스가 루트 `Canvas.sortingOrder` 를 `레이어 + 연 순위 × CanvasOrderStep`(기본 1, 3.2.0) 으로 매기되 다음 설정 레이어 값보다 작게만 씀(3.1.0). 레이어를 띄워 둠. 간격이 모자라면 먼저 연 캔버스끼리 정렬값을 같이 쓰고(앞뒤 미정) 경고. 자식 Canvas 는 그대로 |
 | 여러 팝업 큐 | 같은 서비스의 큐끼리는 로드 중인 팩토리도 기다림(먼저 시작한 큐가 이김, 3.1.0). 큐 사이는 우선순위 값이 아니라 시작 순서를 따르므로 우선순위로 순서를 정하려면 한 큐에 넣음. `IUiService` 를 직접 구현한 서비스에서는 조정하지 않음 |
