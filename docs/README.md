@@ -8,6 +8,7 @@
 | [핵심 개념](core-concepts.md) | 서비스 인터페이스, 생명주기, 피처, 레이어, 세트, 다중 인스턴스, 설정, 에디터 도구 |
 | [API 레퍼런스](api-reference.md) | 공개 API 시그니처와 동작 |
 | [고급 주제](advanced.md) | 헬퍼 뷰, 커스텀 로더, 로딩 전략 |
+| [URP 렌더링 피처](urp-rendering.md) | 카메라 스택, 뒤 배경 흐림, 렌더 텍스처 작성, 레이어 순서 주의점 |
 | [뒤로가기, 팝업 큐, 모달 dim, 입력 차단](navigation.md) | 화면 맨 위 규칙, 뒤로가기 처리 순서, 큐 진행 조건, dim·차단막 배치 |
 | [문제 해결](troubleshooting.md) | 자주 겪는 문제와 해결 방법 |
 
@@ -54,7 +55,8 @@ Runtime/                              (어셈블리 Geuneda.UiService)
 ├── Queue/                            IUiPopupQueue, UiPopupQueue, UiPopupQueueHold, 큐 사이 팩토리 조정(internal UiPopupQueueGate)
 ├── Loaders/                          IUiAssetLoader 와 구현 3종
 ├── Features/                         PresenterFeatureBase, ITransitionFeature, 기본 피처
-└── Views/                            헬퍼 뷰 (네임스페이스 Geuneda.UiService.Views)
+├── Views/                            헬퍼 뷰 (네임스페이스 Geuneda.UiService.Views)
+└── Rendering/                        (어셈블리 Geuneda.UiService.Urp, URP 가 있을 때만) 카메라 스택·뒤 배경 흐림 피처, 블러 셰이더
 
 Editor/                               (어셈블리 Geuneda.UiService.Editor, 네임스페이스 GeunedaEditor.UiService)
 ├── UiConfigsEditorBase.cs            설정 인스펙터 공통 기반 (레이어 시각화, 세트 편집)
@@ -67,5 +69,5 @@ Editor/                               (어셈블리 Geuneda.UiService.Editor, �
 ├── UiPresenterEditor.cs              프레젠터 인스펙터 (열기/닫기 버튼)
 └── NonDrawingViewEditor.cs           NonDrawingView 인스펙터
 
-Tests/EditMode, Tests/PlayMode        단위/통합/성능/스모크 테스트
+Tests/EditMode, Tests/PlayMode        단위/통합/성능/스모크 테스트 (Urp/ 하위는 URP 가 있을 때만)
 ```

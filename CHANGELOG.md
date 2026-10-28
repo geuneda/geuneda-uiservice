@@ -4,6 +4,17 @@
 형식은 [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)를 기반으로 하며
 이 프로젝트는 [Semantic Versioning](http://semver.org/spec/v2.0.0.html)을 준수합니다.
 
+## [3.3.0] - 2026-10-28
+
+**추가**:
+- URP 프레젠터 피처 2종을 별도 어셈블리 `Geuneda.UiService.Urp`(`Runtime/Rendering/`, 네임스페이스 `Geuneda.UiService.Rendering`)로 추가했습니다. `com.unity.render-pipelines.universal` 17.0.1 이상이 있을 때만(`versionDefines` 로 `GEUNEDA_URP` 정의) 컴파일되고, 없으면 어셈블리와 테스트가 빠지므로 패키지는 URP 전용이 아닙니다. URP 가 없는 프로젝트에서는 `Runtime/Rendering/Shaders/UiBackdropBlur.shader` 가 URP 셰이더 라이브러리를 찾지 못해 셰이더 임포트 오류 로그가 한 번 남습니다(컴파일과 실행에는 영향 없음).
+- `UiCameraStackFeature`: 프레젠터의 `Canvas` 를 Screen Space - Camera 로 바꾸고 오버레이 카메라를 기본 카메라(`Camera.main`, `BaseCameraResolver` 로 교체)의 URP 카메라 스택에 열 때 넣고 비활성화될 때 뺍니다. 스택 안 순서는 캔버스 `sortingOrder`(또는 직렬화한 `_stackPriority`)의 오름차순이고 같은 값은 뒤에 붙습니다(`InsertIndex`). 캔버스 아래에 둔 카메라는 캔버스 밖으로 꺼내고 프레젠터가 파괴될 때 함께 파괴합니다. Overlay 캔버스와 섞이면 `UiConfig.Layer` 가 전체 순서가 아닙니다([docs/urp-rendering.md](docs/urp-rendering.md)).
+- `UiBackdropBlurRendererFeature`(URP Renderer 에셋에 추가) + `UiBackdropBlurPresenterFeature`(프레젠터에 추가): 프레젠터가 열려 있는 동안 뒤 배경을 흐립니다. 모양(다운샘플, 반복 1~8, 퍼짐, 틴트)은 렌더러 피처에서 정하고, 런타임에는 정적 `UiBackdropBlurRendererFeature.IterationsOverride`(0 이하면 해제, `EffectiveIterations` 로 확인)로 반복 횟수만 바꿉니다. Game 카메라이고 오버레이 카메라나 렌더 텍스처 카메라가 아니며 흐림 프레젠터가 하나라도 열려 있을 때만 패스를 넣습니다. 렌더러 피처 없이 프레젠터 피처만 열면 설정 방법을 적은 Error 로그를 남깁니다.
+- `Tests/EditMode/Urp/`, `Tests/PlayMode/Urp/`(각각 `Geuneda.UiService.Tests.Urp`, `Geuneda.UiService.Tests.PlayMode.Urp`, URP 가 있을 때만)와 `InteractableTextView` PlayMode 테스트를 추가했습니다.
+
+**수정**:
+- `InteractableTextView` 가 링크 판정에 항상 `null` 카메라를 넘겨 Screen Space - Camera 와 World Space 캔버스에서 클릭 위치가 어긋나던 문제를 수정했습니다. 캔버스의 `worldCamera` 를 넘기고, Screen Space - Overlay 와 카메라 없는 Screen Space - Camera 캔버스, 부모 Canvas 가 없는 경우에는 그대로 `null` 을 넘깁니다.
+
 ## [3.2.0] - 2026-10-18
 
 **추가**:

@@ -111,6 +111,8 @@ public class ConfirmPopup : UiPresenter
 | `AnimationDelayFeature` | 열린 뒤 인트로 클립, 닫기 시작 시 아웃트로 클립을 `Animation` 컴포넌트로 재생하고 클립 길이만큼 대기 | `Animation` 컴포넌트 필요(`RequireComponent`), 인트로/아웃트로 클립. 클립이 없으면 해당 전환은 즉시 완료 |
 | `UiToolkitPresenterFeature` | `UIDocument` 의 비주얼 트리가 준비되면 콜백 호출 | `UIDocument` 필요(`RequireComponent`) |
 | `UiToolkitPanelRendererFeature` | Unity 6000.5 이상 전용. `PanelRenderer` 의 UI 리로드 콜백으로 루트를 받아 같은 API 로 전달 | `PanelRenderer` 필요. `#if UNITY_6000_5_OR_NEWER` 안에서만 컴파일 |
+| `UiCameraStackFeature` | URP 전용. 캔버스를 Screen Space - Camera 로 바꾸고 오버레이 카메라를 기본 카메라의 카메라 스택에 열 때 넣고 비활성화될 때 뺌 | 오버레이 `Camera` 와 `Canvas` 지정, `BaseCameraResolver`. [URP 렌더링 피처](urp-rendering.md) |
+| `UiBackdropBlurPresenterFeature` | URP 전용. 열려 있는 동안 뒤 배경을 흐림 | 설정 없음. URP Renderer 에셋에 `UiBackdropBlurRendererFeature` 를 추가해야 함. [URP 렌더링 피처](urp-rendering.md) |
 
 `AnimationDelayFeature` 는 레거시 `Animation` 컴포넌트를 사용합니다. `Animator` 는 지원하지 않습니다.
 

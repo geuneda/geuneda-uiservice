@@ -76,7 +76,7 @@ public class TermsLinkHandler : MonoBehaviour
 }
 ```
 
-링크 판정에 카메라로 `null` 을 넘기므로 Screen Space - Overlay 캔버스를 기준으로 동작합니다. 레이캐스트를 받으려면 텍스트의 `Raycast Target` 이 켜져 있고 씬에 `EventSystem` 이 있어야 합니다.
+링크 판정에는 부모 `Canvas` 의 `worldCamera` 를 넘기므로 Screen Space - Camera 와 World Space 캔버스에서도 클릭 위치가 맞습니다(3.3.0. 이전에는 항상 `null` 을 넘겨 Overlay 에서만 맞았음). Screen Space - Overlay 캔버스, 카메라가 없는 Screen Space - Camera 캔버스, 부모 Canvas 가 없는 텍스트는 `null` 로 판정합니다. 레이캐스트를 받으려면 텍스트의 `Raycast Target` 이 켜져 있고 씬에 `EventSystem` 이 있어야 합니다.
 
 ---
 
@@ -184,3 +184,4 @@ public class LevelLoader
 | `UiPopupQueue` 와 서비스 수명 | 서비스를 Dispose 하는 동안에는 `PresenterClosed` 가 오지 않으므로, 큐를 먼저 Dispose 함 |
 | 같은 레이어의 uGUI | 서비스가 루트 `Canvas.sortingOrder` 를 `레이어 + 연 순위 × CanvasOrderStep`(기본 1, 3.2.0) 으로 매기되 다음 설정 레이어 값보다 작게만 씀(3.1.0). 레이어를 띄워 둠. 간격이 모자라면 먼저 연 캔버스끼리 정렬값을 같이 쓰고(앞뒤 미정) 경고. 자식 Canvas 는 그대로 |
 | 여러 팝업 큐 | 같은 서비스의 큐끼리는 로드 중인 팩토리도 기다림(먼저 시작한 큐가 이김, 3.1.0). 큐 사이는 우선순위 값이 아니라 시작 순서를 따르므로 우선순위로 순서를 정하려면 한 큐에 넣음. `IUiService` 를 직접 구현한 서비스에서는 조정하지 않음 |
+| 렌더 모드가 섞인 레이어 | `UiCameraStackFeature` 를 붙인 Screen Space - Camera 프레젠터는 레이어가 아무리 높아도 Screen Space - Overlay 프레젠터 아래에 그려짐. [URP 렌더링 피처](urp-rendering.md) |
