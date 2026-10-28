@@ -1,0 +1,27 @@
+{
+    "name": "Geuneda.UiService.Urp",
+    "rootNamespace": "Geuneda.UiService.Rendering",
+    "references": [
+        "Geuneda.UiService",
+        "Geuneda.Core",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "GEUNEDA_URP"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "17.0.1",
+            "define": "GEUNEDA_URP"
+        }
+    ],
+    "noEngineReferences": false
+}

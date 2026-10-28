@@ -7,10 +7,11 @@
 - 패키지: `com.geuneda.uiservice` (버전은 `package.json` 기준)
 - Unity: 6000.0+ (`UiToolkitPanelRendererFeature` 는 6000.5+)
 - 의존성(`package.json`): `com.geuneda.core` 0.4.0(로거 `ModuleLogger`, 클래스마다 `Geuneda.UiService.*` 모듈), `com.unity.addressables` 2.6.0, `com.cysharp.unitask` 2.5.10, `com.unity.ugui` 2.0.0
+- 선택 의존성: `com.unity.render-pipelines.universal` 17.0.1+. `Runtime/Rendering/Geuneda.UiService.Urp.asmdef` 가 `versionDefines` 로 `GEUNEDA_URP` 를 정의하고 `defineConstraints` 로 그 define 이 있을 때만 컴파일됩니다(3.3.0). URP 가 없으면 이 어셈블리와 `Tests/*/Urp/` 테스트 어셈블리가 통째로 빠집니다. 셰이더 `Runtime/Rendering/Shaders/UiBackdropBlur.shader` 는 asmdef 로 가릴 수 없어 URP 없는 프로젝트에서 임포트 오류 로그가 한 번 남습니다(동작 영향 없음, 알려진 제한).
 - 선택 의존성: `com.unity.inputsystem`. 런타임 asmdef 가 `Unity.InputSystem` 을 참조하고 `versionDefines` 로 `GEUNEDA_INPUT_SYSTEM` 을 정의합니다. 패키지가 없으면 참조는 무시되고 레거시 입력 분기가 컴파일됩니다(2.0.0, Input System 없는 빈 프로젝트에서 확인).
 - 런타임 asmdef 는 TextMeshPro 와 uGUI 도 사용합니다(`Views/`). Unity 6 에서는 둘 다 `com.unity.ugui` 에 포함됩니다.
-- 어셈블리: `Runtime/Geuneda.UiService.asmdef`, `Editor/Geuneda.UiService.Editor.asmdef`, `Tests/EditMode/Geuneda.UiService.Tests.asmdef`, `Tests/PlayMode/Geuneda.UiService.Tests.PlayMode.asmdef`, `Tests/PlayMode/InputSystem/Geuneda.UiService.Tests.PlayMode.InputSystem.asmdef`(`GEUNEDA_INPUT_SYSTEM` 일 때만, `InputTestFixture` 사용)
-- 네임스페이스: 런타임 `Geuneda.UiService`, 헬퍼 뷰 `Geuneda.UiService.Views`, 에디터 `GeunedaEditor.UiService`
+- 어셈블리: `Runtime/Geuneda.UiService.asmdef`, `Editor/Geuneda.UiService.Editor.asmdef`, `Tests/EditMode/Geuneda.UiService.Tests.asmdef`, `Tests/PlayMode/Geuneda.UiService.Tests.PlayMode.asmdef`, `Tests/PlayMode/InputSystem/Geuneda.UiService.Tests.PlayMode.InputSystem.asmdef`(`GEUNEDA_INPUT_SYSTEM` 일 때만, `InputTestFixture` 사용), `Runtime/Rendering/Geuneda.UiService.Urp.asmdef`(`GEUNEDA_URP` 일 때만, `Geuneda.UiService`·`Geuneda.Core`·URP 런타임 참조), `Tests/EditMode/Urp/Geuneda.UiService.Tests.Urp.asmdef`, `Tests/PlayMode/Urp/Geuneda.UiService.Tests.PlayMode.Urp.asmdef`(둘 다 `GEUNEDA_URP` 일 때만. PlayMode 쪽은 `MockAssetLoader`·`TestHelpers` 를 쓰려고 `Geuneda.UiService.Tests.PlayMode` 를 참조)
+- 네임스페이스: 런타임 `Geuneda.UiService`, 헬퍼 뷰 `Geuneda.UiService.Views`, URP 피처 `Geuneda.UiService.Rendering`, 에디터 `GeunedaEditor.UiService`
 - `Runtime/AssemblyInfo.cs` 가 internal 멤버를 `Geuneda.UiService.Editor`, `Geuneda.UiService.Tests.PlayMode`, `Geuneda.UiService.Tests`(EditMode, 3.1.0 부터 게이트·정렬값 계산 단위 테스트) 에 노출합니다.
 
 ## 2. 런타임 구조
@@ -40,7 +41,12 @@
 - `Runtime/Features/`: `PresenterFeatureBase`, `ITransitionFeature`, `TimeDelayFeature`, `AnimationDelayFeature`, `UiToolkitPresenterFeature`, `UiToolkitPanelRendererFeature`(`#if UNITY_6000_5_OR_NEWER`)
 - `Runtime/Loaders/`: `IUiAssetLoader`, `AddressablesUiAssetLoader`(기본), `ResourcesUiAssetLoader`, `PrefabRegistryUiAssetLoader`
   - 로더는 `UiService` 생성자로만 정해집니다. 설정 에셋 타입이 로더를 고르지 않습니다.
-- `Runtime/Views/`: `SafeAreaHelperView`(같은 파일에 `#if UNITY_EDITOR` 인스펙터 포함), `NonDrawingView`, `AdjustScreenSizeFitterView`, `InteractableTextView`
+- `Runtime/Views/`: `SafeAreaHelperView`(같은 파일에 `#if UNITY_EDITOR` 인스펙터 포함), `NonDrawingView`, `AdjustScreenSizeFitterView`, `InteractableTextView`(링크 판정 카메라는 `ResolveEventCamera` 가 부모 `Canvas` 의 `worldCamera`, Overlay·카메라 없는 Screen Space - Camera·Canvas 없음이면 `null`, 3.3.0)
+- `Runtime/Rendering/`(어셈블리 `Geuneda.UiService.Urp`, URP 가 있을 때만): `UiCameraStackFeature`, `UiBackdropBlurRendererFeature`(`ScriptableRendererFeature`), `UiBackdropBlurPass`(internal, Render Graph), `UiBackdropBlurPresenterFeature`, `Shaders/UiBackdropBlur.shader`(`Hidden/Geuneda/UiService/UiBackdropBlur`). `Rendering/AssemblyInfo.cs` 가 internal 을 두 URP 테스트 어셈블리에 노출합니다. 로그는 `ModuleLogger("Geuneda.UiService.Rendering")`.
+  - 정적 상태를 둔 이유(프레임워크 규칙의 예외로 기록): 렌더러 피처 에셋은 URP Renderer 가 소유해 프레젠터나 게임 코드에서 닿을 참조 경로가 없습니다. 그래서 `UiBackdropBlurPresenterFeature._openCount`(열린 프레젠터 수, `AnyOpen`), `UiBackdropBlurRendererFeature._isInstalled`/`_iterationsOverride`/`_authoredIterations`, `UiCameraStackFeature.StackPriorities`(스택에 넣은 카메라의 우선순위)가 정적이고, 모두 `[RuntimeInitializeOnLoadMethod(SubsystemRegistration)]` 로 초기화합니다(도메인 리로드 끈 플레이 대비). 서비스로 옮기려면 렌더러 피처가 서비스를 찾는 경로가 먼저 필요합니다.
+  - 블러 패스는 `ShouldInject(isGameCamera, !overlay, !targetTexture, AnyOpen)` 이 모두 참일 때만 들어가고, 백버퍼가 활성 대상이면 읽을 수 없어 건너뜁니다. 작업 텍스처 설명자에서 깊이와 memoryless 를 지우지 않으면 URP 가 매 프레임 경고를 남깁니다. 틴트는 마지막 반복에만 곱합니다.
+  - `UiBackdropBlurPresenterFeature` 는 `OnPresenterClosed` 가 아니라 `OnDisable` 에서 수를 줄입니다(닫기 전환이 끝나 숨겨질 때까지 흐림 유지). `UiCameraStackFeature` 도 `OnDisable` 에서 스택에서 빼고 카메라를 끕니다. 오버레이 카메라는 스택에 들어갈 때만 켭니다(URP 가 `isActiveAndEnabled` 아닌 스택 카메라를 건너뜀).
+  - 셰이더는 `[SerializeField] _blurShader` 직렬화 참조이고 에디터에서는 `Create`/`Reset` 때 패키지 경로에서 자동으로 채웁니다. `Shader.Find`/`Resources.Load` 로 바꾸면 플레이어에서 변형이 빠져 분홍색이 됩니다.
 
 ## 3. 에디터 구조
 
@@ -87,6 +93,7 @@ API 확인이 필요하면 `Library/PackageCache/com.unity.addressables@*/`, `Li
 - 프레젠터 추가: 루트에 `UiPresenter` 파생 컴포넌트와 `Canvas`/`UIDocument` 를 둔 프리팹을 만들고 Addressable 로 표시한 뒤 `UiConfigs` 인스펙터를 열어 동기화합니다(`Tools/UI Service/Select UiConfigs`).
 - 세트 ID 변경: 0부터 연속인 enum 과 `[CustomEditor(typeof(AddressablesUiConfigs))] class X : AddressablesUiConfigsEditor<TEnum>` 을 만듭니다. 같은 타입에 패키지 기본 에디터도 등록되어 있으므로 적용 여부를 확인합니다.
 - 피처 추가: `PresenterFeatureBase` 를 상속하고, 전환이 있으면 `ITransitionFeature` 도 구현합니다. 태스크는 `OnPresenterOpened`/`OnPresenterClosing` 에서 만들어야 프레젠터가 기다릴 수 있습니다.
+- URP 전용 코드: `Runtime/Rendering/` 과 `Tests/*/Urp/` 에만 둡니다. 메인 어셈블리가 URP 를 참조하게 만들지 마세요(패키지가 URP 전용이 됨). 테스트는 호스트 프로젝트 manifest 에 `com.unity.render-pipelines.universal` 이 있어야 돕니다.
 - 로더 추가: `IUiAssetLoader` 를 구현합니다.
 - 뒤로가기·모달 프레젠터: `HandlesBack`/`IsModal` 을 재정의하고 필요하면 `OnBackPressed`/`OnDimClicked` 를 재정의합니다. 테스트 헬퍼는 `Tests/PlayMode/Helpers/TestPopupPresenter*.cs`, UI Toolkit 모달은 `TestToolkitPopupPresenter.CreatePrefab(panelSettings)`(Canvas 없음)입니다.
 - 공개 API, 생명주기, 설정 형식, 에디터 직렬화 방식을 바꾸면 `docs/`, 이 파일, 메타 레포(geuneda-frameworks)의 `claude-skills/geuneda-uiservice/` 스킬 문서를 함께 갱신합니다.

@@ -87,7 +87,7 @@ Package Manager 의 `+` > `Add package from git URL` 에 위 URL 을 넣어도 �
 | 레이어 | `UiConfig.Layer` 값이 프리팹 루트의 `Canvas`, `UIDocument`, `PanelRenderer`(Unity 6.5+) `sortingOrder` 로 설정됨. 열고 닫을 때 `Canvas` 는 `레이어 + 연 순위 × CanvasOrderStep`(기본 1, 다음 레이어 값 미만), `UIDocument` 는 `레이어 + 순위/1024` 로 다시 매겨 같은 레이어에서도 나중에 연 것이 위 |
 | UI 세트 | 여러 프레젠터를 묶어 `OpenUiSetAsync`, `CloseAllUiSet`, `UnloadUiSet` 으로 일괄 처리 |
 | 다중 인스턴스 | `UiInstanceId`(타입 + 인스턴스 주소)로 같은 프레젠터 타입을 여러 개 띄움 |
-| 피처 | `PresenterFeatureBase` 컴포넌트를 프리팹에 붙여 동작을 확장. `TimeDelayFeature`, `AnimationDelayFeature`, `UiToolkitPresenterFeature`, `UiToolkitPanelRendererFeature`(Unity 6.5+) 기본 제공 |
+| 피처 | `PresenterFeatureBase` 컴포넌트를 프리팹에 붙여 동작을 확장. `TimeDelayFeature`, `AnimationDelayFeature`, `UiToolkitPresenterFeature`, `UiToolkitPanelRendererFeature`(Unity 6.5+) 기본 제공. URP 가 있으면 `UiCameraStackFeature`(카메라 스택), `UiBackdropBlurPresenterFeature`(뒤 배경 흐림, Renderer 에셋에 `UiBackdropBlurRendererFeature` 필요) 추가 |
 | 에셋 로더 | `IUiAssetLoader` 구현을 `UiService` 생성자에 주입. `AddressablesUiAssetLoader`(기본), `ResourcesUiAssetLoader`, `PrefabRegistryUiAssetLoader` 기본 제공 |
 | 헬퍼 뷰 | `Geuneda.UiService.Views` 의 `SafeAreaHelperView`, `NonDrawingView`, `AdjustScreenSizeFitterView`, `InteractableTextView` |
 | 에디터 도구 | `Tools > UI Service` 메뉴의 `Select UiConfigs`, `Layer Visualizer`, `Presenter Manager` |
@@ -103,6 +103,7 @@ Package Manager 의 `+` > `Add package from git URL` 에 위 URL 을 넣어도 �
 | [핵심 개념](docs/core-concepts.md) | 생명주기, 피처, 레이어, 세트, 다중 인스턴스, 설정, 에디터 도구 |
 | [API 레퍼런스](docs/api-reference.md) | 공개 API 시그니처와 동작 |
 | [고급 주제](docs/advanced.md) | 헬퍼 뷰, 커스텀 로더, 로딩 전략 |
+| [URP 렌더링 피처](docs/urp-rendering.md) | 카메라 스택, 뒤 배경 흐림, 렌더 텍스처 작성, 레이어 순서 주의점 |
 | [뒤로가기, 팝업 큐, 모달 dim, 입력 차단](docs/navigation.md) | 화면 맨 위 규칙, 뒤로가기 처리 순서, 큐 진행 조건, dim·차단막 배치 |
 | [문제 해결](docs/troubleshooting.md) | 자주 겪는 문제와 해결 방법 |
 | [문서 색인](docs/README.md) | 아키텍처 개요와 패키지 구조 |
@@ -117,6 +118,7 @@ Package Manager 의 `+` > `Add package from git URL` 에 위 URL 을 넣어도 �
 - `com.cysharp.unitask` 2.5.10
 - `com.unity.ugui` 2.0.0. 헬퍼 뷰가 uGUI(`UnityEngine.UI`)와 TextMeshPro(`TMPro`)를 사용하며, Unity 6 에서는 TextMeshPro 가 `com.unity.ugui` 에 포함되어 있습니다.
 - 선택: `com.unity.inputsystem`. 있으면 `ReadsBackInput` 이 Input System 으로 Escape 를 읽습니다(`versionDefines` 로 감지). 없으면 레거시 Input Manager 를 씁니다.
+- 선택: `com.unity.render-pipelines.universal` 17.0.1 이상. 있으면 `Geuneda.UiService.Urp` 어셈블리(`Geuneda.UiService.Rendering` 의 카메라 스택·뒤 배경 흐림 피처)가 컴파일됩니다(`versionDefines` 로 감지). 없으면 그 어셈블리가 빠지고 패키지의 블러 셰이더가 임포트 오류 로그를 한 번 남기지만 컴파일과 실행에는 영향이 없습니다.
 
 ## 라이선스
 
