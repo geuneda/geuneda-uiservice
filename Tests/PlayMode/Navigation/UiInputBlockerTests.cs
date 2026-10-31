@@ -103,7 +103,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator CanvasBlocker_TakesRaycastsOnlyWhileBlocked()
 		{
-			_eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+			_eventSystem = new GameObject("EventSystem", typeof(EventSystem));
 			var loadTask = _service.LoadUiAsync<TestUiPresenter>();
 			yield return loadTask.ToCoroutine();
 			var blocker = loadTask.GetAwaiter().GetResult().transform.parent.Find("UiInputBlocker");
@@ -158,7 +158,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator BlockInput_ClearsSelectionAndNavigation_ThenRestoresNavigationOnly()
 		{
-			_eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+			_eventSystem = new GameObject("EventSystem", typeof(EventSystem));
 			var button = new GameObject("Button", typeof(RectTransform), typeof(UnityEngine.UI.Image), typeof(UnityEngine.UI.Button));
 			yield return null;
 			var eventSystem = _eventSystem.GetComponent<EventSystem>();
@@ -203,7 +203,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator BlockInputFromDeselectCallback_KeepsDistinctTokens()
 		{
-			_eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+			_eventSystem = new GameObject("EventSystem", typeof(EventSystem));
 			var target = new GameObject("Target", typeof(TestSelectionCallback));
 			yield return null;
 			var nested = default(UiInputBlock);
@@ -222,7 +222,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator BlockInputFromSelectCallback_ReleasesSelectionNextFrame()
 		{
-			_eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+			_eventSystem = new GameObject("EventSystem", typeof(EventSystem));
 			var target = new GameObject("Target", typeof(TestSelectionCallback));
 			yield return null;
 			var eventSystem = _eventSystem.GetComponent<EventSystem>();
@@ -254,7 +254,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 			var block = _service.BlockInput("loading");
 
 			// 막힌 뒤 생긴 EventSystem 의 선택이 풀릴 때 마지막 토큰을 풉니다
-			_eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+			_eventSystem = new GameObject("EventSystem", typeof(EventSystem));
 			var target = new GameObject("Target", typeof(TestSelectionCallback));
 			target.GetComponent<TestSelectionCallback>().Deselected = () => block.Dispose();
 			_eventSystem.GetComponent<EventSystem>().SetSelectedGameObject(target);
@@ -293,7 +293,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		public IEnumerator EventSystemCreatedWhileBlocked_IsBlockedToo()
 		{
 			var block = _service.BlockInput("scene-load");
-			_eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+			_eventSystem = new GameObject("EventSystem", typeof(EventSystem));
 			yield return null;
 			yield return null;
 			var eventSystem = _eventSystem.GetComponent<EventSystem>();

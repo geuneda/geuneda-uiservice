@@ -59,7 +59,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator SameLayerCanvases_LaterOpenedIsHitFirst_InEitherOrder()
 		{
-			_eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+			_eventSystem = new GameObject("EventSystem", typeof(EventSystem));
 			yield return _service.OpenUiAsync<TestUiPresenter>().ToCoroutine();
 			yield return _service.OpenUiAsync<TestPlainPresenter>().ToCoroutine();
 			var hud = _service.GetUi<TestUiPresenter>();
@@ -81,7 +81,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator CanvasReopenedDuringCloseTransition_IsHitFirst()
 		{
-			_eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+			_eventSystem = new GameObject("EventSystem", typeof(EventSystem));
 			var firstTask = _service.OpenUiAsync(typeof(TestTimeDelayPresenter), "a");
 			yield return firstTask.ToCoroutine();
 			var first = firstTask.GetAwaiter().GetResult();
@@ -104,7 +104,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator SameLayerModal_DimCoversEarlierCanvas_WithoutWarning()
 		{
-			_eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+			_eventSystem = new GameObject("EventSystem", typeof(EventSystem));
 			yield return _service.OpenUiAsync<TestUiPresenter>().ToCoroutine();
 			yield return _service.OpenUiAsync<TestPopupPresenter>().ToCoroutine();
 			var popup = _service.GetUi<TestPopupPresenter>();
@@ -219,7 +219,7 @@ namespace Geuneda.UiService.Tests.PlayMode
 		[UnityTest]
 		public IEnumerator CanvasOrderStep_SpacesSameLayerCanvases_SoChildOffsetStaysBelowLaterPresenter()
 		{
-			_eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+			_eventSystem = new GameObject("EventSystem", typeof(EventSystem));
 			_service.CanvasOrderStep = 10;
 			var lower = CreateRaycastPrefab<TestPlainPresenter>(false).GetComponent<TestPlainPresenter>();
 			var upper = CreateRaycastPrefab<TestPlainPresenter>(true).GetComponent<TestPlainPresenter>();

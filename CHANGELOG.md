@@ -4,6 +4,12 @@
 형식은 [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)를 기반으로 하며
 이 프로젝트는 [Semantic Versioning](http://semver.org/spec/v2.0.0.html)을 준수합니다.
 
+## [3.3.1] - 2026-10-31
+
+**수정**:
+- `Tests/EditMode/Urp/`, `Tests/PlayMode/Urp/` 의 테스트 asmdef 가 `Geuneda.UiService` 를 GUID 와 이름으로 두 번 참조해, URP 를 쓰는 프로젝트에서 패키지를 넣으면 `Assembly has duplicate references` 로 프로젝트 전체 스크립트 컴파일이 멈추던 문제를 수정했습니다.
+- PlayMode 테스트가 `StandaloneInputModule` 을 붙여 Input System 전용 프로젝트에서 예외 로그로 실패하던 문제를 수정했습니다. 이 테스트들은 입력 모듈이 필요 없어 `EventSystem` 만 만듭니다.
+
 ## [3.3.0] - 2026-10-28
 
 **추가**:
